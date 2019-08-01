@@ -1,0 +1,22 @@
+{
+  "name": "react-gun",
+  "version": "0.1.0-beta.0",
+  "description": "React bindings for GUN DB – Alternative to redux and firebase",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react",
+    "gun",
+    "graph database",
+    "state management",
+    "redux",
+    "firebase"
+  ],
+  "author": "Rob Christian",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "react": "^16.8.6"
+  }
+}
