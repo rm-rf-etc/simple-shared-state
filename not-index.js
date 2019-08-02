@@ -1,5 +1,5 @@
 const React = require('react');
-const { useRef, useCallback, useReducer, useEffect } = React;
+const { useRef, useReducer, useEffect } = React;
 
 const _tables = new Map();
 

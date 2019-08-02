@@ -46,3 +46,15 @@ const MyApp = bind(gun.get('counter/1'))(App);
 
 ReactDOM.render(<MyApp />, document.body);
 ```
+
+## Dev Testing
+
+If you are using `npm link` to develop the library and test in a local project,
+you may encounter this error:
+```
+Invalid hook call. Hooks can only be called inside of the body of a function
+component. This could happen for one of the following reasons
+```
+
+You simply need to link react in `react-gun` to the react in your project.  
+https://github.com/facebook/react/issues/15315#issuecomment-479802153
