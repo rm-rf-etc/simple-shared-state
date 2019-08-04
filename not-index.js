@@ -1,8 +1,6 @@
 const React = require('react');
 const { useRef, useReducer, useEffect } = React;
 
-const _tables = new Map();
-
 const reducer = (state = {}, { prop, value }) => {
 	if (state[prop] === value) { return state; }
 	return { ...state, [prop]: value };
