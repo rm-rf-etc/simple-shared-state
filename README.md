@@ -21,7 +21,7 @@ declared externally and used via reference
 
 Add to your create-react-app project and try it.
 
-```
+```javascript
 import React from 'react';
 import ReactDOM from 'react-dom';
 import bind from 'react-gun';
