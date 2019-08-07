@@ -1,29 +1,39 @@
 import * as React from 'react';
 import Gun from 'gun/gun';
+// import 'gun/lib/open';
+// import 'gun/lib/load';
+// import 'gun/lib/unset';
+// const gun = Gun(['http://localhost:7700/gun']);
+// (window as any).gun = gun;
 const { useRef, useReducer, useEffect } = React;
 
 export const gun = Gun<StateShape>();
+const discardNode = gun.get('');
+export type ChainNode = typeof discardNode;
 
+export type ReactClassComponent = React.ElementType & React.Component & { boundProps: any } & React.FC;
 export type PrimitiveValue = number | string | boolean;
 export type ChainRoot = typeof gun;
-export type ChainNode = ReturnType<typeof gun.get>;
-export type GenericDataType = {
-	[k: string]: PrimitiveValue | GenericDataType | ChainRoot,
+
+export type CommonChain = ChainRoot | ChainNode;
+
+export type RootNodeShape = {
+	[k: string]: PrimitiveValue;
 };
 export type StateShape = {
-	[k: string]: GenericDataType,
+	[k: string]: RootNodeShape;
 };
 export interface SendProps extends React.Attributes {
-	state: { [key: string]: any; };
-	_root: ChainNode;
+	state: { [key: string]: PrimitiveValue; };
+	$: ChainNode;
 }
 
-const reducer = (state: GenericDataType = {}, { prop, value }: { prop: string, value: PrimitiveValue }) => {
+const reducer = (state: RootNodeShape = {}, { prop, value }: { prop: string, value: PrimitiveValue }) => {
 	if (state[prop] === value) { return state; }
 	return { ...state, [prop]: value };
 }
 
-export const bind = (rootKey: string) => (Component: React.FC) => {
+export const bind = (rootKey: string) => (Component: ReactClassComponent) => {
 
 	if (typeof rootKey !== 'string') {
 		throw new Error(`bind() requires a string for the root node key. Received ${typeof rootKey} instead.`)
@@ -32,6 +42,10 @@ export const bind = (rootKey: string) => (Component: React.FC) => {
 		throw new Error(`bind only works with function components, but received ${typeof Component} instead.`);
 	}
 	const _root = gun.get(rootKey);
+
+	if (Component.hasOwnProperty('boundProps')) {
+		console.log('boundProps', Component.boundProps);
+	}
 	const args = getArgs(Component);
 
 	return (ownProps: {}) => {
@@ -48,12 +62,12 @@ export const bind = (rootKey: string) => (Component: React.FC) => {
 			})
 		}, [dispatch]);
 
-		const props: SendProps = { ...ownProps, state, _root };
+		const props: SendProps = { ...ownProps, state, $: _root };
 		return React.createElement(Component, props);
 	};
 }
 
-export const getArgs = (fn: React.FC): string[] => {
+export const getArgs = (fn: React.ElementType): string[] => {
 	if (typeof fn !== 'function') { return []; }
 
 	const args = fn
