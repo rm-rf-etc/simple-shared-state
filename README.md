@@ -1,9 +1,9 @@
 # React-GUN
 
-_Auto-generate data bindings between react component and GUN DB nodes_
+_Auto-generate data bindings between react components and GUN DB nodes_
 
-With GUN, you can replace both redux and firebase (or equivalent state management
-and persistent storage). Or you can replace just one, the choice is yours.
+React-GUN provides auto-magical state management and persistent storage,
+in one convenient little library. Simply wrap components and receive data.
 
 ## Install
 
@@ -17,7 +17,9 @@ and persistent storage). Or you can replace just one, the choice is yours.
 * `bind()` cannot be called from inside a React function component, it must be
 declared externally and used via reference
 
-## Mostly Self-Contained Demo
+## Demo
+
+Add to your create-react-app project and try it.
 
 ```
 import React from 'react';
@@ -39,6 +41,7 @@ const App = ({ gun: { counter = 0, _root } }) => (
   </p>
 );
 
+// 'counter/1' can be any arbitrary string
 const MyApp = bind(gun.get('counter/1'))(App);
 
 ReactDOM.render(<MyApp />, document.body);
