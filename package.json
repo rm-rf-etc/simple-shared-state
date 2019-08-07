@@ -17,6 +17,10 @@
   "author": "Rob Christian",
   "license": "Apache-2.0",
   "dependencies": {
-    "react": "^16.8.6"
+    "@types/gun": "^0.9.1",
+    "@types/react": "^16.8.24",
+    "gun": "^0.2019.726",
+    "react": "^16.8.6",
+    "typescript": "^3.5.3"
   }
 }
