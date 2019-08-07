@@ -1,5 +1,5 @@
 const React = require('react');
-const e = React.createElement;
+const { useRef, useCallback, useReducer, useEffect } = React;
 
 const _tables = new Map();
 
@@ -9,12 +9,6 @@ const reducer = (state = {}, { prop, value }) => {
 }
 
 const bind = (_root) => (Component) => {
-
-	_tables.set(_root, _tables.get(_root) || {
-		listeners: {},
-		state: {},
-	});
-	const _table = _tables.get(_root);
 
 	if (typeof _root !== 'object' || _root.constructor.name !== 'Gun') {
 		throw new Error(`bind expects Gun reference but received ${typeof _root} instead.`)
@@ -26,24 +20,19 @@ const bind = (_root) => (Component) => {
 
 	return (props) => {
 
-		let [state, dispatch] = React.useReducer(reducer, _table.state);
-		_table.dispatch = dispatch;
-		_table.state = state;
+		const stateRef = useRef();
+		const [state, dispatch] = useReducer(reducer, stateRef.current || {});
+		stateRef.current = state;
 
-		args.forEach((arg) => {
-			let _listener = _table.listeners[arg];
+		useEffect(() => {
+			args.forEach((arg) => {
+				_root.get(arg).on((value) => {
+					dispatch({ prop: arg, value })
+				})
+			})
+		}, [dispatch]);
 
-			if (_listener) { return; }
-
-			_listener = (value) => {
-				_table.dispatch({ prop: arg, value });
-			};
-			_root.get(arg).on(_listener);
-
-			_table.listeners[arg] = _listener;
-		});
-
-		return e(
+		return React.createElement(
 			Component,
 			{ gun: { ...state, _root }, ...props },
 		);
