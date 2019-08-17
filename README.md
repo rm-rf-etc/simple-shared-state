@@ -22,6 +22,9 @@ Add to your create-react-app project and try it.
 
 ### Function-Based Components
 ```javascript
+import React from 'react';
+import { bind } from 'react-gun';
+
 const FunctionalComponent = ({
 	'@state': { counter = 0 },
 	'@methods': { increment, decrement },
@@ -51,17 +54,20 @@ so instead you define state props by declaring `boundProps` as a static
 array.
 
 ```javascript
+import React from 'react';
+import { bind } from 'react-gun';
+
 class ClassComponent extends React.Component {
 
-    static boundProps = ['counter'];
+	static boundProps = ['counter'];
 
-    render() {
+	render() {
 		const {
 			'@state': { counter = 0 },
 			'@methods': { increment, decrement },
 		} = this.props;
 
-        return (
+		return (
 			<>
 				<div className="col">
 					<button onClick={increment}>Increment</button>
@@ -71,8 +77,8 @@ class ClassComponent extends React.Component {
 					<p>{counter}</p>
 				</div>
 			</>
-        );
-    }
+		);
+	}
 }
 
 const methods = (getState, { put }) => ({
