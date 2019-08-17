@@ -38,7 +38,7 @@ export const _getArgs = (fn) => {
 	if (typeof fn !== 'function') { return []; }
 
 	const fnStr = fn.toString().replace(/[\n\s]/g, '');
-	const args = (/state:\{([^\}]*)\}/)
+	const args = (/['"]@state['"]:\{([^\}]*)\}/)
 		.exec(fnStr)[1]
 		.split(',')
 		.map((str) => str.split('=')[0]);
@@ -46,14 +46,11 @@ export const _getArgs = (fn) => {
 	if (Array.isArray(args) && args.length < 1) {
 		throw new Error(`No arguments found for component ${fn.name}`);
 	}
-	if (args.includes('_root')) {
-		args.splice(args.indexOf('_root'), 1);
-	}
 
 	return args;
 };
 
-export const bind = (rootKey) => (Component) => {
+export const bind = (rootKey, methods) => (Component) => {
 
 	if (typeof rootKey !== 'string') {
 		throw new Error(`bind() requires a string for the root node key. Received ${typeof rootKey} instead.`)
@@ -63,7 +60,7 @@ export const bind = (rootKey) => (Component) => {
 	}
 
 	let args = [];
-	if (Component.prototype && !!Component.prototype.render) {
+	if (Component.prototype && Component.prototype.isReactComponent) {
 		if (!isArray(Component.boundProps)) {
 			throw new Error('`boundProps` not found. Did you forget `static`?');
 		}
@@ -83,18 +80,21 @@ export const bind = (rootKey) => (Component) => {
 		useEffect(() => {
 			args.forEach((arg) => {
 				node.get(arg).on((value) => {
-					dispatch({ prop: arg, value })
-				})
-			})
+					dispatch({ prop: arg, value });
+				});
+			});
 		}, [dispatch]);
+
+		const defaultMethods = {
+			get: node.get,
+			put: (prop, val) => node.get(prop).put(val),
+		};
+		console.log('recalculate');
 
 		return React.createElement(Component, {
 			...ownProps,
-			state,
-			methods: {
-				get: node.get,
-				put: (prop, val) => node.get(prop).put(val),
-			},
+			'@state': state,
+			'@methods': methods ? methods(state, defaultMethods) : defaultMethods,
 		});
 	};
 };
