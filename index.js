@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useRef, useReducer, useEffect, useCallback } from 'react';
 import Gun from 'gun/gun';
 import 'gun/lib/open';
 import 'gun/lib/load';
 import 'gun/lib/unset';
-const { useRef, useReducer, useEffect } = React;
 
+let gun;
 let _intrnl = {};
 const { isArray } = Array;
 
@@ -12,27 +12,34 @@ export const getData = (rootName) => (
 	_intrnl.app ? _intrnl.app.get(rootName) : null
 );
 
-export const DataInitializer = ({
-		children,
-		peers,
-		root: rootName,
-	}) => {
+export class DataInitializer extends React.PureComponent {
 
-	const gun = Gun(peers);
+	componentWillMount() {
+		// console.log('PROVIDER: willMount()');
+		const {
+			peers,
+			options,
+			root: rootName,
+		} = this.props;
 
-	_intrnl = {
-		app: gun.get(rootName),
-		gun,
-	};
+		gun = Gun(peers, options);
+		_intrnl = {
+			app: gun.get(rootName),
+			gun,
+		};
+	}
 
-	return children;
+	render() {
+		// console.log('PROVIDER: render()', );
+		// console.log('gun is initialized:', !!_intrnl.app);
+		return this.props.children;
+	}
 };
-
 
 export const _reducer = (state, { prop, value }) => {
 	if (state[prop] === value) { return state; }
 	return { ...state, [prop]: value };
-}
+};
 
 export const _getArgs = (fn) => {
 	if (typeof fn !== 'function') { return []; }
@@ -43,20 +50,20 @@ export const _getArgs = (fn) => {
 		.split(',')
 		.map((str) => str.split('=')[0]);
 
-	if (Array.isArray(args) && args.length < 1) {
+	if (isArray(args) && args.length < 1) {
 		throw new Error(`No arguments found for component ${fn.name}`);
 	}
 
 	return args;
 };
 
-export const bind = (rootKey, methods) => (Component) => {
+export const bind = (rootKey, setMethods) => (Component) => {
 
 	if (typeof rootKey !== 'string') {
 		throw new Error(`bind() requires a string for the root node key. Received ${typeof rootKey} instead.`)
 	}
 	if (typeof Component !== 'function') {
-		throw new Error(`bind only works with function components, but received ${typeof Component} instead.`);
+		throw new Error(`bind expects a React component, but received ${typeof Component} instead.`);
 	}
 
 	let args = [];
@@ -68,12 +75,12 @@ export const bind = (rootKey, methods) => (Component) => {
 	} else {
 		args = _getArgs(Component);
 	}
+	// console.log('bind:', rootKey);
 
 	return (ownProps) => {
-		if (!_intrnl.app) { return null; }
-		const node = _intrnl.app.get(rootKey);
-
 		const stateRef = useRef();
+		const methodsRef = useRef();
+		const getState = useCallback(() => stateRef.current, []);
 		const [state, dispatch] = useReducer(_reducer, stateRef.current || {});
 		stateRef.current = state;
 
@@ -85,16 +92,25 @@ export const bind = (rootKey, methods) => (Component) => {
 			});
 		}, [dispatch]);
 
-		const defaultMethods = {
-			get: node.get,
-			put: (prop, val) => node.get(prop).put(val),
-		};
-		console.log('recalculate');
+		if (!_intrnl.app) return null;
+		const node = _intrnl.app.get(rootKey);
+
+		if (!methodsRef.current) {
+			const defaultMethods = {
+				get: node.get,
+				put: (prop, val) => node.get(prop).put(val),
+			};
+			if (setMethods) {
+				methodsRef.current = setMethods(getState, defaultMethods);
+			} else {
+				methodsRef.current = defaultMethods;
+			}
+		}
 
 		return React.createElement(Component, {
 			...ownProps,
 			'@state': state,
-			'@methods': methods ? methods(state, defaultMethods) : defaultMethods,
+			'@methods': methodsRef.current,
 		});
 	};
 };
