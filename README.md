@@ -13,6 +13,9 @@ library. Simply wrap components and receive data.
 ## Status
 **_Currently in beta_**
 
+Current work is focused on developing a simplistic but flexible API around GUN DB's API,
+along with primitive data types and convenience methods for all the major use cases.
+
 ### Known Limitations
 * `bind()` cannot be called from inside a React component.
 
