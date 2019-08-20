@@ -12,7 +12,7 @@ export const getData = (rootName) => (
 	_intrnl.app ? _intrnl.app.get(rootName) : null
 );
 
-export class DataInitializer extends React.PureComponent {
+export class Data extends React.PureComponent {
 
 	componentWillMount() {
 		// console.log('PROVIDER: willMount()');
@@ -36,44 +36,32 @@ export class DataInitializer extends React.PureComponent {
 	}
 };
 
-export const _reducer = (state, { prop, value }) => {
-	if (state[prop] === value) { return state; }
-	return { ...state, [prop]: value };
-};
-
-export const _getArgs = (fn) => {
-	if (typeof fn !== 'function') { return []; }
-
-	const fnStr = fn.toString().replace(/[\n\s]/g, '');
-	const args = (/['"]@state['"]:\{([^\}]*)\}/)
-		.exec(fnStr)[1]
-		.split(',')
-		.map((str) => str.split('=')[0]);
-
-	if (isArray(args) && args.length < 1) {
-		throw new Error(`No arguments found for component ${fn.name}`);
-	}
-
-	return args;
+export const scan = (Component) => {
+	Component.boundProps = getArgs(Component);
+	return Component;
 };
 
 export const bind = (rootKey, setMethods) => (Component) => {
 
-	if (typeof rootKey !== 'string') {
-		throw new Error(`bind() requires a string for the root node key. Received ${typeof rootKey} instead.`)
+	if (!['string', 'object'].includes(typeof rootKey)) {
+		throw new Error(`bind() requires a string or object with id property for root_key. Received ${typeof rootKey} instead.`)
 	}
 	if (typeof Component !== 'function') {
 		throw new Error(`bind expects a React component, but received ${typeof Component} instead.`);
 	}
 
 	let args = [];
-	if (Component.prototype && Component.prototype.isReactComponent) {
-		if (!isArray(Component.boundProps)) {
-			throw new Error('`boundProps` not found. Did you forget `static`?');
+	if (typeof Component !== 'function') {
+		throw new Error('`bind` received invalid component.');
+	}
+	if (Component.boundProps && isArray(Component.boundProps)) {
+		if (Component.boundProps.length < 1) {
+			console.warn('`bind` received component with empty list of boundProps.');
+			return null;
 		}
 		args = Component.boundProps;
 	} else {
-		args = _getArgs(Component);
+		args = getArgs(Component);
 	}
 	// console.log('bind:', rootKey);
 
@@ -93,7 +81,8 @@ export const bind = (rootKey, setMethods) => (Component) => {
 		}, [dispatch]);
 
 		if (!_intrnl.app) return null;
-		const node = _intrnl.app.get(rootKey);
+		const { id } = rootKey;
+		const node = (id ? _intrnl.gun : _intrnl.app).get(id || rootKey);
 
 		if (!methodsRef.current) {
 			const defaultMethods = {
@@ -113,4 +102,71 @@ export const bind = (rootKey, setMethods) => (Component) => {
 			'@methods': methodsRef.current,
 		});
 	};
+};
+
+export const _reducer = (state, { prop, value }) => {
+	if (state[prop] === value) return state;
+	return {
+		...state,
+		[prop]: value,
+	};
+};
+
+const extractMinifiedComponentArgs = (fnStr) => {
+	const block = /function \w*\(_ref\)\s*\{(.+?)return/si.exec(fnStr);
+	const lines = block[1].trim().replace(/[,;]?\n/, ';').split(/[,;]/);
+	const args = [];
+
+	let pushing = false;
+	for (let line of lines) {
+		if (pushing) {
+			args.push(line.replace(/\s+/g, '').split('=')[0]);
+		}
+		if (/@state/.test(line)) {
+			pushing = true;
+
+			const parsed = /@state['"]\]\.(\w+);$/.exec(line);
+			if (parsed) {
+				args.push(parsed[1]);
+			}
+		} else if (/@methods/.test(line)) {
+			pushing = false;
+		}
+	}
+
+	return args;
+};
+
+const extractComponentArgs = (fnStr) => {
+	try {
+		return (/['"]@state['"]:\{([^}]*)\}/)
+			.exec(fnStr.replace(/[\n\s]/g, ''))[1]
+			.split(',')
+			.map((str) => str.split('=')[0]);
+	} catch (err) {
+		console.log(err);
+		console.log('ƒ:', fnStr);
+	}
+	return [];
+};
+
+export const getArgs = (fn) => {
+	if (typeof fn !== 'function') {
+		return [];
+	}
+
+	let fnStr = fn.toString();
+
+	let args;
+	if (/react__|var _ref\$State|_ref\['@state'\][,.]/g.test(fnStr)) {
+		args = extractMinifiedComponentArgs(fnStr);
+	} else {
+		args = extractComponentArgs(fnStr);
+	}
+
+	if (isArray(args) && args.length < 1) {
+		throw new Error(`No arguments found for component ${fn.name}`);
+	}
+
+	return args;
 };
