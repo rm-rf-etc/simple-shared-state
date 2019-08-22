@@ -1,7 +1,6 @@
 import { createElement, useRef, useState, useEffect, useCallback } from 'react';
 import _intrnl from './internal';
 import specialTypes from './specialTypes';
-// const { isArray } = Array;
 
 
 const bind = (rootKey, setMethods, schema) => (Component) => {
