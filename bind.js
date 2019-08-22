@@ -1,48 +1,21 @@
 import { createElement, useRef, useState, useEffect, useCallback } from 'react';
-import { omit } from 'lodash';
-import getStateProps from './discoverProps';
 import _intrnl from './internal';
-// import _reducer from './reducer';
-const { isArray } = Array;
+import specialTypes from './specialTypes';
+// const { isArray } = Array;
 
-export default (rootKey, setMethods, schema) => (Component) => {
+
+const bind = (rootKey, setMethods, schema) => (Component) => {
 
 	if (!['string', 'object'].includes(typeof rootKey)) {
-		throw new Error(`bind() requires a string or object with id property for root_key. Received ${typeof rootKey} instead.`)
+		throw new Error(`\`bind\` requires a string or object with id property for root_key. Received ${typeof rootKey} instead.`)
 	}
 	if (typeof Component !== 'function') {
-		throw new Error(`bind expects a React component, but received ${typeof Component} instead.`);
+		throw new Error(`\`bind\` expects a React component, but received ${typeof Component} instead.`);
 	}
-
-	let stateProps = [];
-	if (typeof Component !== 'function') {
-		throw new Error('`bind` received invalid component.');
+	if (!schema || !schema.constructor || schema.constructor.name !== 'Object' || Object.values(schema).length < 1) {
+		throw new Error('`bind` could not find a valid schema, received:', schema);
 	}
-	if (Component.boundProps && isArray(Component.boundProps)) {
-		if (Component.boundProps.length < 1) {
-			console.warn('`bind` received component with empty list of boundProps.');
-			return null;
-		}
-		stateProps = Component.boundProps;
-	} else {
-		stateProps = getStateProps(Component);
-	}
-	if (stateProps.length < 1) {
-		throw new Error('State props could not be found');
-	}
-	stateProps.forEach((propKey) => {
-		if (!schema.hasOwnProperty(propKey)) {
-			throw new Error(`Schema failed validation, property key '${propKey}' found in your component but not in your schema.`);
-		}
-	});
-
 	let initialState = {};
-
-	Object.entries(schema).forEach(([propKey, propSchema]) => {
-		const specialType = specialTypes[propSchema.type];
-
-		initialState[propKey] = specialType ? specialType.store(propSchema.default) : propSchema.default;
-	});
 	// console.log('bind:', rootKey);
 
 	return (ownProps) => {
@@ -78,43 +51,29 @@ export default (rootKey, setMethods, schema) => (Component) => {
 		*/
 		useEffect(() => {
 
-			node.once((nodeData) => {
-				const content = omit(nodeData, '_');
-				const objProps = Object.values(content).filter(p => p.hasOwnProperty('#'));
-
-				if (objProps.length) {
-					const objPromises = {};
-					Object.entries(content).map(([propKey, propVal]) => {
-						objPromises[propKey] = _intrnl.read.gun.get(propVal['#']).then();
-					});
-
-					Promise.all(Object.values(objPromises)).then(d => {
-						const newState = d.map(d => omit(d, '_'));
-
-						console.log('newState', newState);
-						// setState(newState);
-					});
-				}
-
-				// setState({
-				// 	...stateRef.current,
-				// 	...omit(nodeData, '_'),
-				// });
+			Object.entries(schema).forEach(([key, { default: _default, type }]) => {
+				const typeConverter = specialTypes[type];
+				initialState[key] = typeConverter ? typeConverter.store(_default) : _default;
 			});
+
 
 			/*
 			For the current property, load the associated developer-provided schema.
 			Using this schema, check if it's a special type, and if so, use that
 			special type to `put` the default value.
 			*/
-			stateProps.forEach((propKey) => {
+			Object.keys(schema).forEach((propKey) => {
 
 				// a gun db reference for this property of our active node
 				const nodeProp = node.get(propKey);
 
-				nodeProp.put(initialState[propKey]);
-				nodeProp.on(propVal => setState({ [propKey]: propVal }));
+				nodeProp.once((value) => {
+					nodeProp.put(value || initialState[propKey]);
+				});
+
+				nodeProp.on((propVal) => setState({ [propKey]: propVal }));
 			});
+
 		}, [setState]);
 
 
@@ -157,20 +116,6 @@ export default (rootKey, setMethods, schema) => (Component) => {
 	};
 };
 
-// alt+B: ∫
-// alt+O: ø
-const specialTypes = {
-	stringified: {
-		default: [],
-		retrieve(subject) {
-			return JSON.parse(subject);
-		},
-		store(subject) {
-			return JSON.stringify(subject);
-		},
-	}
-};
-
 const convertForRender = (state, schema) => {
 	let result = {};
 
@@ -188,3 +133,5 @@ const getSpecial = (propKey, schema) => {
 	const propSchema = schema[propKey];
 	return specialTypes[propSchema.type];
 };
+
+export default bind;

@@ -1,6 +1,8 @@
-import getStateProps from 'react-gun/discoverProps';
+// import getStateProps from 'react-gun/discoverProps';
 
-export default (Component) => {
-	Component.boundProps = getStateProps(Component);
-	return Component;
-};
+// const scan = (Component) => {
+// 	Component.boundProps = getStateProps(Component);
+// 	return Component;
+// };
+
+// export default scan;

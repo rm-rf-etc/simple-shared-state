@@ -1,7 +1,6 @@
 import { PureComponent } from 'react';
 import _intrnl from './internal';
 import bind from './bind';
-import scan from './scan';
 import Gun from 'gun/gun';
 import 'gun/lib/then';
 // import 'gun/lib/load';
@@ -9,15 +8,16 @@ import 'gun/lib/then';
 
 let gun;
 
-export const getData = (rootStr) => (
+const getData = (rootStr) => (
 	_intrnl.read.app ? _intrnl.read.app.get(rootStr) : null
 );
 
-export class Data extends PureComponent {
+class Data extends PureComponent {
 
-	componentWillMount() {
+	constructor(props) {
+		super(props);
 		// console.log('PROVIDER: willMount()');
-		const { peers, options, root: rootStr } = this.props;
+		const { peers, options, root: rootStr } = props;
 
 		gun = Gun(peers, options);
 		_intrnl.write = {
@@ -33,4 +33,4 @@ export class Data extends PureComponent {
 	}
 };
 
-export { bind, scan };
+export { bind, getData, Data };

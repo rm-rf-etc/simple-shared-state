@@ -1,11 +1,13 @@
 
-let _internal = {};
+let INTERNAL_STORE = {};
 
-export default {
+const _internal = {
 	get read () {
-		return _internal;
+		return INTERNAL_STORE;
 	},
 	set write (val) {
-		_internal = val;
+		INTERNAL_STORE = val;
 	},
 };
+
+export default _internal;
