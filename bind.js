@@ -1,25 +1,30 @@
 import { createElement, useRef, useState, useEffect, useCallback } from 'react';
 import _intrnl from './internal';
 import specialTypes from './specialTypes';
+const { isArray } = Array;
 
 
-const bind = (rootKey, setMethods, schema) => (Component) => {
+const bind = ({ dataRef, methods, schema: _schema }, Component) => {
 
-	if (!['string', 'object'].includes(typeof rootKey)) {
-		throw new Error(`\`bind\` requires a string or object with id property for root_key. Received ${typeof rootKey} instead.`)
+	if (!['string', 'object'].includes(typeof dataRef)) {
+		throw new Error(`\`bind\` requires a string or object with id property for root_key. Received ${typeof dataRef} instead.`)
 	}
 	if (typeof Component !== 'function') {
 		throw new Error(`\`bind\` expects a React component, but received ${typeof Component} instead.`);
 	}
-	if (!schema || !schema.constructor || schema.constructor.name !== 'Object' || Object.values(schema).length < 1) {
-		throw new Error('`bind` could not find a valid schema, received:', schema);
+	if (!_schema || !_schema.constructor || _schema.constructor.name !== 'Object') {
+		throw new Error('`bind` could not find a valid schema');
 	}
+	const schema = Object.entries(_schema).reduce((sum, [key, [type, _default]]) => ({
+		...sum,
+		[key]: { type, default: _default },
+	}), {});
+
 	let initialState = {};
-	// console.log('bind:', rootKey);
+	// console.log('bind:', dataRef);
 
 	return (ownProps) => {
 		const methodsRef = useRef();
-		const schemaRef = useRef(schema);
 		const stateRef = useRef(initialState);
 
 		/*
@@ -29,7 +34,6 @@ const bind = (rootKey, setMethods, schema) => (Component) => {
 		*/
 		const getState = useCallback((propKey) => {
 			const state = stateRef.current;
-			const schema = schemaRef.current;
 
 			if (!schema.hasOwnProperty(propKey)) {
 				throw new Error(`Property '${propKey}' not available from your pre-defined schema`);
@@ -61,6 +65,8 @@ const bind = (rootKey, setMethods, schema) => (Component) => {
 			Using this schema, check if it's a special type, and if so, use that
 			special type to `put` the default value.
 			*/
+			const listeners = {};
+
 			Object.keys(schema).forEach((propKey) => {
 
 				// a gun db reference for this property of our active node
@@ -70,22 +76,33 @@ const bind = (rootKey, setMethods, schema) => (Component) => {
 					nodeProp.put(value || initialState[propKey]);
 				});
 
-				nodeProp.on((propVal) => setState({ [propKey]: propVal }));
+				nodeProp.on((propVal, propKey, _, chain) => {
+
+					// store chain object so we can remove listeners upon unmount
+					if (!listeners[propKey]) listeners[propKey] = chain;
+
+					setState({ [propKey]: propVal });
+				});
 			});
 
-		}, [setState]);
+			return () => Object.entries(listeners).forEach(([propKey, chain]) => {
+				chain.off();
+				delete listeners[propKey];
+			});
+
+		}, []);
 
 
 		/*
-		If rootKey is an object with property `id`, then node lookup needs to happen
+		If dataRef is an object with property `id`, then node lookup needs to happen
 		from above the application root, because gun ID's are global.
 
 		gun.get('jsdk24ys')
 		vs
 		gun.get('app_root').get('node_name')
 		*/
-		const { id } = rootKey;
-		const node = (id ? _intrnl.read.gun : _intrnl.read.app).get(id || rootKey);
+		const { id } = dataRef;
+		const node = (id ? _intrnl.read.gun : _intrnl.read.app).get(id || dataRef);
 
 
 		/*
@@ -102,8 +119,8 @@ const bind = (rootKey, setMethods, schema) => (Component) => {
 				},
 			};
 
-			methodsRef.current = setMethods
-				? setMethods(getState, defaultMethods)
+			methodsRef.current = methods
+				? methods(getState, defaultMethods)
 				: defaultMethods;
 		}
 
