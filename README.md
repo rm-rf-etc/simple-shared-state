@@ -17,9 +17,9 @@ Current work is focused on developing a simplistic but flexible API around GUN D
 along with advanced data types and convenience methods for all the major use cases.
 
 ## Feature Agenda
-- Index enforcement
-- Dimentional AdvancedType
-- Add-on API
+- [Enforcement Indices](https://github.com/rm-rf-etc/react-substrate/issues/2)
+- [Dimentional AdvancedType](https://github.com/rm-rf-etc/react-substrate/issues/3)
+- [Advanced Types Add-on API](https://github.com/rm-rf-etc/react-substrate/issues/4)
 - Dev-mode index dump
 - Dev-mode index dump, server-side
 - AdvancedType add-on API
