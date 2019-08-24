@@ -14,82 +14,28 @@ library. Simply wrap components and receive data.
 **_Currently in beta_**
 
 Current work is focused on developing a simplistic but flexible API around GUN DB's API,
-along with primitive data types and convenience methods for all the major use cases.
+along with advanced data types and convenience methods for all the major use cases.
 
-### Known Limitations
-* `bind()` cannot be called from inside a React component.
+## Feature Agenda
+- Index enforcement
+- Dimentional AdvancedType
+- Add-on API
+- Dev-mode index dump
+- Dev-mode index dump, server-side
+- AdvancedType add-on API
+	- AdvancedType rehydration
+	- AdvancedType method hooks
+- User auth
+	- User data - private
+	- User data - public
+- Messaging
+- Invite-based account creation
+- RBAC
+
 
 ## Demo
 
-Add to your create-react-app project and try it.
-
-### Function-Based Components
-```javascript
-import React from 'react';
-import { bind } from 'react-gun';
-
-const FunctionalComponent = ({
-	'@state': { counter = 0 },
-	'@methods': { increment, decrement },
-}) => (
-	<>
-		<div className="col">
-			<button onClick={increment}>Increment</button>
-			<button onClick={decrement}>Decrement</button>
-		</div>
-		<div className="col">
-			<p>{counter}</p>
-		</div>
-	</>
-);
-
-const methods = (getState, { put }) => ({
-	increment: () => put('counter', getState().counter + 1),
-	decrement: () => put('counter', getState().counter - 1),
-});
-export default bind('counter_1', methods)(FunctionalComponent);
-```
-
-### Class-Based Components
-
-Class-based components can't infer state props from a function signature,
-so instead you define state props by declaring `boundProps` as a static
-array.
-
-```javascript
-import React from 'react';
-import { bind } from 'react-gun';
-
-class ClassComponent extends React.Component {
-
-	static boundProps = ['counter'];
-
-	render() {
-		const {
-			'@state': { counter = 0 },
-			'@methods': { increment, decrement },
-		} = this.props;
-
-		return (
-			<>
-				<div className="col">
-					<button onClick={increment}>Increment</button>
-					<button onClick={decrement}>Decrement</button>
-				</div>
-				<div className="col">
-					<p>{counter}</p>
-				</div>
-			</>
-		);
-	}
-}
-
-const methods = (getState, { put }) => ({
-	increment: () => put('counter', getState().counter + 1),
-	decrement: () => put('counter', getState().counter - 1),
-});
-export default bind('counter_2', methods)(ClassComponent);
-```
+Unavailable right now. Too many changes have been happening to the API.
 
 
 ## Dev Testing
