@@ -1,6 +1,6 @@
 {
   "name": "react-substrate",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.1.01",
   "description": "State management, data binding, and P2P synchronization framework for React",
   "repository": "https://github.com/rm-rf-etc/react-substrate",
   "main": "index.js",
