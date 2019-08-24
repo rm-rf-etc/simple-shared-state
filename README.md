@@ -29,7 +29,7 @@ along with advanced data types and convenience methods for all the major use cas
 	- User data - private
 	- User data - public
 - [Chat Messaging / Notifications](https://github.com/rm-rf-etc/react-substrate/issues/9)
-- [Invite-based account creation](https://github.com/rm-rf-etc/react-substrate/issues/8)
+- [Invite-Based Account Creation](https://github.com/rm-rf-etc/react-substrate/issues/8)
 
 
 ## Demo
