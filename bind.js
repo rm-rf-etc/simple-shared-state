@@ -1,27 +1,33 @@
 import { createElement, useRef, useState, useEffect, useCallback } from 'react';
-import _intrnl from './internal';
+import _intrnl, { getSymbolValue } from './internal';
 import specialTypes from './specialTypes';
-const { isArray } = Array;
+// const { isArray } = Array;
 
 
-const bind = ({ dataRef, methods, schema: _schema }, Component) => {
-
-	if (!['string', 'object'].includes(typeof dataRef)) {
-		throw new Error(`\`bind\` requires a string or object with id property for root_key. Received ${typeof dataRef} instead.`)
-	}
+const bind = (
+	{ index, methods, schema: _schema },
+	Component,
+) => {
+	/*
+	Validation block. All invalid input should throw.
+	*/
 	if (typeof Component !== 'function') {
 		throw new Error(`\`bind\` expects a React component, but received ${typeof Component} instead.`);
 	}
 	if (!_schema || !_schema.constructor || _schema.constructor.name !== 'Object') {
 		throw new Error('`bind` could not find a valid schema');
 	}
+
+	/*
+	Convert from developer-friendly syntax to internally-useful schema structure
+	*/
 	const schema = Object.entries(_schema).reduce((sum, [key, [type, _default]]) => ({
 		...sum,
 		[key]: { type, default: _default },
 	}), {});
 
 	let initialState = {};
-	// console.log('bind:', dataRef);
+	// console.log('bind:', index);
 
 	return (ownProps) => {
 		const methodsRef = useRef();
@@ -53,6 +59,13 @@ const bind = ({ dataRef, methods, schema: _schema }, Component) => {
 		One-time setup process. Adds node property listeners and sets default node property values.
 		*/
 		useEffect(() => {
+
+			if (!_intrnl.indices) {
+				throw new Error('Indices not initialized');
+			}
+			if (typeof index === 'string' && typeof _intrnl.indices[index] !== 'symbol') {
+				throw new Error('Invalid index');
+			}
 
 			Object.entries(schema).forEach(([key, { default: _default, type }]) => {
 				const typeConverter = specialTypes[type];
@@ -94,15 +107,15 @@ const bind = ({ dataRef, methods, schema: _schema }, Component) => {
 
 
 		/*
-		If dataRef is an object with property `id`, then node lookup needs to happen
+		If index is an object with property `id`, then node lookup needs to happen
 		from above the application root, because gun ID's are global.
 
 		gun.get('jsdk24ys')
 		vs
 		gun.get('app_root').get('node_name')
 		*/
-		const { id } = dataRef;
-		const node = (id ? _intrnl.read.gun : _intrnl.read.app).get(id || dataRef);
+		const lookupStr = index.id || typeof index === 'string' ? index : getSymbolValue(index);
+		const node = (index.id ? _intrnl.gun : _intrnl.app).get(lookupStr);
 
 
 		/*

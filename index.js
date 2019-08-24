@@ -5,21 +5,17 @@ import Gun from 'gun/gun';
 import 'gun/lib/then';
 
 
-const getData = (rootStr) => (
-	_intrnl.read.app ? _intrnl.read.app.get(rootStr) : null
-);
-
 class Data extends PureComponent {
 
 	constructor(props) {
 		super(props);
-		const { peers, options, root: rootStr } = props;
+		const { peers, indices, options, namespace = '@app' } = props.config;
+
+		console.log('indices', indices);
+		console.log('peers', peers);
 
 		const gun = Gun(peers, options);
-		_intrnl.write = {
-			app: gun.get(rootStr),
-			gun,
-		};
+		_intrnl.init(gun, gun.get(namespace), indices);
 	}
 
 	render() {
@@ -27,4 +23,4 @@ class Data extends PureComponent {
 	}
 };
 
-export { bind, getData, Data };
+export { bind, Data };
