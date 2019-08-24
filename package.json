@@ -1,7 +1,7 @@
 {
-  "name": "react-gun",
-  "version": "0.1.0-beta.1",
-  "description": "React bindings for GUN DB – Alternative to redux and firebase",
+  "name": "react-substrate",
+  "version": "0.1.0-beta.2",
+  "description": "State management, data binding, and P2P synchronization framework for React",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,8 +19,10 @@
   "dependencies": {
     "@types/gun": "^0.9.1",
     "@types/react": "^16.8.24",
+    "eventemitter3": "^4.0.0",
     "gun": "^0.2019.726",
     "react": "^16.8.6",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "uuid": "^3.3.3"
   }
 }
