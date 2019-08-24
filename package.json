@@ -1,28 +1,27 @@
 {
   "name": "react-substrate",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.1",
   "description": "State management, data binding, and P2P synchronization framework for React",
+  "repository": "https://github.com/rm-rf-etc/react-substrate",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
+	"gun",
     "react",
-    "gun",
-    "graph database",
+	"redux",
+	"react-redux",
     "state management",
-    "redux",
-    "firebase"
+    "firebase alternative",
+    "graph database"
   ],
-  "author": "Rob Christian",
+  "author": "Rob Christian <rm.rf.etc@gmail.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@types/gun": "^0.9.1",
-    "@types/react": "^16.8.24",
     "eventemitter3": "^4.0.0",
     "gun": "^0.2019.726",
     "react": "^16.8.6",
-    "typescript": "^3.5.3",
     "uuid": "^3.3.3"
   }
 }
