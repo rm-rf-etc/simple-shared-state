@@ -1,23 +1,24 @@
 import EventEmitter from 'eventemitter3';
 const { isArray } = Array;
 
-const _INTERNAL_ = {};
+// const _INTERNAL_ = {};
 
 const env = process.env.DEVELOPMENT || 'development';
 
 const indicesToString = (obj) => Object.keys(obj).sort().join(',');
 
-const forExport = {
+// const forExport = {
+const _INTERNAL_ = {
 
-	get indices () {
-		return _INTERNAL_.indices;
-	},
-	get gun () {
-		return _INTERNAL_.gun;
-	},
-	get app () {
-		return _INTERNAL_.app;
-	},
+	// get indices () {
+	// 	return _INTERNAL_.indices;
+	// },
+	// get gun () {
+	// 	return _INTERNAL_.gun;
+	// },
+	// get app () {
+	// 	return _INTERNAL_.app;
+	// },
 	init(gun, app, indices) {
 		const _indices = (typeof indices === 'object') ?
 			Object.values(indices) :
@@ -37,7 +38,7 @@ const forExport = {
 			if (typeof symbol !== 'symbol') {
 				throw new Error('An index can only be defined as a symbol');
 			}
-			const symbolName = getSymbolValue(symbol);
+			const symbolName = symbolString(symbol);
 
 			if (!/^[A-Z0-9:-_/]+$/.test(symbolName)) {
 				throw new Error(`Invalid index string content: '${symbolName}'`);
@@ -58,12 +59,13 @@ const forExport = {
 			});
 		}
 
-		console.log('emit');
+		console.log('emit data_loaded');
 		events.emit('data_loaded');
 	},
 };
 
-export default forExport;
+// export default forExport;
+export default _INTERNAL_;
 export const events = new EventEmitter();
 export const getIndex = (str) => _INTERNAL_.indices[str];
-export const getSymbolValue = (sym) => /^Symbol\((.+)\)$/.exec(sym.toString())[1];
+export const symbolString = (sym) => /^Symbol\((.+)\)$/.exec(sym.toString())[1];

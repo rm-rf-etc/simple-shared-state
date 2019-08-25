@@ -1,11 +1,10 @@
 import { createElement, useRef, useState, useEffect, useCallback } from 'react';
-import _intrnl, { getSymbolValue } from './internal';
-import specialTypes from './specialTypes';
+import _intrnl, { symbolString } from './internal';
+import advancedTypes from './advancedTypes';
 // const { isArray } = Array;
 
-
 const bind = (
-	{ index, methods, schema: _schema },
+	{ index, methods, schema },
 	Component,
 ) => {
 	/*
@@ -14,16 +13,16 @@ const bind = (
 	if (typeof Component !== 'function') {
 		throw new Error(`\`bind\` expects a React component, but received ${typeof Component} instead.`);
 	}
-	if (!_schema || !_schema.constructor || _schema.constructor.name !== 'Object') {
+	if (!schema || !schema.constructor || schema.constructor.name !== 'Object') {
 		throw new Error('`bind` could not find a valid schema');
 	}
 
 	/*
 	Convert from developer-friendly syntax to internally-useful schema structure
 	*/
-	const schema = Object.entries(_schema).reduce((sum, [key, [type, _default]]) => ({
+	schema = Object.entries(schema).reduce((sum, [key, [type, _default, options]]) => ({
 		...sum,
-		[key]: { type, default: _default },
+		[key]: { type, default: _default, options },
 	}), {});
 
 	let initialState = {};
@@ -48,7 +47,7 @@ const bind = (
 			const statePiece = state[propKey];
 			const type = schema[propKey] ? schema[propKey].type : null;
 
-			return type && specialTypes[type] ? specialTypes[type].retrieve(statePiece) : statePiece;
+			return type && advancedTypes[type] ? advancedTypes[type].retrieve(statePiece) : statePiece;
 		}, []);
 
 		const [state, setState] = useState(stateRef.current || initialState);
@@ -60,16 +59,20 @@ const bind = (
 		*/
 		useEffect(() => {
 
-			if (!_intrnl.indices) {
+			if (typeof _intrnl !== 'object' || !_intrnl.indices) {
 				throw new Error('Indices not initialized');
 			}
-			if (typeof index === 'string' && typeof _intrnl.indices[index] !== 'symbol') {
+			if ((index.id && typeof index.id !== 'string') || !Object.values(_intrnl.indices).includes(index)) {
 				throw new Error('Invalid index');
 			}
 
-			Object.entries(schema).forEach(([key, { default: _default, type }]) => {
-				const typeConverter = specialTypes[type];
-				initialState[key] = typeConverter ? typeConverter.store(_default) : _default;
+			Object.entries(schema).forEach(([key, { default: _default, type, options }]) => {
+				const typeConverter = advancedTypes[type];
+				if (typeConverter.path) {
+					typeConverter.init(_default, { base: key, axes: options });
+				} else {
+					initialState[key] = typeConverter ? typeConverter.store(_default) : _default;
+				}
 			});
 
 
@@ -86,7 +89,10 @@ const bind = (
 				const nodeProp = node.get(propKey);
 
 				nodeProp.once((value) => {
-					nodeProp.put(value || initialState[propKey]);
+
+					if (initialState[propKey]) {
+						nodeProp.put(value || initialState[propKey]);
+					}
 				});
 
 				nodeProp.on((propVal, propKey, _, chain) => {
@@ -114,7 +120,7 @@ const bind = (
 		vs
 		gun.get('app_root').get('node_name')
 		*/
-		const lookupStr = index.id || typeof index === 'string' ? index : getSymbolValue(index);
+		const lookupStr = index.id || symbolString(index);
 		const node = (index.id ? _intrnl.gun : _intrnl.app).get(lookupStr);
 
 
@@ -127,8 +133,14 @@ const bind = (
 			const defaultMethods = {
 				get: node.get,
 				put: (propKey, val) => {
-					const specialType = getSpecial(propKey, schema);
-					node.get(propKey).put(specialType ? specialType.store(val) : val);
+					const advancedType = getSpecial(propKey, schema);
+
+					if (advancedType && !advancedType.path) {
+						// advancedType.putter(node.get(propKey), val);
+						throw new Error('`put` not implemented on advanced types with derived indices');
+					} else {
+						node.get(propKey).put(advancedType ? advancedType.store(val) : val);
+					}
 				},
 			};
 
@@ -150,7 +162,7 @@ const convertForRender = (state, schema) => {
 
 	for (let k in state) {
 		const propSchema = schema[k];
-		const sType = specialTypes[propSchema.type];
+		const sType = advancedTypes[propSchema.type];
 
 		result[k] = sType ? sType.retrieve(state[k]) : state[k];
 	}
@@ -160,7 +172,7 @@ const convertForRender = (state, schema) => {
 
 const getSpecial = (propKey, schema) => {
 	const propSchema = schema[propKey];
-	return specialTypes[propSchema.type];
+	return advancedTypes[propSchema.type];
 };
 
 export default bind;

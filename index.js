@@ -11,9 +11,6 @@ class Data extends PureComponent {
 		super(props);
 		const { peers, indices, options, namespace = '@app' } = props.config;
 
-		console.log('indices', indices);
-		console.log('peers', peers);
-
 		const gun = Gun(peers, options);
 		_intrnl.init(gun, gun.get(namespace), indices);
 	}

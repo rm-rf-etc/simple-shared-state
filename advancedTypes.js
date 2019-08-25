@@ -3,7 +3,7 @@ import { omit } from 'lodash';
 import _intrnl, { events } from './internal';
 const { isArray } = Array;
 
-const specialTypes = {
+const advancedTypes = {
 	stringified: {
 		default: [],
 		path: null,
@@ -18,6 +18,39 @@ const specialTypes = {
 		},
 	},
 	dimensional: {
+
+		/*
+		From a base index (which is a string extracted from the index Symbol), and a
+		list of axes (an array of strings), we derive indices of the format
+		`[base]/[axis](/[axis])*`. E.g. `BASE/X`, `BASE/X/Y`, `BASE/X/Y/Z`.
+
+		We then read the value from `BASE`, expecting a semicolon-separated string
+		of the derived indices previously stored from past sessions. If this string
+		is different from our current derived indices string, then we null out all
+		the old derived indices and store the new derived indices string at `BASE`.
+		*/
+		init(_default, { base, axes }) {
+			const homeIndexStr = base.toUpperCase();
+			const homeIndex = _intrnl.app.get(homeIndexStr);
+			const derivedIndices = getDerivedIndicesFromAxes(homeIndexStr, axes);
+			const derivedIndicesStr = derivedIndices.sort().join(';');
+
+			homeIndex.once((record) => {
+				if (record !== derivedIndicesStr) {
+					if (typeof record === 'string') {
+						record.split(';').forEach(i => _intrnl.app.get(i).put(null));
+					}
+					homeIndex.put(derivedIndicesStr);
+				}
+			});
+
+			this.derivedIndices = derivedIndices.reduce((sum, index) => ({
+				...sum,
+				[index]: _intrnl.app.get(index),
+			}), {});
+
+			console.log('this advanced type', this);
+		},
 		default: 0,
 		path: '__schematype_dimensional__',
 		rehydrate(node) {
@@ -36,7 +69,7 @@ const specialTypes = {
 };
 
 events.on('data_loaded', () => {
-	Object.values(specialTypes).forEach((type) => {
+	Object.values(advancedTypes).forEach((type) => {
 		if (!type.path) return;
 		_intrnl.app.get(type.path).once((data) => type.rehydrate(data));
 	})
@@ -67,4 +100,9 @@ const arrayMethodOverrides = {
 	}
 }
 
-export default specialTypes;
+export default advancedTypes;
+
+const getDerivedIndicesFromAxes = (baseStr, axesArray) => axesArray.reduce((sum, d) => ([
+	...sum,
+	`${sum.length ? sum.slice(-1) : baseStr}/${d.toUpperCase()}`,
+]), []);
