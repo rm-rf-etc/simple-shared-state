@@ -68,7 +68,7 @@ const bind = (
 
 			Object.entries(schema).forEach(([key, { default: _default, type, options }]) => {
 				const typeConverter = advancedTypes[type];
-				if (typeConverter.path) {
+				if (typeConverter.multiIndex) {
 					typeConverter.init(_default, { base: key, axes: options });
 				} else {
 					initialState[key] = typeConverter ? typeConverter.store(_default) : _default;
@@ -135,7 +135,7 @@ const bind = (
 				put: (propKey, val) => {
 					const advancedType = getSpecial(propKey, schema);
 
-					if (advancedType && !advancedType.path) {
+					if (advancedType && !advancedType.multiIndex) {
 						// advancedType.putter(node.get(propKey), val);
 						throw new Error('`put` not implemented on advanced types with derived indices');
 					} else {

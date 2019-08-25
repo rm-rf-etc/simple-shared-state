@@ -52,7 +52,7 @@ const advancedTypes = {
 			console.log('this advanced type', this);
 		},
 		default: 0,
-		path: '__schematype_dimensional__',
+		multiIndex: true,
 		rehydrate(node) {
 			console.log('rehydrate?', omit(node, '_'));
 		},
@@ -70,9 +70,13 @@ const advancedTypes = {
 
 events.on('data_loaded', () => {
 	Object.values(advancedTypes).forEach((type) => {
-		if (!type.path) return;
-		_intrnl.app.get(type.path).once((data) => type.rehydrate(data));
-	})
+		if (!type.multiIndex) return;
+
+		console.log('data_loaded', type);
+		if (type.derivedIndices && Object.values(type.derivedIndices).length) {
+			console.log('data loaded:', type.derivedIndices);
+		}
+	});
 });
 
 const arrayMethodOverrides = {

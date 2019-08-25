@@ -20,6 +20,11 @@ const _INTERNAL_ = {
 	// 	return _INTERNAL_.app;
 	// },
 	init(gun, app, indices) {
+
+		/*
+		Index enforcing logic lives here. Indices are defined using JS Symbols, where
+		the Symbol wraps a string which must conform to the pattern /^[A-Z0-9:-_/]+$/.
+		*/
 		const _indices = (typeof indices === 'object') ?
 			Object.values(indices) :
 			indices;
