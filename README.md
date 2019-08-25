@@ -18,12 +18,12 @@ along with advanced data types and convenience methods for all the major use cas
 
 ## Feature Agenda
 - [Enforcement Indices](https://github.com/rm-rf-etc/react-substrate/issues/2)
-- [Dimentional AdvancedType](https://github.com/rm-rf-etc/react-substrate/issues/3)
+- [ND Data Structures](https://github.com/rm-rf-etc/react-substrate/issues/3)
 - [Dev-mode Index Dump/Reset](https://github.com/rm-rf-etc/react-substrate/issues/5)
 - [Dev-mode Index Dump/Reset, Server-Side](https://github.com/rm-rf-etc/react-substrate/issues/6)
 - [Advanced Types Add-on API](https://github.com/rm-rf-etc/react-substrate/issues/4)
-	- AdvancedType rehydration
-	- AdvancedType method hooks
+	- Data Structures rehydration
+	- Data Structures method hooks
 - [User Auth](https://github.com/rm-rf-etc/react-substrate/issues/7)
 	- RBAC
 	- User data - private

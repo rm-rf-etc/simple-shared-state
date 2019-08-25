@@ -4,7 +4,7 @@
   "description": "State management, data binding, and P2P synchronization framework for React",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --watchAll"
   },
   "keywords": [
     "react",
@@ -19,10 +19,17 @@
   "dependencies": {
     "@types/gun": "^0.9.1",
     "@types/react": "^16.8.24",
-    "eventemitter3": "^4.0.0",
+    "cartesian-product": "^2.1.2",
     "gun": "^0.2019.726",
     "react": "^16.8.6",
     "typescript": "^3.5.3",
     "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
+    "babel-jest": "^24.9.0",
+    "jest": "^24.9.0"
   }
 }
