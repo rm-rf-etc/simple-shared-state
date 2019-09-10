@@ -37,7 +37,7 @@ export default (bucketDesc, construct) => {
     } else if (oldBuckets !== newBuckets) {
         localStorage.clear();
         bucketsNode.put(newBuckets);
-        window.location.reload();
+        typeof window !== 'undefined' && window.location.reload();
     }
 
     return filledBucket;

@@ -1,7 +1,7 @@
-import { stripDeep } from './util';
+// import { stripDeep } from './util';
 import reactWeirComponent from './react-weir';
 
-const funnel = (bucket, inputs, Component) => {
+export const funnel = (bucket, inputs, Component) => {
 	let initialState = {};
 
 	if (typeof Component !== 'function') {
@@ -10,5 +10,3 @@ const funnel = (bucket, inputs, Component) => {
 
 	return reactWeirComponent(Component, bucket, inputs, initialState);
 };
-
-export default funnel;

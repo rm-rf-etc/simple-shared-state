@@ -25,7 +25,7 @@ const dimensional = ({ space, methods, default: _default }) => (identity, nodeBu
 	});
 	if (dimensionsBefore && dimensionsBefore !== dimensionsNow) {
 		localStorage.clear();
-		window.location.reload();
+		typeof window !== 'undefined' && window.location.reload();
 	}
 
 	let hydrated = false;

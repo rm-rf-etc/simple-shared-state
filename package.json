@@ -2,9 +2,10 @@
   "name": "weir",
   "version": "0.1.0-beta.3",
   "description": "State management, data binding, and P2P synchronization framework",
-  "main": "index.js",
+  "main": "dist/main.js",
+  "module": "src/index.js",
   "scripts": {
-    "test": "jest --watchAll"
+    "build": "webpack ."
   },
   "keywords": [
     "react",
@@ -33,5 +34,8 @@
     "jest": "^24.9.0",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.8"
+  },
+  "directories": {
+    "dist": "./dist"
   }
 }

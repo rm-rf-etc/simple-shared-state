@@ -1,12 +1,10 @@
 import events from "./events";
 import Gun from "gun/gun";
-import "gun/sea";
+// import "gun/sea";
 import "gun/lib/then";
 import "gun/lib/open";
 import "gun/lib/load";
 import bucket from "./bucket";
-
-document.env = process.env.DEVELOPMENT || "development";
 
 const weir = {
 	bucketsList: [],
@@ -31,7 +29,7 @@ export const tank = (options) => {
 	} else if (oldNamespace && oldNamespace !== namespace) {
 		localStorage.clear();
 		localStorage.setItem("weir-ns", namespace);
-		window.location.reload();
+		typeof window !== 'undefined' && window.location.reload();
 		return;
 	}
 
@@ -39,7 +37,10 @@ export const tank = (options) => {
 	weir.app = weir.gun.get(namespace);
 	weir.private = Gun({ websocket: false, localStorage: false });
 
-	if (debug) window.weir = weir;
+	if (debug) {
+		if (typeof window !== 'undefined') window.weir = weir;
+		else global.weir = weir;
+	}
 
 	return { bucket };
 };

@@ -3,6 +3,8 @@ const priv = Symbol('inaccessible');
 const generic = (identity, bucketNode, construct) => {
 	if (!construct.properties) throw new Error("Bucket construct must have `properties`");
 
+	let hydrated = false;
+
 	const struct = {
 
 		[Symbol.for('identity')]: identity,
@@ -23,8 +25,10 @@ const generic = (identity, bucketNode, construct) => {
 			if (watchers) watchers.forEach(fn => fn(struct.state[propKey]));
 		},
 
-		rehydrate(init) { console.log('generic!');
+		rehydrate() {
 			const { listeners } = struct[priv];
+
+			if (hydrated) return struct.state;
 
 			Object.entries(construct.properties).forEach(([propKey, propVal]) => {
 				propVal = propVal.default || propVal;
@@ -47,7 +51,9 @@ const generic = (identity, bucketNode, construct) => {
 				});
 			});
 
-			init(struct.state);
+			hydrated = true;
+
+			return struct.state;
 		},
 
 		vacate() {
