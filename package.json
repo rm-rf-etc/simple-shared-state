@@ -1,7 +1,7 @@
 {
-  "name": "react-substrate",
-  "version": "0.1.0-beta.2",
-  "description": "State management, data binding, and P2P synchronization framework for React",
+  "name": "weir",
+  "version": "0.1.0-beta.3",
+  "description": "State management, data binding, and P2P synchronization framework",
   "main": "index.js",
   "scripts": {
     "test": "jest --watchAll"
