@@ -1,4 +1,3 @@
-import weir from "../weir";
 import cProduct from "cartesian-product";
 import { range, match, strip, mt, nodeRead } from "../util";
 const { isArray } = Array;
@@ -14,6 +13,7 @@ const dimensional = ({ space, methods, default: _default }) => (identity, nodeBu
 		throw new Error("At least one axis name is invalid, must match pattern /^[A-Z0-9-_]+$/");
 	}
 	nodeRead(nodeBucket);
+	const nodeRoot = nodeBucket.back(-1);
 
 	const dimensionsBefore = nodeRead(nodeBucket.get("dimensions"));
 	const dimensionsNow = space.map(d => d[0]).join();
@@ -31,7 +31,6 @@ const dimensional = ({ space, methods, default: _default }) => (identity, nodeBu
 	let hydrated = false;
 	const watchList = {};
 	const nodeTags = nodeBucket.get("tags");
-	const nodeRoot = /^L/.test(identity.description) ? weir.private : weir.gun;
 	const derivedTags = deriveTags(space);
 	const allTag = "_" + space.map(() => "$").join("_");
 

@@ -6,6 +6,7 @@ module.exports = {
     filename: 'main.js',
     library: 'weir',
     path: path.resolve(__dirname, 'dist'),
+    globalObject: "this",
     libraryTarget: 'umd'
   },
   externals: {
@@ -13,13 +14,11 @@ module.exports = {
       commonjs: 'lodash',
       commonjs2: 'lodash',
       amd: 'lodash',
-      root: '_'
     },
-    react: {
-      commonjs: 'lodash',
-      commonjs2: 'lodash',
-      amd: 'lodash',
-      root: '_'
-    }
+    // react: {
+    //   commonjs: 'react',
+    //   commonjs2: 'react',
+    //   amd: 'react',
+    // }
   }
 };

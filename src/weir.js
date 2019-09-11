@@ -1,27 +1,15 @@
-import events from "./events";
+import getTank from "./tank";
 import Gun from "gun/gun";
 // import "gun/sea";
-import "gun/lib/then";
-import "gun/lib/open";
-import "gun/lib/load";
-import bucket from "./bucket";
 
-const weir = {
-	bucketsList: [],
-	buckets: new Map(),
-	get events() { return events },
-};
-export default weir;
-
-export const tank = (options) => {
-	const {
-		namespace = "@pp",
-		listeners,
-		peers,
-		debug,
-		...gunOptions
-	} = options;
-
+export default ({
+	namespace = "@pp",
+	listeners,
+	peers,
+	debug,
+	reloadOnChange = false,
+	...gunOptions,
+}) => {
 	const oldNamespace = localStorage.getItem("weir-ns");
 
 	if (oldNamespace === null) {
@@ -29,18 +17,18 @@ export const tank = (options) => {
 	} else if (oldNamespace && oldNamespace !== namespace) {
 		localStorage.clear();
 		localStorage.setItem("weir-ns", namespace);
-		typeof window !== 'undefined' && window.location.reload();
+		typeof location !== 'undefined' && location.reload();
 		return;
 	}
 
-	weir.gun = Gun(peers, gunOptions);
-	weir.app = weir.gun.get(namespace);
-	weir.private = Gun({ websocket: false, localStorage: false });
+	const tank = getTank({
+		namespace,
+		reloadOnChange,
+		publicRoot: Gun(peers, gunOptions),
+		privateRoot: Gun({ websocket: false, localStorage: false }),
+	});
 
-	if (debug) {
-		if (typeof window !== 'undefined') window.weir = weir;
-		else global.weir = weir;
-	}
+	if (debug && typeof window !== 'undefined') window.tank = tank;
 
-	return { bucket };
+	return tank;
 };

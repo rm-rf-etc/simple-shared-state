@@ -5,7 +5,8 @@
   "main": "dist/main.js",
   "module": "src/index.js",
   "scripts": {
-    "build": "webpack ."
+    "build": "webpack --mode development",
+    "test": "jest"
   },
   "keywords": [
     "react",
@@ -18,8 +19,6 @@
   "author": "Rob Christian",
   "license": "Apache-2.0",
   "dependencies": {
-    "@types/gun": "^0.9.1",
-    "@types/react": "^16.8.24",
     "cartesian-product": "^2.1.2",
     "gun": "^0.2019.726",
     "react": "^16.8.6",
@@ -27,9 +26,10 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
+    "@babel/core": "^7.6.0",
+    "@babel/preset-env": "^7.6.0",
     "@babel/preset-react": "^7.0.0",
+    "babel-cli": "^6.26.0",
     "babel-jest": "^24.9.0",
     "jest": "^24.9.0",
     "webpack": "^4.39.3",

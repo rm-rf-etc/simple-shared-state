@@ -1,7 +1,6 @@
 import { createElement, useReducer, useEffect } from 'react';
 import { zipObjectDeep, merge } from 'lodash';
-import { stripDeep } from './util';
-
+import { stripDeep } from '../util';
 
 const reducer = (state, { propKey, propVal }) => {
     let newState = {
@@ -18,7 +17,7 @@ const reducer = (state, { propKey, propVal }) => {
     return newState;
 };
 
-export default (Component, bucket, inputs, initialState) => (ownProps) => {
+const HOC = (Component, bucket, inputs, initialState) => (ownProps) => {
     const [state, dispatch] = useReducer(reducer, initialState || {});
     console.log('RENDER:', JSON.stringify(state));
 
@@ -41,4 +40,14 @@ export default (Component, bucket, inputs, initialState) => (ownProps) => {
         bucketMethods: bucket && bucket.methods || {},
         bucketState: state,
     });
+};
+
+export default (bucket, inputs, Component) => {
+    let initialState = {};
+
+    if (typeof Component !== 'function') {
+        throw new Error(`\`bind\` expects a React component, but received ${typeof Component} instead.`);
+    }
+
+    return HOC(Component, bucket, inputs, initialState);
 };

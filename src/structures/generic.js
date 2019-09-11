@@ -1,6 +1,6 @@
 const priv = Symbol('inaccessible');
 
-const generic = (identity, bucketNode, construct) => {
+const generic = (construct, identity, nodeBucket) => {
 	if (!construct.properties) throw new Error("Bucket construct must have `properties`");
 
 	let hydrated = false;
@@ -12,7 +12,7 @@ const generic = (identity, bucketNode, construct) => {
 		[Symbol.toStringTag]: 'SubstrateStructure',
 
 		[priv]: {
-			bucket: bucketNode,
+			nodeBucket,
 			propNodes: {},
 			watchList: {},
 			listeners: {},
@@ -33,7 +33,7 @@ const generic = (identity, bucketNode, construct) => {
 			Object.entries(construct.properties).forEach(([propKey, propVal]) => {
 				propVal = propVal.default || propVal;
 
-				const node = bucketNode.get(propKey);
+				const node = nodeBucket.get(propKey);
 				const watchers = new Set();
 				struct[priv].watchList[propKey] = watchers;
 				struct[priv].propNodes[propKey] = node;

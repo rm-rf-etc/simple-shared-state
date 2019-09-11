@@ -1,4 +1,4 @@
-const { deriveTags, axesExpand, validCoords } = require('../structures/dimensional');
+const { deriveTags, axesExpand, validCoords } = require('../src/structures/dimensional');
 const $ = "$";
 
 describe('deriveTags', () => {
