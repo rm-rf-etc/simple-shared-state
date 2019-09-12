@@ -1,8 +1,8 @@
-# React-Substrate
+# Weir
 
 _Auto-generate data bindings between react components and GUN DB nodes_
 
-React-Substrate provides auto-magical state management, with offline-first auto-synchronized
+Weir provides auto-magical state management, with offline-first auto-synchronized
 storage, as-needed relationships, and real-time updates, all in one convenient little
 library. Simply wrap components and receive data.
 
