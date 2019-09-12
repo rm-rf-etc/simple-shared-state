@@ -1,6 +1,7 @@
 import { createElement, useReducer, useEffect } from 'react';
-import { zipObjectDeep, merge } from 'lodash';
-import { stripDeep } from '../util';
+import { zipObjectDeep, merge, isFunction } from 'lodash';
+import { stripDeep, match } from '../util';
+const { isArray } = Array;
 
 const reducer = (state, { propKey, propVal }) => {
     let newState = {
@@ -42,8 +43,13 @@ const HOC = (Component, bucket, inputs, initialState) => (ownProps) => {
     });
 };
 
-export default (bucket, inputs, Component) => {
+export default (bucket, a, b) => {
     let initialState = {};
+    const [inputs, Component] = match(
+        [isArray(a) && isFunction(b), () => ([a, b])],
+        [isFunction(a) && isArray(b), () => ([b, a])],
+        [true, () => ([null, null])],
+    );
 
     if (typeof Component !== 'function') {
         throw new Error(`\`bind\` expects a React component, but received ${typeof Component} instead.`);

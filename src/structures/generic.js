@@ -1,7 +1,7 @@
 const priv = Symbol('inaccessible');
 
 const generic = (construct, identity, nodeBucket) => {
-	if (!construct.properties) throw new Error("Bucket construct must have `properties`");
+	if (!construct.state) throw new Error("Bucket construct must include `state` property");
 
 	let hydrated = false;
 
@@ -20,6 +20,10 @@ const generic = (construct, identity, nodeBucket) => {
 
 		state: {},
 
+		getState(propKey) {
+			return struct.state[propKey] || null;
+		},
+
 		triggerWatchers(propKey) {
 			const watchers = struct[priv].watchList[propKey];
 			if (watchers) watchers.forEach(fn => fn(struct.state[propKey]));
@@ -30,7 +34,7 @@ const generic = (construct, identity, nodeBucket) => {
 
 			if (hydrated) return struct.state;
 
-			Object.entries(construct.properties).forEach(([propKey, propVal]) => {
+			Object.entries(construct.state).forEach(([propKey, propVal]) => {
 				propVal = propVal.default || propVal;
 
 				const node = nodeBucket.get(propKey);

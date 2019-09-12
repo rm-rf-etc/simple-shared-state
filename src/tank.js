@@ -38,7 +38,7 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 			const filledBucket = {
 				identity,
 				...bucketWrapper,
-				tap: (Component, inputs) => tap(filledBucket, inputs, Component),
+				tap: (a, b) => tap(filledBucket, a, b),
 			};
 
 			tank.bucketsList.push(identity.description);

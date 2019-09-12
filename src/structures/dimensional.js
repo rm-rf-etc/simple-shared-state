@@ -3,15 +3,14 @@ import { range, match, strip, mt, nodeRead } from "../util";
 const { isArray } = Array;
 const priv = Symbol("inaccessible");
 
-
-const dimensional = ({ space, methods, default: _default }) => (identity, nodeBucket) => {
-
+const dimensional = ({ space, methods /*, default: _default*/ }) => (identity, nodeBucket) => {
 	if (!isArray(space) || !space.length) {
 		throw new Error("Dimensional structure received invalid `space` definition");
 	}
 	if (space.some(d => !isValidAxisName(d[0]))) {
 		throw new Error("At least one axis name is invalid, must match pattern /^[A-Z0-9-_]+$/");
 	}
+
 	nodeRead(nodeBucket);
 	const nodeRoot = nodeBucket.back(-1);
 
