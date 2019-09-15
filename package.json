@@ -11,12 +11,13 @@
     "test": "jest"
   },
   "keywords": [
+	"gun",
     "react",
-    "gun",
-    "graph database",
+	"redux",
+	"react-redux",
     "state management",
-    "redux",
-    "firebase"
+    "firebase alternative",
+    "graph database"
   ],
   "author": "Rob Christian <rm.rf.etc@gmail.com>",
   "license": "Apache-2.0",

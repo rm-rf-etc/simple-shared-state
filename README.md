@@ -1,20 +1,22 @@
 # Weir
 
-_Auto-generate data bindings between react components and GUN DB nodes_
+_An exciting and dramatically simplified approach to building modern web-based
+applications._
 
-Weir provides auto-magical state management, with offline-first auto-synchronized
-storage, as-needed relationships, and real-time updates, all in one convenient little
-library. Simply wrap components and receive data.
+
+## Frameworks
+* Weir currently has bindings (via hooks API) for React. Bindings for Vue and Angular
+are also planned.
+
 
 ## Install
 
-`yarn add https://github.com/rm-rf-etc/react-substrate#latest`
+Don't install this yet, it's not ready.
+
 
 ## Status
 **_Currently in beta_**
 
-Current work is focused on developing a simplistic but flexible API around GUN DB's API,
-along with advanced data types and convenience methods for all the major use cases.
 
 ## Feature Agenda
 - [Dimensional Data Structures](https://github.com/rm-rf-etc/react-substrate/issues/3)
