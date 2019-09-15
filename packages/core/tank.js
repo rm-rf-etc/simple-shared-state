@@ -1,5 +1,5 @@
-import nodeRead from "@weir/util/noderead";
-import match from "@weir/util/match";
+import nodeRead from "weir.util/noderead";
+import match from "weir.util/match";
 import generic from "./generic";
 import validIdentity from "./identity";
 

@@ -1,6 +1,6 @@
 {
-  "name": "@weir/react",
-  "version": "1.0.0",
+  "name": "weir.react",
+  "version": "0.1.0-beta.0",
   "description": "",
   "main": "index.js",
   "workspaces": true,
@@ -8,12 +8,16 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Rob Christian <rm.rf.etc@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "lodash.merge": "^4.6.2",
     "lodash.omit": "^4.5.0",
     "lodash.zipobjectdeep": "^4.4.2",
     "react": "^16.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rm-rf-etc/weir"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "weir",
-  "version": "0.1.0-beta.3",
+  "version": "0.1.0-beta.4",
   "description": "State management, data binding, and P2P synchronization framework",
   "private": true,
   "workspaces": [
@@ -18,7 +18,7 @@
     "redux",
     "firebase"
   ],
-  "author": "Rob Christian",
+  "author": "Rob Christian <rm.rf.etc@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/core": "^7.6.0",
@@ -27,10 +27,15 @@
     "babel-cli": "^6.26.0",
     "babel-jest": "^24.9.0",
     "jest": "^24.9.0",
+    "lerna": "^3.16.4",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.8"
   },
   "directories": {
     "dist": "./dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rm-rf-etc/weir"
   }
 }

@@ -1,6 +1,6 @@
 {
-  "name": "@weir/structures-dimensional",
-  "version": "1.0.0",
+  "name": "weir.structures-dimensional",
+  "version": "0.1.0-beta.0",
   "description": "",
   "main": "index.js",
   "workspaces": true,
@@ -8,12 +8,16 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Rob Christian <rm.rf.etc@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "@weir/util": "1.0.0",
+    "weir.util": "0.1.0-beta.0",
     "cartesian-product": "^2.1.2",
     "lodash.omit": "^4.5.0",
     "lodash.range": "^3.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rm-rf-etc/weir"
   }
 }
