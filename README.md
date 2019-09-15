@@ -1,33 +1,27 @@
 # Weir
 
-_Auto-generate data bindings between components and GUN DB nodes_
+_An exciting and dramatically simplified approach to building modern web-based
+applications._
 
-Weir provides auto-magical state management, with offline-first storage, automatic
-server sync, any-to-any relationships, and real-time updates, all in one convenient
-compact library. Simply wrap components and receive data.
 
 ## Frameworks
 * Weir currently has bindings (via hooks API) for React. Bindings for Vue and Angular
 are also planned.
 
+
 ## Install
 
-`yarn add https://github.com/rm-rf-etc/react-substrate#latest`
+Don't install this yet, it's not ready.
+
 
 ## Status
 **_Currently in beta_**
 
-Current work is focused on developing a simplistic but flexible API around GUN DB's API,
-along with advanced data types and convenience methods for all the major use cases.
 
 ## Feature Agenda
-- [Enforcement Indices](https://github.com/rm-rf-etc/react-substrate/issues/2)
-- [Dimentional AdvancedType](https://github.com/rm-rf-etc/react-substrate/issues/3)
+- [Dimensional Data Structures](https://github.com/rm-rf-etc/react-substrate/issues/3)
 - [Dev-mode Index Dump/Reset](https://github.com/rm-rf-etc/react-substrate/issues/5)
 - [Dev-mode Index Dump/Reset, Server-Side](https://github.com/rm-rf-etc/react-substrate/issues/6)
-- [Advanced Types Add-on API](https://github.com/rm-rf-etc/react-substrate/issues/4)
-	- AdvancedType rehydration
-	- AdvancedType method hooks
 - [User Auth](https://github.com/rm-rf-etc/react-substrate/issues/7)
 	- RBAC
 	- User data - private
@@ -38,7 +32,7 @@ along with advanced data types and convenience methods for all the major use cas
 
 ## Demo
 
-Unavailable right now. Too many changes have been happening to the API.
+Unavailable right now. Too many changes coming in too fast. Will update once ready.
 
 
 ## Dev Testing

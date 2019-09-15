@@ -1,0 +1,21 @@
+{
+  "name": "weir",
+  "version": "0.1.0-beta.4",
+  "description": "",
+  "main": "index.js",
+  "workspaces": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Rob Christian <rm.rf.etc@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "gun": "^0.2019.726",
+    "weir.util": "0.1.0-beta.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rm-rf-etc/weir"
+  }
+}
