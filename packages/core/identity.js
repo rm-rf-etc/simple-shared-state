@@ -1,6 +1,6 @@
 const bucketRegex = /^(GLOBAL|LOCAL)\.[A-Z0-9-_]+$/;
 
-export const validIdentity = (sym) => {
+export default (sym) => {
 	if (typeof sym !== 'symbol' || Symbol.for(sym.description) !== sym) {
 		throw new Error("Invalid identity, use `Symbol.for('...')`");
 	}

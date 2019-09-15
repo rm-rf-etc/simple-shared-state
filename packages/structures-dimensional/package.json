@@ -1,0 +1,19 @@
+{
+  "name": "@weir/structures-dimensional",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "workspaces": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@weir/util": "1.0.0",
+    "cartesian-product": "^2.1.2",
+    "lodash.omit": "^4.5.0",
+    "lodash.range": "^3.2.0"
+  }
+}

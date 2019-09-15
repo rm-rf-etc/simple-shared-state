@@ -47,11 +47,11 @@ const generic = (construct, identity, nodeBucket) => {
 					struct.state[propKey] = val || propVal;
 					node.put(val || propVal);
 				});
-				node.on((val, key, _, chain) => {
+				node.on((val, key, _, evt) => {
 					struct.state[key] = val;
 					watchers.forEach(fn => fn(key, val));
 					// if we later need to remove the listener
-					if (!listeners[propKey]) listeners[propKey] = chain;
+					if (!listeners[propKey]) listeners[propKey] = evt;
 				});
 			});
 

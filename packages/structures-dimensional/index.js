@@ -1,5 +1,9 @@
+import nodeRead from "@weir/util/noderead";
+import match from "@weir/util/match";
+import mt from "@weir/util/microtask";
+import omit from "lodash.omit";
+import range from "lodash.range";
 import cProduct from "cartesian-product";
-import { range, match, strip, mt, nodeRead } from "../util";
 const { isArray } = Array;
 const priv = Symbol("inaccessible");
 
@@ -160,14 +164,14 @@ const dimensional = ({ space, methods /*, default: _default*/ }) => (identity, n
 		// console.log(`watchers for tag '${tag}'`, watchers);
 		return (data) => {
 			if (!data) return;
-			const keys = Object.keys(strip(data));
+			const keys = Object.keys(omit(data, "_"));
 			if (!keys.length) return;
 
 			keys.forEach(soul => nodeRoot.get(soul).once(data => {
 				struct.state[tag][soul] = data;
 
 				const path = `${tag}.${soul}`;
-				const content = typeof data === 'object' ? strip(data) : data;
+				const content = typeof data === 'object' ? omit(data, "_") : data;
 				const notify = key=> fn=> fn(key, content);
 
 				if (watchList[path] && watchList[path].size) {
@@ -194,7 +198,7 @@ export const n2s = val => match(
 );
 // takes [['X', 2], ['Y', 3]], returns [[1,2], [1,2,3]]
 export const axesExpand = (axes) => (
-	axes.map(([, L]) => range(L).concat("$"))
+	axes.map(([, L]) => range(0, L).concat("$"))
 );
 export const deriveTags = (axes) => (
 	cProduct(axesExpand(axes)).map(row => row.map(n2s).join(''))

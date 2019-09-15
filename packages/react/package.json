@@ -1,0 +1,19 @@
+{
+  "name": "@weir/react",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "workspaces": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lodash.merge": "^4.6.2",
+    "lodash.omit": "^4.5.0",
+    "lodash.zipobjectdeep": "^4.4.2",
+    "react": "^16.9.0"
+  }
+}

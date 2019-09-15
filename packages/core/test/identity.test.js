@@ -1,4 +1,4 @@
-const { validIdentity } = require('../src/identity');
+const { validIdentity } = require('../identity');
 
 describe('Symbol handling', () => {
 	it('uniqueness recognizes new symbols with the same description', () => {

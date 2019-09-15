@@ -1,7 +1,7 @@
-import tap from "./react/bind";
-import generic from "./structures/generic";
-import { validIdentity } from "./identity";
-import { match, nodeRead } from "./util";
+import nodeRead from "@weir/util/noderead";
+import match from "@weir/util/match";
+import generic from "./generic";
+import validIdentity from "./identity";
 
 let tank;
 
@@ -9,7 +9,6 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 	if (tank) return tank;
 
 	tank = {
-
 		appRoot: publicRoot.get(namespace),
 
 		publicRoot,
@@ -35,22 +34,17 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 				construct(identity, nodeBucket) :
 				generic(construct, identity, nodeBucket);
 
-			const filledBucket = {
-				identity,
-				...bucketWrapper,
-				tap: (a, b) => tap(filledBucket, a, b),
-			};
-
 			tank.bucketsList.push(identity.description);
 			tank.buckets.set(identity, bucketWrapper.struct);
 
-			filledBucket.initialState = bucketWrapper.struct.rehydrate();
+			bucketWrapper.initialState = bucketWrapper.struct.rehydrate();
+			bucketWrapper.identity = identity;
 
-			if (!tank.reloadOnChange) return filledBucket;
+			if (!tank.reloadOnChange) return bucketWrapper;
 
-			const bucketsNode = tank.appRoot.get("[BUCKETS]");
+			const bucketsNode = tank.appRoot.get("@BUCKETS");
 			const oldBuckets = nodeRead(bucketsNode);
-			const newBuckets = tank.bucketsList.sort().join(",");
+			const newBuckets = tank.bucketsList.sort().join(":");
 
 			if (oldBuckets === undefined) {
 				bucketsNode.put(newBuckets);
@@ -60,7 +54,7 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 				typeof window !== 'undefined' && window.location.reload();
 			}
 
-			return filledBucket;
+			return bucketWrapper;
 		}
 	};
 
