@@ -9,7 +9,7 @@ const generic = (construct, identity, nodeBucket) => {
 
 		[Symbol.for('identity')]: identity,
 
-		[Symbol.toStringTag]: 'SubstrateStructure',
+		[Symbol.toStringTag]: 'WeirStruct',
 
 		[priv]: {
 			nodeBucket,

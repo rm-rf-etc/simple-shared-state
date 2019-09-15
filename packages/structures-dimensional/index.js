@@ -41,7 +41,7 @@ const dimensional = ({ space, methods /*, default: _default*/ }) => (identity, n
 
 		[Symbol.for("identity")]: identity,
 
-		[Symbol.toStringTag]: "SubstrateStructure",
+		[Symbol.toStringTag]: "WeirStruct",
 
 		[priv]: { nodeTags },
 
