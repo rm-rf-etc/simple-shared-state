@@ -7,7 +7,7 @@ import cProduct from "cartesian-product";
 const { isArray } = Array;
 const priv = Symbol("inaccessible");
 
-const dimensional = ({ space, methods /*, default: _default*/ }) => (identity, nodeBucket) => {
+const dimensional = ({ space, actions /*, default: _default*/ }) => (identity, nodeBucket) => {
 	if (!isArray(space) || !space.length) {
 		throw new Error("Dimensional structure received invalid `space` definition");
 	}
@@ -54,7 +54,7 @@ const dimensional = ({ space, methods /*, default: _default*/ }) => (identity, n
 		},
 
 		get(...coords) {
-			return methods.getState(...coords);
+			return actions.getState(...coords);
 		},
 
 		set(coords, value) {
@@ -185,7 +185,7 @@ const dimensional = ({ space, methods /*, default: _default*/ }) => (identity, n
 	};
 
 	return {
-		methods: methods(struct),
+		actions: actions(struct),
 		struct,
 	};
 };

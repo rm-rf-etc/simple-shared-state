@@ -82,7 +82,7 @@ const generic = (construct, identity, nodeBucket) => {
 	};
 
 	return {
-		methods: construct.methods && construct.methods(struct),
+		actions: construct.actions && construct.actions(struct),
 		struct,
 	};
 };
