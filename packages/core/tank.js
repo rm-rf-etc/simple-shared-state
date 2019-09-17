@@ -21,6 +21,10 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 
 		buckets: new Map(),
 
+		connect: (buckets, devtools) => {
+			[].concat(buckets).map(b => b.connectDevTools(devtools));
+		},
+
 		bucket: (bucketDesc, construct) => {
 			const identity = Symbol.for(bucketDesc);
 			validIdentity(identity);

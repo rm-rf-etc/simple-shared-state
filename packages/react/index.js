@@ -1,13 +1,14 @@
-import { useReducer, useEffect } from 'react';
-import zipObjectDeep from 'lodash.zipobjectdeep';
-import merge from 'lodash.merge';
-import omit from 'lodash.omit';
+import { useReducer, useEffect } from "react";
+import zipObjectDeep from "lodash.zipobjectdeep";
+import merge from "lodash.merge";
+import omit from "lodash.omit";
+const { isArray } = Array;
 
 const strip = (thing) => {
-	if (typeof thing !== 'object') return thing;
+	if (typeof thing !== "object") return thing;
 
 	function stripProp(prop, thing) {
-		if (typeof thing[prop] !== 'object') return;
+		if (typeof thing[prop] !== "object") return;
 		thing[prop] = omit(thing[prop], "_");
 		Object.keys(thing[prop]).forEach(next => stripProp(next, thing[prop]));
 	}
@@ -36,10 +37,9 @@ const reducer = (state, { propKey, propVal }) => {
 export const useBucket = (bucket, watchList) => {
 	const { struct } = bucket;
 	const [state, dispatch] = useReducer(reducer, struct.state);
-	watchList = watchList
-		.trim()
-		.replace(/\\n/g, "")
-		.split(/\s+/g);
+	if (!isArray(watchList) || watchList.some(v => typeof v !== "string")) {
+		throw new Error("`useBucket` requires an array of strings for watchList");
+	}
 
 	useEffect(() => watchList.forEach(key => {
 		struct.sub(key, (path, val) => dispatch({

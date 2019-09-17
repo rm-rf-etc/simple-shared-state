@@ -8,6 +8,7 @@ export default ({
 	peers,
 	debug,
 	reloadOnChange = false,
+	devtools = null,
 	...gunOptions,
 }) => {
 	const oldNamespace = localStorage.getItem("weir-ns");
@@ -21,11 +22,16 @@ export default ({
 		return;
 	}
 
+	if (devtools === true && window.__REDUX_DEVTOOLS_EXTENSION__) {
+		devtools = window.__REDUX_DEVTOOLS_EXTENSION__;
+	}
+
 	const tank = getTank({
 		namespace,
 		reloadOnChange,
 		publicRoot: Gun(peers, gunOptions),
 		privateRoot: Gun({ websocket: false, localStorage: false }),
+		devtools,
 	});
 
 	if (debug && typeof window !== 'undefined') window.tank = tank;

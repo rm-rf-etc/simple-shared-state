@@ -1,9 +1,21 @@
+import get from "lodash.get";
 const priv = Symbol('inaccessible');
 
 const generic = (construct, identity, nodeBucket) => {
 	if (!construct.state) throw new Error("Bucket construct must include `state` property");
+	if (!construct.reducers) throw new Error("Bucket construct must include `reducers` property");
 
 	let hydrated = false;
+
+	const getState = () => ({ ...struct.state });
+
+	let devtools;
+	const connectDevTools = (dt) => {
+		devtools = dt;
+		devtools.send({}, struct.state);
+
+		return bucket;
+	};
 
 	const struct = {
 
@@ -19,10 +31,6 @@ const generic = (construct, identity, nodeBucket) => {
 		},
 
 		state: {},
-
-		getState(propKey) {
-			return struct.state[propKey] || null;
-		},
 
 		triggerWatchers(propKey) {
 			const watchers = struct[priv].watchList[propKey];
@@ -67,6 +75,7 @@ const generic = (construct, identity, nodeBucket) => {
 		},
 
 		sub(propKey, listener) {
+			struct[priv].watchList[propKey] = struct[priv].watchList[propKey] || new Set();
 			struct[priv].watchList[propKey].add(listener);
 		},
 
@@ -81,10 +90,28 @@ const generic = (construct, identity, nodeBucket) => {
 		}
 	};
 
-	return {
-		actions: construct.actions && construct.actions(struct),
+	const actionCreators = {};
+	const bucketReducers = construct.reducers(getState);
+
+	Object.keys(bucketReducers).forEach(reducerName => {
+		const actionName = `${identity.description}::${reducerName}`;
+
+		actionCreators[reducerName] = async (...args) => {
+			const value = await bucketReducers[reducerName](...args);
+			const newState = { ...struct.state, ...value };
+			nodeBucket.put(newState);
+			if (devtools && devtools.send) {
+				devtools.send({ type: actionName, payload: args.slice(1) }, newState);
+			}
+		};
+	});
+
+	const bucket = {
+		connectDevTools,
+		actions: actionCreators,
 		struct,
 	};
+	return bucket;
 };
 
 export default generic;
