@@ -1,5 +1,5 @@
 
-const generic = (construct, identity, nodeBucket) => {
+export default (construct, identity, nodeBucket) => {
 	if (!construct.state) throw new Error("Bucket construct must include `state` property");
 	if (!construct.reducers) throw new Error("Bucket construct must include `reducers` property");
 
@@ -12,7 +12,7 @@ const generic = (construct, identity, nodeBucket) => {
 		devtools = dt;
 		devtools.send({}, _private.state);
 
-		return bucket;
+		return struct;
 	};
 
 	const _private = {
@@ -23,11 +23,28 @@ const generic = (construct, identity, nodeBucket) => {
 		state: {},
 	};
 
+	const actions = {};
+	const bucketReducers = construct.reducers(getState);
+
+	Object.keys(bucketReducers).forEach(reducerName => {
+		const actionName = `${identity.description}::${reducerName}`;
+
+		actions[reducerName] = async (...args) => {
+			const value = await bucketReducers[reducerName](...args);
+			const newState = { ..._private.state, ...value };
+			nodeBucket.put(newState);
+			if (devtools && devtools.send) {
+				devtools.send({ type: actionName, payload: args.slice(1) }, newState);
+			}
+		};
+	});
+
 	const struct = {
-
 		[Symbol.for('identity')]: identity,
-
 		[Symbol.toStringTag]: 'WeirStruct',
+		actions,
+		getState,
+		connectDevTools,
 
 		triggerWatchers(propKey) {
 			const watchers = _private.watchList[propKey];
@@ -84,29 +101,5 @@ const generic = (construct, identity, nodeBucket) => {
 		}
 	};
 
-	const actionCreators = {};
-	const bucketReducers = construct.reducers(getState);
-
-	Object.keys(bucketReducers).forEach(reducerName => {
-		const actionName = `${identity.description}::${reducerName}`;
-
-		actionCreators[reducerName] = async (...args) => {
-			const value = await bucketReducers[reducerName](...args);
-			const newState = { ..._private.state, ...value };
-			nodeBucket.put(newState);
-			if (devtools && devtools.send) {
-				devtools.send({ type: actionName, payload: args.slice(1) }, newState);
-			}
-		};
-	});
-
-	const bucket = {
-		connectDevTools,
-		actions: actionCreators,
-		getState,
-		struct,
-	};
-	return bucket;
+	return struct;
 };
-
-export default generic;

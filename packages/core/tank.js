@@ -39,9 +39,9 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 				generic(construct, identity, nodeBucket);
 
 			weir.bucketsList.push(identity.description);
-			weir.buckets.set(identity, bucketWrapper.struct);
+			weir.buckets.set(identity, bucketWrapper);
 
-			bucketWrapper.initialState = bucketWrapper.struct.rehydrate();
+			bucketWrapper.initialState = bucketWrapper.rehydrate();
 			bucketWrapper.identity = identity;
 
 			if (!weir.reloadOnChange) return bucketWrapper;

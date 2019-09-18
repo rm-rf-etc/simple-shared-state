@@ -1,5 +1,5 @@
 import { useReducer, useEffect } from "react";
-import zipObjectDeep from "lodash.zipobjectdeep";
+import zip from "lodash.zipobjectdeep";
 import merge from "lodash.merge";
 import omit from "lodash.omit";
 const { isArray } = Array;
@@ -25,7 +25,7 @@ const reducer = (state, { propKey, propVal }) => {
 	};
 
 	if (typeof propKey === "string" && propKey.match(/\./)) {
-		const branch = zipObjectDeep([propKey], [propVal]);
+		const branch = zip([propKey], [propVal]);
 		merge(newState, branch);
 	} else {
 		newState[propKey] = propVal;
@@ -34,20 +34,19 @@ const reducer = (state, { propKey, propVal }) => {
 	return newState;
 };
 
-export const useBucket = (bucket, watchList) => {
-	const { struct } = bucket;
+export default (bucket, watchList) => {
 	const [state, dispatch] = useReducer(reducer, bucket.getState());
 	if (!isArray(watchList) || watchList.some(v => typeof v !== "string")) {
 		throw new Error("`useBucket` requires an array of strings for watchList");
 	}
 
 	useEffect(() => watchList.forEach(key => {
-		struct.sub(key, (path, val) => dispatch({
+		bucket.sub(key, (path, val) => dispatch({
 			propKey: path,
 			propVal: strip(val),
 		}));
 
-		return struct.vacate;
+		return bucket.vacate;
 	}), []);
 
 	return state;
