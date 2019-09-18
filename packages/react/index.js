@@ -36,7 +36,7 @@ const reducer = (state, { propKey, propVal }) => {
 
 export const useBucket = (bucket, watchList) => {
 	const { struct } = bucket;
-	const [state, dispatch] = useReducer(reducer, struct.state);
+	const [state, dispatch] = useReducer(reducer, bucket.getState());
 	if (!isArray(watchList) || watchList.some(v => typeof v !== "string")) {
 		throw new Error("`useBucket` requires an array of strings for watchList");
 	}

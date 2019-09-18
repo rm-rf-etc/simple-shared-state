@@ -3,12 +3,12 @@ import match from "weir.util/match";
 import generic from "./generic";
 import validIdentity from "./identity";
 
-let tank;
+let weir;
 
 export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
-	if (tank) return tank;
+	if (weir) return weir;
 
-	tank = {
+	weir = {
 		appRoot: publicRoot.get(namespace),
 
 		publicRoot,
@@ -30,25 +30,25 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 			validIdentity(identity);
 
 			const nodeBucket = match(
-				[bucketDesc[0] === "G", () => tank.appRoot.get(bucketDesc)],
-				[bucketDesc[0] === "L", () => tank.privateRoot.get(bucketDesc)],
+				[bucketDesc[0] === "G", () => weir.appRoot.get(bucketDesc)],
+				[bucketDesc[0] === "L", () => weir.privateRoot.get(bucketDesc)],
 			);
 
 			const bucketWrapper = typeof construct === "function" ?
 				construct(identity, nodeBucket) :
 				generic(construct, identity, nodeBucket);
 
-			tank.bucketsList.push(identity.description);
-			tank.buckets.set(identity, bucketWrapper.struct);
+			weir.bucketsList.push(identity.description);
+			weir.buckets.set(identity, bucketWrapper.struct);
 
 			bucketWrapper.initialState = bucketWrapper.struct.rehydrate();
 			bucketWrapper.identity = identity;
 
-			if (!tank.reloadOnChange) return bucketWrapper;
+			if (!weir.reloadOnChange) return bucketWrapper;
 
-			const bucketsNode = tank.appRoot.get("@BUCKETS");
+			const bucketsNode = weir.appRoot.get("@BUCKETS");
 			const oldBuckets = nodeRead(bucketsNode);
-			const newBuckets = tank.bucketsList.sort().join(":");
+			const newBuckets = weir.bucketsList.sort().join(":");
 
 			if (oldBuckets === undefined) {
 				bucketsNode.put(newBuckets);
@@ -62,5 +62,5 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 		}
 	};
 
-	return tank;
+	return weir;
 };

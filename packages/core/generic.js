@@ -1,5 +1,3 @@
-import get from "lodash.get";
-const priv = Symbol('inaccessible');
 
 const generic = (construct, identity, nodeBucket) => {
 	if (!construct.state) throw new Error("Bucket construct must include `state` property");
@@ -7,14 +5,22 @@ const generic = (construct, identity, nodeBucket) => {
 
 	let hydrated = false;
 
-	const getState = () => ({ ...struct.state });
+	const getState = () => ({ ..._private.state });
 
 	let devtools;
 	const connectDevTools = (dt) => {
 		devtools = dt;
-		devtools.send({}, struct.state);
+		devtools.send({}, _private.state);
 
 		return bucket;
+	};
+
+	const _private = {
+		nodeBucket,
+		propNodes: {},
+		watchList: {},
+		listeners: {},
+		state: {},
 	};
 
 	const struct = {
@@ -23,68 +29,56 @@ const generic = (construct, identity, nodeBucket) => {
 
 		[Symbol.toStringTag]: 'WeirStruct',
 
-		[priv]: {
-			nodeBucket,
-			propNodes: {},
-			watchList: {},
-			listeners: {},
-		},
-
-		state: {},
-
 		triggerWatchers(propKey) {
-			const watchers = struct[priv].watchList[propKey];
-			if (watchers) watchers.forEach(fn => fn(struct.state[propKey]));
+			const watchers = _private.watchList[propKey];
+			if (watchers) watchers.forEach(fn => fn(_private.state[propKey]));
 		},
 
 		rehydrate() {
-			const { listeners } = struct[priv];
-
-			if (hydrated) return struct.state;
+			if (hydrated) return _private.state;
 
 			Object.entries(construct.state).forEach(([propKey, propVal]) => {
 				propVal = propVal.default || propVal;
 
 				const node = nodeBucket.get(propKey);
 				const watchers = new Set();
-				struct[priv].watchList[propKey] = watchers;
-				struct[priv].propNodes[propKey] = node;
-				struct.state[propKey] = propVal;
+				_private.watchList[propKey] = watchers;
+				_private.propNodes[propKey] = node;
+				_private.state[propKey] = propVal;
 
 				node.once(val => {
-					struct.state[propKey] = val || propVal;
+					_private.state[propKey] = val || propVal;
 					node.put(val || propVal);
 				});
 				node.on((val, key, _, evt) => {
-					struct.state[key] = val;
+					_private.state[key] = val;
 					watchers.forEach(fn => fn(key, val));
 					// if we later need to remove the listener
-					if (!listeners[propKey]) listeners[propKey] = evt;
+					if (!_private.listeners[propKey]) _private.listeners[propKey] = evt;
 				});
 			});
 
 			hydrated = true;
 
-			return struct.state;
+			return _private.state;
 		},
 
 		vacate() {
-			Object.values(struct[priv].watchList).forEach(w=> w.clear());
-			Object.values(struct[priv].listeners).forEach(l=> l.off());
-			struct = null;
+			Object.values(_private.watchList).forEach(w=> w.clear());
+			Object.values(_private.listeners).forEach(l=> l.off());
 		},
 
 		sub(propKey, listener) {
-			struct[priv].watchList[propKey] = struct[priv].watchList[propKey] || new Set();
-			struct[priv].watchList[propKey].add(listener);
+			_private.watchList[propKey] = _private.watchList[propKey] || new Set();
+			_private.watchList[propKey].add(listener);
 		},
 
 		unsub(propKey, listener) {
-			struct[priv].watchList[propKey].delete(listener);
+			_private.watchList[propKey].delete(listener);
 		},
 
 		put(propKey, propVal) {
-			const node = struct[priv].propNodes[propKey];
+			const node = _private.propNodes[propKey];
 			if (!node) { console.warn(`No propKey match for '${propKey}'`); return; }
 			node.put(propVal);
 		}
@@ -98,7 +92,7 @@ const generic = (construct, identity, nodeBucket) => {
 
 		actionCreators[reducerName] = async (...args) => {
 			const value = await bucketReducers[reducerName](...args);
-			const newState = { ...struct.state, ...value };
+			const newState = { ..._private.state, ...value };
 			nodeBucket.put(newState);
 			if (devtools && devtools.send) {
 				devtools.send({ type: actionName, payload: args.slice(1) }, newState);
@@ -109,6 +103,7 @@ const generic = (construct, identity, nodeBucket) => {
 	const bucket = {
 		connectDevTools,
 		actions: actionCreators,
+		getState,
 		struct,
 	};
 	return bucket;
