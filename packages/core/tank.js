@@ -5,7 +5,12 @@ import validIdentity from "./identity";
 
 let weir;
 
-export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
+export default ({
+	namespace,
+	publicRoot,
+	privateRoot,
+	reloadOnChange,
+}) => {
 	if (weir) return weir;
 
 	weir = {
@@ -22,7 +27,7 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 		buckets: new Map(),
 
 		connect: (buckets, devtools) => {
-			[].concat(buckets).map(b => b.connectDevTools(devtools));
+			[].concat(buckets).map((b) => b.connectDevTools(devtools));
 		},
 
 		bucket: (bucketDesc, construct) => {
@@ -34,9 +39,9 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 				[bucketDesc[0] === "L", () => weir.privateRoot.get(bucketDesc)],
 			);
 
-			const bucketWrapper = typeof construct === "function" ?
-				construct(identity, nodeBucket) :
-				generic(construct, identity, nodeBucket);
+			const bucketWrapper = typeof construct === "function"
+				? construct(identity, nodeBucket)
+				: generic(construct, identity, nodeBucket);
 
 			weir.bucketsList.push(identity.description);
 			weir.buckets.set(identity, bucketWrapper);
@@ -55,11 +60,11 @@ export default ({ namespace, publicRoot, privateRoot, reloadOnChange }) => {
 			} else if (oldBuckets !== newBuckets) {
 				localStorage.clear();
 				bucketsNode.put(newBuckets);
-				typeof window !== 'undefined' && window.location.reload();
+				if (typeof window !== "undefined") window.location.reload();
 			}
 
 			return bucketWrapper;
-		}
+		},
 	};
 
 	return weir;
