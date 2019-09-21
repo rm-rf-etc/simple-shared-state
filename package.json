@@ -1,6 +1,4 @@
 {
-  "name": "weir",
-  "version": "0.1.0-beta.4",
   "description": "State management, data binding, and P2P synchronization framework",
   "private": true,
   "workspaces": [
