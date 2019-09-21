@@ -5,14 +5,15 @@
     "packages/*"
   ],
   "scripts": {
+    "lint": "eslint packages/core && eslint packages/structures-dimensional",
     "build": "webpack --mode development",
     "test": "jest"
   },
   "keywords": [
-	"gun",
+    "gun",
     "react",
-	"redux",
-	"react-redux",
+    "redux",
+    "react-redux",
     "state management",
     "firebase alternative",
     "graph database"

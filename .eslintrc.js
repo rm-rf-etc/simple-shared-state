@@ -13,5 +13,7 @@ module.exports = {
         "indent": "off",
         "quotes": ["error", "double", { "allowTemplateLiterals": true }],
         "consistent-return": 0,
+        "no-restricted-globals": 0,
+        "no-use-before-define": ["error", { "functions": false, "classes": false }],
     }
 }

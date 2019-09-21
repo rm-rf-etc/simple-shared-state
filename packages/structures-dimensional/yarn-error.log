@@ -1,0 +1,60 @@
+Arguments: 
+  /Users/rob/.nvm/versions/node/v11.11.0/bin/node /Users/rob/.yarn/bin/yarn.js lint
+
+PATH: 
+  /Users/rob/.pyenv/shims:/Users/rob/bin:/usr/local/opt/openssl/bin:/Users/rob/.yarn/bin:/Users/rob/.config/yarn/global/node_modules/.bin:/Users/rob/.cargo/bin:/Users/rob/.yarn/bin:/Users/rob/.nvm/versions/node/v11.11.0/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Library/TeX/texbin:/Users/rob/.rvm/bin
+
+Yarn version: 
+  1.17.3
+
+Node version: 
+  11.11.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/rob/projects/weir/packages/structures-dimensional/package.json: Unexpected token } in JSON at position 734
+      at JSON.parse (<anonymous>)
+      at /Users/rob/.yarn/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/Users/rob/.yarn/lib/cli.js:304:30)
+      at /Users/rob/.yarn/lib/cli.js:315:13
+
+npm manifest: 
+  {
+    "name": "weir.structures-dimensional",
+    "version": "0.0.1-alpha.0",
+    "description": "",
+    "main": "index.js",
+    "workspaces": true,
+    "scripts": {
+      "lint": "eslint",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "Rob Christian <rm.rf.etc@gmail.com>",
+    "license": "ISC",
+    "dependencies": {
+      "cartesian-product": "^2.1.2",
+      "lodash.omit": "^4.5.0",
+      "lodash.range": "^3.2.0",
+      "weir.util": "^0.0.1-alpha.0"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/rm-rf-etc/weir"
+    },
+    "devDependencies": {
+      "babel-eslint": "^10.0.3",
+      "eslint": "^6.4.0",
+      "eslint-config-airbnb-base": "^14.0.0",
+      "eslint-plugin-import": "^2.18.2"
+    },
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
