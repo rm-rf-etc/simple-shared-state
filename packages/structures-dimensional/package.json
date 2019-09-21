@@ -1,6 +1,6 @@
 {
   "name": "weir.structures-dimensional",
-  "version": "0.1.0-beta.0",
+  "version": "0.0.1-alpha.0",
   "description": "",
   "main": "index.js",
   "workspaces": true,
@@ -11,10 +11,10 @@
   "author": "Rob Christian <rm.rf.etc@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "weir.util": "0.1.0-beta.0",
     "cartesian-product": "^2.1.2",
     "lodash.omit": "^4.5.0",
-    "lodash.range": "^3.2.0"
+    "lodash.range": "^3.2.0",
+    "weir.util": "^0.0.1-alpha.0"
   },
   "repository": {
     "type": "git",
