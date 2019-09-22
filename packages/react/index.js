@@ -2,25 +2,27 @@ import { useReducer, useEffect } from "react";
 import zip from "lodash.zipobjectdeep";
 import merge from "lodash.merge";
 import omit from "lodash.omit";
+
 const { isArray } = Array;
 
-const strip = (thing) => {
-	if (typeof thing !== "object") return thing;
+const strip = (ref1) => {
+	if (typeof ref1 !== "object") return ref1;
 
-	function stripProp(prop, thing) {
-		if (typeof thing[prop] !== "object") return;
-		thing[prop] = omit(thing[prop], "_");
-		Object.keys(thing[prop]).forEach(next => stripProp(next, thing[prop]));
+	function stripProp(prop, ref2) {
+		if (typeof ref2[prop] !== "object") return;
+		/* eslint-disable-next-line no-param-reassign */
+		ref2[prop] = omit(ref2[prop], "_");
+		Object.keys(ref2[prop]).forEach((next) => stripProp(next, ref2[prop]));
 	}
 
-	thing = omit(thing, "_");
-	Object.keys(thing).forEach(key => stripProp(key, thing));
+	const newRef1 = omit(ref1, "_");
+	Object.keys(ref1).forEach((key) => stripProp(key, newRef1));
 
-	return thing;
+	return newRef1;
 };
 
 const reducer = (state, { propKey, propVal }) => {
-	let newState = {
+	const newState = {
 		...state,
 	};
 
@@ -36,11 +38,11 @@ const reducer = (state, { propKey, propVal }) => {
 
 export default (bucket, watchList) => {
 	const [state, dispatch] = useReducer(reducer, bucket.getState());
-	if (!isArray(watchList) || watchList.some(v => typeof v !== "string")) {
+	if (!isArray(watchList) || watchList.some((v) => typeof v !== "string")) {
 		throw new Error("`useBucket` requires an array of strings for watchList");
 	}
 
-	useEffect(() => watchList.forEach(key => {
+	useEffect(() => watchList.forEach((key) => {
 		bucket.sub(key, (path, val) => dispatch({
 			propKey: path,
 			propVal: strip(val),
