@@ -1,6 +1,6 @@
 {
   "name": "weir",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "index.js",
   "workspaces": true,
@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "gun": "^0.2019.726",
-    "weir.util": "^0.0.1"
+    "weir.util": "^0.0.2"
   },
   "repository": {
     "type": "git",
