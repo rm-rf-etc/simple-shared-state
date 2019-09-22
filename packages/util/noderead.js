@@ -1,5 +1,5 @@
-export default node => {
+export default (node) => {
     let result;
-    node.once(data => { result = data; });
+    node.once((data) => { result = data; });
     return result;
 };

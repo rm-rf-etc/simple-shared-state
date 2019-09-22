@@ -1,1 +1,1 @@
-export default fn => Promise.resolve().then(fn);
+export default (fn) => Promise.resolve().then(fn);
