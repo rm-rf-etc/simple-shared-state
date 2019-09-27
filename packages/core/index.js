@@ -1,6 +1,7 @@
 import Gun from "gun/gun";
+import "gun/lib/open";
+import "gun/sea";
 import getTank from "./tank";
-// import "gun/sea";
 
 /* eslint no-undef: "error" */
 /* eslint-env browser */
@@ -25,10 +26,12 @@ export default ({
 		return;
 	}
 
+	const gun = Gun(peers, gunOptions);
 	const tank = getTank({
 		namespace,
 		reloadOnChange,
-		publicRoot: Gun(peers, gunOptions),
+		userRoot: gun.user(),
+		publicRoot: gun,
 		privateRoot: Gun({ websocket: false, localStorage: false }),
 		/* eslint-disable no-underscore-dangle */
 		devtools: devtools === true && window.__REDUX_DEVTOOLS_EXTENSION__

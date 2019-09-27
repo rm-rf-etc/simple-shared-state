@@ -13,5 +13,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/rm-rf-etc/weir"
+  },
+  "dependencies": {
+    "lodash.omit": "^4.5.0"
   }
 }

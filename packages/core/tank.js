@@ -36,6 +36,7 @@ export default ({
 
 			const nodeBucket = match(
 				[bucketDesc[0] === "G", () => weir.appRoot.get(bucketDesc)],
+				[bucketDesc[0] === "U", () => weir.userRoot.get(bucketDesc)],
 				[bucketDesc[0] === "L", () => weir.privateRoot.get(bucketDesc)],
 			);
 

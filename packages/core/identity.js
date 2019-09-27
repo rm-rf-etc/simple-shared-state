@@ -1,4 +1,4 @@
-const bucketRegex = /^(GLOBAL|LOCAL)\.[A-Z0-9-_]+$/;
+const bucketRegex = /^(GLOBAL|LOCAL|USER)\.[A-Z0-9-_]+$/;
 
 export default (sym) => {
 	if (typeof sym !== "symbol" || Symbol.for(sym.description) !== sym) {

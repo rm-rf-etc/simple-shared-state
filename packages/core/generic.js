@@ -1,3 +1,5 @@
+import strip from "weir.util/deepomit";
+import merge from "lodash.merge";
 
 export default (construct, identity, nodeBucket) => {
 	if (!construct.state) throw new Error("Bucket construct must include `state` property");
@@ -12,15 +14,14 @@ export default (construct, identity, nodeBucket) => {
 	};
 	let hydrated = false;
 
-	const getState = () => ({ ...privateData.state });
+	const getState = () => privateData.state;
 	const getStateProp = (propKey) => privateData.state[propKey];
-	const getStateProps = (propKeys) => propKeys.reduce((m, k) => ({
-		...m,
+	const getStateProps = (propKeys) => propKeys.reduce((merged, k) => ({
+		...merged,
 		[k]: privateData.state[k],
 	}), {});
 
 	let devtools;
-
 	const actions = {};
 	const bucketReducers = construct.reducers({ getState, getStateProp, getStateProps });
 
@@ -28,11 +29,11 @@ export default (construct, identity, nodeBucket) => {
 		const actionName = `${identity.description}::${reducerName}`;
 
 		actions[reducerName] = async (...args) => {
-			const value = await bucketReducers[reducerName](...args);
-			const newState = { ...privateData.state, ...value };
-			nodeBucket.put(newState);
+			const stateChange = await bucketReducers[reducerName](...args);
+
+			nodeBucket.put(stateChange);
 			if (devtools && devtools.send) {
-				devtools.send({ type: actionName, payload: args.slice(1) }, newState);
+				devtools.send({ type: actionName, payload: args.slice(1) }, privateData.state);
 			}
 		};
 	});
@@ -46,6 +47,11 @@ export default (construct, identity, nodeBucket) => {
 		getStateProps,
 		initialState: construct.state,
 		reducers: construct.reducers,
+		watchListRequired: true,
+
+		setListeners: (watchList, fn) => {
+			watchList.forEach((key) => struct.sub(key, fn));
+		},
 
 		connectDevTools: (dt) => {
 			devtools = dt;
@@ -72,11 +78,16 @@ export default (construct, identity, nodeBucket) => {
 				privateData.state[propKey] = propVal;
 
 				node.once((val) => {
-					privateData.state[propKey] = val || propVal;
-					node.put(val || propVal);
+					const newVal = val || propVal;
+					if (typeof newVal === "object") {
+						merge(privateData.state[propKey], newVal);
+					} else {
+						privateData.state[propKey] = newVal;
+					}
+					node.put(newVal);
 				});
-				node.on((val, key, _, evt) => {
-					privateData.state[key] = val;
+				node.open((val, key, _, evt) => {
+					privateData.state[key] = strip(val);
 					watchers.forEach((fn) => fn(key, val));
 					// if we later need to remove the listener
 					if (!privateData.listeners[propKey]) privateData.listeners[propKey] = evt;
