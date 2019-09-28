@@ -103,7 +103,7 @@ const dimensional = ({ space, actions }) => (identity, nodeBucket) => {
 		// select(queryFn) {
 		// 	// console.log("state", struct.state);
 
-		// 	// const list = Object.values(nodeTags).map(many => Object.values(many)).flat();
+		// 	// const list = values(nodeTags).map(many => values(many)).flat();
 
 		// 	// const resultTags = list.filter(queryFn);
 
@@ -165,7 +165,7 @@ const dimensional = ({ space, actions }) => (identity, nodeBucket) => {
 		// console.log(`watchers for tag "${tag}"`, watchers);
 		return (data1) => {
 			if (!data1) return;
-			const keys = Object.keys(omit(data1, "_"));
+			const keys = keys(omit(data1, "_"));
 			if (!keys.length) return;
 
 			keys.forEach((soul) => nodeRoot.get(soul).once((data2) => {

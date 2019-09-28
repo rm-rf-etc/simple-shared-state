@@ -1,5 +1,8 @@
 import strip from "weir.util/deepomit";
+import entries from "lodash.topairs";
+import values from "lodash.values";
 import merge from "lodash.merge";
+import keys from "lodash.keys";
 
 export default (construct, identity, nodeBucket) => {
 	if (!construct.state) throw new Error("Bucket construct must include `state` property");
@@ -25,7 +28,7 @@ export default (construct, identity, nodeBucket) => {
 	const actions = {};
 	const bucketReducers = construct.reducers({ getState, getStateProp, getStateProps });
 
-	Object.keys(bucketReducers).forEach((reducerName) => {
+	keys(bucketReducers).forEach((reducerName) => {
 		const actionName = `${identity.description}::${reducerName}`;
 
 		actions[reducerName] = async (...args) => {
@@ -68,7 +71,7 @@ export default (construct, identity, nodeBucket) => {
 		rehydrate() {
 			if (hydrated) return privateData.state;
 
-			Object.entries(construct.state).forEach(([propKey, propValDefault]) => {
+			entries(construct.state).forEach(([propKey, propValDefault]) => {
 				const propVal = propValDefault.default || propValDefault;
 
 				const node = nodeBucket.get(propKey);
@@ -100,8 +103,8 @@ export default (construct, identity, nodeBucket) => {
 		},
 
 		vacate() {
-			Object.values(privateData.watchList).forEach((w) => w.clear());
-			Object.values(privateData.listeners).forEach((l) => l.off());
+			values(privateData.watchList).forEach((w) => w.clear());
+			values(privateData.listeners).forEach((l) => l.off());
 		},
 
 		sub(propKey, listener) {

@@ -13,7 +13,10 @@
   "license": "ISC",
   "dependencies": {
     "gun": "^0.2019.726",
+    "lodash.keys": "^4.2.0",
     "lodash.merge": "^4.6.2",
+    "lodash.topairs": "^4.3.0",
+    "lodash.values": "^4.3.0",
     "weir.util": "^0.0.2"
   },
   "repository": {

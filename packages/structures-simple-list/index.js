@@ -1,5 +1,7 @@
+import { branchUnflatten } from "weir.util/nestflatten";
 import strip from "weir.util/deepomit";
-import zip from "lodash.zipobjectdeep";
+import values from "lodash.values";
+import keys from "lodash.keys";
 // import merge from "lodash.merge";
 
 const { isArray } = Array;
@@ -7,15 +9,15 @@ const isFn = (fn) => typeof fn === "function";
 
 class List {
 	map(cb) {
-		return Object.keys(this).map((k) => cb(this[k], k));
+		return keys(this).map((k) => cb(this[k], k));
 	}
 
 	forEach(cb) {
-		Object.keys(this).forEach((k) => cb(this[k], k));
+		keys(this).forEach((k) => cb(this[k], k));
 	}
 
 	at(idx) {
-		return Object.values(this)[idx];
+		return values(this)[idx];
 	}
 }
 
@@ -40,7 +42,7 @@ export default (construct) => (identity, nodeBucket) => {
 	if (construct.reducers) {
 		const bucketReducers = construct.reducers({ getState, getStateProp });
 
-		Object.keys(bucketReducers).forEach((reducerName) => {
+		keys(bucketReducers).forEach((reducerName) => {
 			const actionName = `${identity.description}::${reducerName}`;
 
 			actions[reducerName] = async (...args) => {
@@ -115,8 +117,8 @@ export default (construct) => (identity, nodeBucket) => {
 		},
 
 		vacate() {
-			Object.values(privateData.watchList).forEach((w) => w.clear());
-			Object.values(privateData.listeners).forEach((l) => l.off());
+			values(privateData.watchList).forEach((w) => w.clear());
+			values(privateData.listeners).forEach((l) => l.off());
 		},
 
 		sub(listener) {
@@ -129,7 +131,7 @@ export default (construct) => (identity, nodeBucket) => {
 		},
 
 		put(propPath, propVal) {
-			const stateChange = zip([propPath], [propVal]);
+			const stateChange = branchUnflatten(propPath, propVal);
 			nodeBucket.put(stateChange);
 			/* eslint-disable-next-line no-console */
 			// if (!node) { console.warn(`No propKey match for '${propKey}'`); return; }

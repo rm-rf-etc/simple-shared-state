@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "Rob Christian <rm.rf.etc@gmail.com>",
@@ -15,6 +15,9 @@
     "url": "https://github.com/rm-rf-etc/weir"
   },
   "dependencies": {
-    "lodash.omit": "^4.5.0"
+    "lodash.keys": "^4.2.0",
+    "lodash.merge": "^4.6.2",
+    "lodash.omit": "^4.5.0",
+    "lodash.topairs": "^4.3.0"
   }
 }

@@ -1,4 +1,4 @@
-const stripDeep = require("../deepomit");
+const stripDeep = require("../deepomit").default;
 
 const testNested = {
     _: {
