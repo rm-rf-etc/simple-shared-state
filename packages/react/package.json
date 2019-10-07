@@ -1,6 +1,6 @@
 {
   "name": "weir.react",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "workspaces": true,
@@ -12,10 +12,10 @@
   "author": "Rob Christian <rm.rf.etc@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "weir.util": "^0.0.2",
     "lodash.merge": "^4.6.2",
     "lodash.zipobjectdeep": "^4.4.2",
-    "react": "^16.9.0"
+    "react": "^16.9.0",
+    "weir.util": "^0.0.3"
   },
   "repository": {
     "type": "git",

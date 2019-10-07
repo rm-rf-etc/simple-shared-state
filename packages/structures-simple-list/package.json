@@ -1,6 +1,6 @@
 {
     "name": "weir.structures-simple-list",
-    "version": "0.0.1",
+    "version": "0.0.3",
     "description": "",
     "main": "index.js",
     "workspaces": true,
@@ -12,10 +12,10 @@
     "author": "Rob Christian <rm.rf.etc@gmail.com>",
     "license": "ISC",
     "dependencies": {
+        "lodash.keys": "^4.2.0",
         "lodash.merge": "^4.6.2",
         "lodash.values": "^4.3.0",
-        "lodash.keys": "^4.2.0",
-        "weir.util": "^0.0.2"
+        "weir.util": "^0.0.3"
     },
     "repository": {
         "type": "git",
