@@ -15,9 +15,19 @@
     "url": "https://github.com/rm-rf-etc/weir"
   },
   "dependencies": {
+    "lodash.isboolean": "^3.0.3",
+    "lodash.ismap": "^4.4.2",
+    "lodash.isnumber": "^3.0.3",
+    "lodash.isplainobject": "^4.0.6",
+    "lodash.isset": "^4.4.2",
+    "lodash.isstring": "^4.0.1",
+    "lodash.isweakmap": "^4.4.1",
+    "lodash.isweakset": "^4.3.0",
     "lodash.keys": "^4.2.0",
     "lodash.merge": "^4.6.2",
     "lodash.omit": "^4.5.0",
-    "lodash.topairs": "^4.3.0"
+    "lodash.reduce": "^4.6.0",
+    "lodash.topairs": "^4.3.0",
+    "lodash.topath": "^4.5.2"
   }
 }

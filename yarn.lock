@@ -5943,10 +5943,50 @@ lodash.get@^4.4.2:
   resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
   integrity sha1-LRd/ZS+jHpObRDjVNBSZ36OCXpk=
 
+lodash.isboolean@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz#6c2e171db2a257cd96802fd43b01b20d5f5870f6"
+  integrity sha1-bC4XHbKiV82WgC/UOwGyDV9YcPY=
+
+lodash.ismap@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/lodash.ismap/-/lodash.ismap-4.4.2.tgz#836bf06dee57fd3d2aa357bf6946e61d1e77e279"
+  integrity sha1-g2vwbe5X/T0qo1e/aUbmHR534nk=
+
 lodash.ismatch@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.ismatch/-/lodash.ismatch-4.4.0.tgz#756cb5150ca3ba6f11085a78849645f188f85f37"
   integrity sha1-dWy1FQyjum8RCFp4hJZF8Yj4Xzc=
+
+lodash.isnumber@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/lodash.isnumber/-/lodash.isnumber-3.0.3.tgz#3ce76810c5928d03352301ac287317f11c0b1ffc"
+  integrity sha1-POdoEMWSjQM1IwGsKHMX8RwLH/w=
+
+lodash.isplainobject@^4.0.6:
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz#7c526a52d89b45c45cc690b88163be0497f550cb"
+  integrity sha1-fFJqUtibRcRcxpC4gWO+BJf1UMs=
+
+lodash.isset@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/lodash.isset/-/lodash.isset-4.4.2.tgz#d5eecc56b7a97ab588509e4795b3541b1cdb67bb"
+  integrity sha1-1e7MVreperWIUJ5HlbNUGxzbZ7s=
+
+lodash.isstring@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/lodash.isstring/-/lodash.isstring-4.0.1.tgz#d527dfb5456eca7cc9bb95d5daeaf88ba54a5451"
+  integrity sha1-1SfftUVuynzJu5XV2ur4i6VKVFE=
+
+lodash.isweakmap@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/lodash.isweakmap/-/lodash.isweakmap-4.4.1.tgz#c37f7c391276ad4b1492c931585273729d80d3c4"
+  integrity sha1-w398ORJ2rUsUkskxWFJzcp2A08Q=
+
+lodash.isweakset@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/lodash.isweakset/-/lodash.isweakset-4.3.0.tgz#de25dadd9fcf6f8987ddab65c36e740a07e2b259"
+  integrity sha1-3iXa3Z/Pb4mH3atlw250Cgfislk=
 
 lodash.keys@^4.2.0:
   version "4.2.0"
@@ -5967,6 +6007,11 @@ lodash.range@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/lodash.range/-/lodash.range-3.2.0.tgz#f461e588f66683f7eadeade513e38a69a565a15d"
   integrity sha1-9GHliPZmg/fq3q3lE+OKaaVloV0=
+
+lodash.reduce@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/lodash.reduce/-/lodash.reduce-4.6.0.tgz#f1ab6b839299ad48f784abbf476596f03b914d3b"
+  integrity sha1-8atrg5KZrUj3hKu/R2WW8DuRTTs=
 
 lodash.set@^4.3.2:
   version "4.3.2"
@@ -5997,6 +6042,11 @@ lodash.topairs@^4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/lodash.topairs/-/lodash.topairs-4.3.0.tgz#3b6deaa37d60fb116713c46c5f17ea190ec48d64"
   integrity sha1-O23qo31g+xFnE8RsXxfqGQ7EjWQ=
+
+lodash.topath@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/lodash.topath/-/lodash.topath-4.5.2.tgz#3616351f3bba61994a0931989660bd03254fd009"
+  integrity sha1-NhY1Hzu6YZlKCTGYlmC9AyVP0Ak=
 
 lodash.uniq@^4.5.0:
   version "4.5.0"

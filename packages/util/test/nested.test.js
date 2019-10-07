@@ -1,10 +1,10 @@
 /* eslint-env jest */
-const {
+import {
 	nestFlatten,
 	nestExpand,
 	getPath,
 	branchExpand,
-} = require("../nested");
+} from "../nested";
 
 /* eslint-disable quote-props */
 describe("getPath", () => {
@@ -161,8 +161,8 @@ describe("nestFlatten", () => {
 		expect(nestFlatten(initial)).toEqual(expected);
 	});
 });
-describe.only("nestExpand", () => {
-	it("UNflattens deeply nested arrays", () => {
+describe("nestExpand", () => {
+	it("Expands (unflattens) deep nested arrays", () => {
 		const initial = {
 			"[0][0][0][0][0]": Infinity,
 			"[0][0][0][0][1]": NaN,
@@ -181,7 +181,7 @@ describe.only("nestExpand", () => {
 		];
 		expect(nestExpand(initial)).toEqual(expected);
 	});
-	it("UNflattens mixed objects deeply", () => {
+	it("Expands (unflattens) deep mixed objects", () => {
 		const initial = {
 			"1.3[0].b[0]": 1678.03,
 		};

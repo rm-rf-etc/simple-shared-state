@@ -1,6 +1,8 @@
-import keys from "lodash.keys";
-import merge from "lodash.merge";
+import isPlainObject from "lodash.isplainobject";
 import entries from "lodash.topairs";
+import merge from "lodash.merge";
+import keys from "lodash.keys";
+import isPrimitive from "./isprimitive";
 
 const { isArray } = Array;
 
@@ -28,13 +30,14 @@ export const branchExpand = (path, leaf) => (
 );
 export const nestFlatten = (src, curPath) => {
     const result = {};
-    keys(src).forEach((nextProp) => {
-        const newPath = getPath(src, curPath, nextProp);
-        if (typeof src[nextProp] !== "object") {
-            // eslint-disable-next-line no-param-reassign
-            result[newPath] = src[nextProp];
+    keys(src).forEach((propKey) => {
+        const newPath = getPath(src, curPath, propKey);
+        const nextSrc = src[propKey];
+
+        if (isPrimitive(nextSrc) || (!isPlainObject(nextSrc) && !isArray(nextSrc))) {
+            result[newPath] = nextSrc;
         } else {
-            merge(result, nestFlatten(src[nextProp], newPath));
+            merge(result, nestFlatten(nextSrc, newPath));
         }
     });
     return result;

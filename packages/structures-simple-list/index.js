@@ -1,6 +1,6 @@
-import { branchUnflatten } from "weir.util/nestflatten";
-import strip from "weir.util/deepomit";
+import { branchExpand } from "weir.util/nested";
 import values from "lodash.values";
+import strip from "weir.util/deepomit";
 import keys from "lodash.keys";
 // import merge from "lodash.merge";
 
@@ -131,7 +131,7 @@ export default (construct) => (identity, nodeBucket) => {
 		},
 
 		put(propPath, propVal) {
-			const stateChange = branchUnflatten(propPath, propVal);
+			const stateChange = branchExpand(propPath, propVal);
 			nodeBucket.put(stateChange);
 			/* eslint-disable-next-line no-console */
 			// if (!node) { console.warn(`No propKey match for '${propKey}'`); return; }
