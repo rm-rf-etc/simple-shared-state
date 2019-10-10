@@ -1,6 +1,6 @@
 {
   "name": "weir.react",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "index.js",
   "workspaces": true,
@@ -15,7 +15,7 @@
     "lodash.merge": "^4.6.2",
     "lodash.zipobjectdeep": "^4.4.2",
     "react": "^16.9.0",
-    "weir.util": "^0.0.3"
+    "weir.util": "^0.0.4"
   },
   "repository": {
     "type": "git",
