@@ -1,11 +1,16 @@
-import { branchExpand } from "weir.util/nested";
+import toPath from "lodash.topath";
+import reduce from "lodash.reduce";
 import values from "lodash.values";
-import strip from "weir.util/deepomit";
 import keys from "lodash.keys";
+import {
+	branchExpand,
+	nestFlatten,
+} from "weir.util/nested";
+// import strip from "weir.util/deepomit";
 // import merge from "lodash.merge";
 
 const { isArray } = Array;
-const isFn = (fn) => typeof fn === "function";
+// const isFn = (fn) => typeof fn === "function";
 
 class List {
 	map(cb) {
@@ -23,6 +28,7 @@ class List {
 
 export default (construct) => (identity, nodeBucket) => {
 	if (!construct.state) throw new Error("Bucket construct must include `state` property");
+	if (!construct.shape) throw new Error("Bucket construct must include `shape` property");
 	if (!isArray(construct.state)) throw new Error("Bucket `state` for SimpleList must be an array");
 
 	const privateData = {
@@ -84,6 +90,8 @@ export default (construct) => (identity, nodeBucket) => {
 		rehydrate() {
 			if (hydrated) return privateData.state;
 
+			const shapeMap = nestFlatten(construct.shape);
+
 			construct.state.forEach((propVal) => {
 				const node = nodeBucket.set(propVal);
 				const soul = node._.get;
@@ -99,16 +107,18 @@ export default (construct) => (identity, nodeBucket) => {
 					privateData.state[thisSoul] = newVal;
 					node.put(newVal);
 				});
-				node.open((val, thisSoul, _, evt) => {
-					/*
-					WRITE EVENT HANDLER
-					console.log("OPEN", val);
-					*/
-					privateData.state[thisSoul] = strip(val);
-					privateData.watchList.forEach((fn) => isFn(fn) && fn(val.id, val));
-					// if we later need to remove the listener
-					if (!privateData.listeners[thisSoul]) privateData.listeners[thisSoul] = evt;
-				});
+
+				addChangeListeners(nodeBucket, shapeMap, privateData.watchList);
+				// node.open((val, thisSoul, _, evt) => {
+				// 	/*
+				// 	WRITE EVENT HANDLER
+				// 	console.log("OPEN", val);
+				// 	*/
+				// 	privateData.state[thisSoul] = strip(val);
+				// 	privateData.watchList.forEach((fn) => isFn(fn) && fn(val.id, val));
+				// 	// if we later need to remove the listener
+				// 	if (!privateData.listeners[thisSoul]) privateData.listeners[thisSoul] = evt;
+				// });
 			});
 
 			hydrated = true;
@@ -141,3 +151,13 @@ export default (construct) => (identity, nodeBucket) => {
 
 	return struct;
 };
+
+function addChangeListeners(nodeBucket, shapeMap, watchList) {
+	keys(shapeMap).forEach((path) => {
+		reduce(toPath(path), (last, next) => (
+			last.get(next)
+		), nodeBucket).on((val) => {
+			watchList.forEach((fn) => fn(path, val));
+		});
+	});
+}

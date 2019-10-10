@@ -1,6 +1,6 @@
 import strip from "weir.util/deepomit";
 import entries from "lodash.topairs";
-import values from "lodash.values";
+// import values from "lodash.values";
 import merge from "lodash.merge";
 import keys from "lodash.keys";
 
@@ -103,8 +103,9 @@ export default (construct, identity, nodeBucket) => {
 		},
 
 		vacate() {
-			values(privateData.watchList).forEach((w) => w.clear());
-			values(privateData.listeners).forEach((l) => l.off());
+			console.log("VACATE");
+			// values(privateData.watchList).forEach((w) => w.clear());
+			// values(privateData.listeners).forEach((l) => l.off());
 		},
 
 		sub(propKey, listener) {
