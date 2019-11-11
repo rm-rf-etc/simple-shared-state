@@ -14,7 +14,7 @@
     "dependencies": {
         "lodash.keys": "^4.2.0",
         "lodash.merge": "^4.6.2",
-        "lodash.reduce": "^3.2.0",
+        "lodash.reduce": "^4.6.0",
         "lodash.topath": "^4.5.2",
         "lodash.values": "^4.3.0",
         "weir.util": "^0.0.4"
