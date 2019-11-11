@@ -1,6 +1,6 @@
 {
     "name": "weir.structures-simple-list",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "",
     "main": "index.js",
     "workspaces": true,
@@ -17,7 +17,7 @@
         "lodash.reduce": "^4.6.0",
         "lodash.topath": "^4.5.2",
         "lodash.values": "^4.3.0",
-        "weir.util": "^0.0.4"
+        "weir.util": "^0.0.5"
     },
     "repository": {
         "type": "git",

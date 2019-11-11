@@ -1,6 +1,6 @@
 {
   "name": "weir.structures-dimensional",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "main": "index.js",
   "workspaces": true,
@@ -15,7 +15,7 @@
     "cartesian-product": "^2.1.2",
     "lodash.omit": "^4.5.0",
     "lodash.range": "^3.2.0",
-    "weir.util": "^0.0.4"
+    "weir.util": "^0.0.5"
   },
   "repository": {
     "type": "git",

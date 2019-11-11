@@ -1,6 +1,6 @@
 {
   "name": "weir",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "main": "index.js",
   "workspaces": true,
@@ -17,7 +17,7 @@
     "lodash.merge": "^4.6.2",
     "lodash.topairs": "^4.3.0",
     "lodash.values": "^4.3.0",
-    "weir.util": "^0.0.4"
+    "weir.util": "^0.0.5"
   },
   "repository": {
     "type": "git",
