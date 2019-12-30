@@ -1,0 +1,36 @@
+{
+  "name": "reduxlite",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.js",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "test": "jest --watchAll",
+    "test-dist": "JEST_TEST_TARGET=../dist/reduxlite.min.js jest --watchAll",
+    "test-once": "jest",
+    "doc": "jsdoc -c ./jsdoc.json -t templates/",
+    "doc2md": "jsdoc2md ./src/index.js ./src/store.js | pbcopy",
+    "build": "webpack ./src/index.js"
+  },
+  "keywords": [],
+  "author": "Rob Christian <rm.rf.etc@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "lodash.keys": "^4.2.0",
+    "taffydb": "^2.7.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rm-rf-etc/reduxlite"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.7.7",
+    "esm": "^3.2.25",
+    "jest": "^24.9.0",
+    "minami": "^1.2.3",
+    "redux": "^4.0.5",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  }
+}
