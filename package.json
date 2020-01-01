@@ -1,9 +1,8 @@
 {
-  "name": "reduxlite",
-  "version": "0.0.1",
+  "name": "simple-shared-state",
+  "version": "0.0.2",
   "description": "",
   "main": "src/index.js",
-  "private": true,
   "scripts": {
     "lint": "eslint .",
     "test": "jest --watchAll",
