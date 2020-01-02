@@ -74,7 +74,7 @@ export default class Store {
 		 * state.
 		 *
 		 * @example
-		 * import { createStore } from "simple-shared-state";
+		 * import { createStore, deleted } from "simple-shared-state";
 		 *
 		 * // Create a store with state:
 		 * const store = createStore({
@@ -101,10 +101,10 @@ export default class Store {
 		 *   },
 		 * });
 		 *
-		 * // To delete any piece of state, use a reference to `sss.deleted` as the value in the branch.
+		 * // To delete any piece of state, use a reference to `deleted` as the value in the branch.
 		 * // To remove `counters` from the state entirely:
 		 * store.dispatch({
-		 *   counters: sss.deleted,
+		 *   counters: deleted,
 		 * });
 		 *
 		 * // To update items in arrays, you can use `sss.partialArray`:
