@@ -45,12 +45,12 @@ The main goal of simple-shared-state is to reduce codebase verbosity in a flux/r
 
 ## Concepts
 
-Redux and simple-shared-state have slightly different scope. If you're comparing one to the other in terms of performance, note
-that simple-shared-state has more features (with a little less than half the code). The included test suite has some performance
-tests if you're interested.
+Redux and SimpleSharedState have slightly different scope. If you're comparing one to the other in terms of performance, note
+that SimpleSharedState has more features (with a little less than half the code). The included test suite has some performance
+tests if you're interested, and you can test the build result with `yarn build && yarn test-dist`.
 
-Terms like `reducers` and `action creators` will be reused for developer familiarity, but a "reducer" in simple-shared-state is
-not the same as a "reducer" in redux.
+Terms like `reducers` and `action creators` will be reused for developer familiarity, but a "reducer" in SimpleSharedState is
+not the same as a "reducer" in Redux.
 
 ## Future Work
 
