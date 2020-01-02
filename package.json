@@ -1,6 +1,6 @@
 {
   "name": "simple-shared-state",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "main": "src/index.js",
   "homepage": "https://simplesharedstate.com",
@@ -13,7 +13,7 @@
     "doc2md": "jsdoc2md ./src/index.js ./src/store.js | pbcopy",
     "build": "webpack ./src/index.js"
   },
-  "keywords": [],
+  "keywords": ["shared state","redux","mobx","react","context","context api"],
   "author": "Rob Christian <rm.rf.etc@gmail.com>",
   "license": "ISC",
   "dependencies": {
