@@ -1,20 +1,20 @@
-# ReduxLite
+# SimpleSharedState
 
-Redux is verbose. ReduxLite is brief.
+Redux is verbose. SimpleSharedState is brief.
 
-- Documentation: [https://reduxlite.com](https://reduxlite.com)
-- Git Repo: [https://github.com/rm-rf-etc/reduxlite](https://github.com/rm-rf-etc/reduxlite)
+- Documentation: [https://simple-shared-state.com](https://simple-shared-state.com)
+- Git Repo: [https://github.com/rm-rf-etc/simple-shared-state](https://github.com/rm-rf-etc/simple-shared-state)
 
 ## Basic Use
 
 First create a store.
 ```javascript
-import { createStore } from "reduxlite";
+import { createStore } from "simple-shared-state";
 
 const initialState = {
   user: {
     name: "Alice",
-    slogan: "ReduxLite makes apps fun again",
+    slogan: "SimpleSharedState makes apps fun again",
   },
 };
 const store = createStore(initialState);
@@ -31,26 +31,26 @@ Then call dispatch to update state and trigger the watch handler.
 ```javascript
 store.dispatch({
   user: {
-    slogan: "ReduxLite is better than cat memes",
+    slogan: "SimpleSharedState is better than cat memes",
   },
 });
-// 'user snapshot:' { name: 'Alice', slogan: 'ReduxLite is better than cat memes' }
+// 'user snapshot:' { name: 'Alice', slogan: 'SimpleSharedState is better than cat memes' }
 ```
 
 ## Status
 
-ReduxLite was first born in late Dec. 2019. There's still more testing needed, particularly on performance with react.
-But your willingness to try out ReduxLite and report back your experience would greatly help me in developing its API.
-The main goal of ReduxLite is to reduce codebase verbosity in a flux/redux-like architecture.
+SimpleSharedState was first born in late Dec. 2019. There's still more testing needed, particularly on performance with react.
+But your willingness to try out simple-shared-state and report back your experience would greatly help me in developing its API.
+The main goal of simple-shared-state is to reduce codebase verbosity in a flux/redux-like architecture.
 
 ## Concepts
 
-Redux and ReduxLite have slightly different scope. If you're comparing one to the other in terms of performance, note
-that ReduxLite has more features (with a little less than half the code). The included test suite has some performance
+Redux and simple-shared-state have slightly different scope. If you're comparing one to the other in terms of performance, note
+that simple-shared-state has more features (with a little less than half the code). The included test suite has some performance
 tests if you're interested.
 
-Terms like `reducers` and `action creators` will be reused for developer familiarity, but a "reducer" in ReduxLite is
-not the same as a "reducer" in Redux.
+Terms like `reducers` and `action creators` will be reused for developer familiarity, but a "reducer" in simple-shared-state is
+not the same as a "reducer" in redux.
 
 ## Future Work
 

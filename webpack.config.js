@@ -5,9 +5,9 @@ module.exports = [
 		entry: "./src/index.js",
 		mode: "production",
 		output: {
-			library: "reduxlite",
+			library: "SimpleSharedState",
 			libraryTarget: "umd",
-			filename: "reduxlite.min.js",
+			filename: "simple-shared-state.min.js",
 			path: path.resolve(__dirname, "dist"),
 			globalObject: 'Function("return this")()',
 		},

@@ -1,7 +1,7 @@
 import * as redux from "redux";
 const testTarget = process.env.JEST_TEST_TARGET;
 console.log(`Running tests against target ${testTarget || 'project root source'}`);
-const reduxlite = require(testTarget || "..");
+const sss = require(testTarget || "..");
 
 const _100_000 = 100000;
 const _50_000_000 = 50000000;
@@ -84,8 +84,8 @@ describe("Redux Performance", () => {
 	});
 });
 
-describe("ReduxLite Performance", () => {
-	let store = reduxlite.createStore({
+describe("SimpleSharedState Performance", () => {
+	let store = sss.createStore({
 		a: [
 			{
 				thing1: 1,
@@ -121,7 +121,7 @@ describe("createStore", () => {
 	let store = {};
 
 	beforeEach(() => {
-		store = reduxlite.createStore({
+		store = sss.createStore({
 			friends: {
 				"1": {
 					name: "Alice",
@@ -251,7 +251,7 @@ describe("createStore", () => {
 					name: "Susan",
 					age: 25,
 				},
-				"2": reduxlite.deleted,
+				"2": sss.deleted,
 			},
 		});
 		expect(spy1.mock.calls).toEqual([[{
@@ -270,10 +270,10 @@ describe("createStore", () => {
 			friends: {
 				"1": {
 					name: "Susan",
-					age: reduxlite.deleted,
+					age: sss.deleted,
 				},
 				"2": {
-					age: reduxlite.deleted,
+					age: sss.deleted,
 				},
 			},
 		});
@@ -313,17 +313,17 @@ describe("simpleMerge", () => {
 
 	it("can update simple values in objects in arrays", () => {
 		const change = {
-			a: reduxlite.partialArray(1, { thing: 3 }),
+			a: sss.partialArray(1, { thing: 3 }),
 		};
 		expect(change.a[1].thing).toEqual(3);
 		expect(target.a[1].thing).toEqual(2);
 
-		reduxlite.simpleMerge(state, change);
+		sss.simpleMerge(state, change);
 		expect(state.a[1].thing).toEqual(3);
 	});
 
 	it("can change simple values to other data types inside nested objects", () => {
-		reduxlite.simpleMerge(state, {
+		sss.simpleMerge(state, {
 			b: {
 				bool: "true",
 			},
@@ -332,8 +332,8 @@ describe("simpleMerge", () => {
 	});
 
 	it("can replace simple values in arrays with new objects", () => {
-		reduxlite.simpleMerge(state, {
-			a: reduxlite.partialArray(1, {
+		sss.simpleMerge(state, {
+			a: sss.partialArray(1, {
 				thing: {
 					new_thing: 1,
 				},
@@ -343,8 +343,8 @@ describe("simpleMerge", () => {
 	});
 
 	it("can append new items to arrays", () => {
-		reduxlite.simpleMerge(state, {
-			a: reduxlite.partialArray(2, {
+		sss.simpleMerge(state, {
+			a: sss.partialArray(2, {
 				thing: "was added",
 			}),
 		});
@@ -352,14 +352,14 @@ describe("simpleMerge", () => {
 	});
 
 	it("doesn't fail on null values", () => {
-		reduxlite.simpleMerge(state, {
-			a: reduxlite.partialArray(1, null),
+		sss.simpleMerge(state, {
+			a: sss.partialArray(1, null),
 		});
 		expect(state.a[1]).toEqual(null);
 	});
 
 	it("doesn't fail for values of 0", () => {
-		reduxlite.simpleMerge(state, {
+		sss.simpleMerge(state, {
 			a: 0,
 			b: {
 				asdf1: 0,

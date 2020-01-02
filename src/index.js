@@ -1,7 +1,7 @@
 import Store from "./store";
 export { partialArray, simpleMerge, deleted } from "./store";
 
-/** @module ReduxLite */
+/** @module SimpleSharedState */
 
 /**
  * @description Call this function to create a new store.

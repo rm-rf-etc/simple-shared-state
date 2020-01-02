@@ -1,6 +1,6 @@
 import keys from "lodash.keys";
 /**
- * @class module:ReduxLite.Store
+ * @class module:SimpleSharedState.Store
  */
 
 const objectPrototype = Object.getPrototypeOf({});
@@ -12,7 +12,7 @@ export default class Store {
 		const listeners = new Set();
 
 		/**
-		 * @method module:ReduxLite.Store#watch
+		 * @method module:SimpleSharedState.Store#watch
 		 * @param {function} - selector A pure function which takes state and returns a piece of that state.
 		 * @param {function} - handler The listener which will receive the piece of state when changes occur.
 		 *
@@ -44,7 +44,7 @@ export default class Store {
 		};
 
 		/**
-		 * @method module:ReduxLite.Store#unwatch
+		 * @method module:SimpleSharedState.Store#unwatch
 		 *
 		 * @description Remove a previously added state listener. You must provide a reference to the same selector
 		 * function as was previously provided when calling #watch.
@@ -65,7 +65,7 @@ export default class Store {
 		};
 
 		/**
-		 * @method module:ReduxLite.Store#dispatch
+		 * @method module:SimpleSharedState.Store#dispatch
 		 *
 		 * @param {object} branch - A JavaScript object. The object may contain any Array or JS primitive, but
 		 * must be a plain JS object ({}) at the top level, otherwise dispatch will throw.
@@ -89,7 +89,7 @@ export default class Store {
 		 * // To change email, call dispatch with a branch. The branch you provide must include the full path
 		 * // from the root of the state, to the value you want to change.
 		 * store.dispatch({
-		 *   email: "me@reduxlite.com",
+		 *   email: "me@simple-shared-state.com",
 		 * });
 		 *
 		 * // To update likes:
@@ -99,15 +99,15 @@ export default class Store {
 		 *   },
 		 * });
 		 *
-		 * // To delete any piece of state, use a reference to `reduxlite.deleted` as the value in the branch.
+		 * // To delete any piece of state, use a reference to `sss.deleted` as the value in the branch.
 		 * // To remove `counters` from the state entirely:
 		 * store.dispatch({
-		 *   counters: reduxlite.deleted,
+		 *   counters: sss.deleted,
 		 * });
 		 *
-		 * // To update items in arrays, you can use `reduxlite.partialArray`:
+		 * // To update items in arrays, you can use `sss.partialArray`:
 		 * store.dispatch({
-		 *   todoList: reduxlite.partialArray(1, {
+		 *   todoList: sss.partialArray(1, {
 		 *     label: "buy oat milk (because it requires 80 times less water than almond milk)",
 		 *   }),
 		 * });
@@ -133,7 +133,7 @@ export default class Store {
 		};
 
 		/**
-		 * @method module:ReduxLite.Store#getState
+		 * @method module:SimpleSharedState.Store#getState
 		 *
 		 * @returns {Object} a copy of the state tree.
 		 */
@@ -149,7 +149,7 @@ export default class Store {
 };
 
 /**
- * @memberof module:ReduxLite
+ * @memberof module:SimpleSharedState
  * @const {number} deleted - A globally unique object to reference when you want to delete
  * things from state.
  *
@@ -161,7 +161,7 @@ export default class Store {
  *
  * @example
  * // Use `deleted` to remove items from state.
- * import { createStore, deleted } from "reduxlite";
+ * import { createStore, deleted } from "simple-shared-state";
  *
  * const store = createStore({ a: 1, b: 2 });
  * console.log(store.getState()); // { a: 1, b: 2 }
@@ -175,10 +175,10 @@ export default class Store {
 export const deleted = new Number(0);
 
 /**
- * @function module:ReduxLite#simpleMerge
+ * @function module:SimpleSharedState#simpleMerge
  * @description This is for internal use. It's a simplified alternative to lodash.merge, and
  * cuts some corners for the sake of speed. Not knocking lodash at all, but lodash.merge is
- * likely intended for a wider set of use cases. For ReduxLite, we choose speed over safety.
+ * likely intended for a wider set of use cases. For simple-shared-state, we choose speed over safety.
  *
  * @param {*} tree - any JS primitive or plain object or plain array. Tree will be mutated.
  * @param {*} branch - any JS primitive or plain object or plain array, but should share the
@@ -187,7 +187,7 @@ export const deleted = new Number(0);
  * @example
  * const obj = { a: 1 };
  *
- * reduxlite.simpleMerge(obj, { b: 2 });
+ * sss.simpleMerge(obj, { b: 2 });
  * // returns { a: 1, b: 2 }
  *
  * console.log(obj); // { a: 1, b: 2 }
@@ -207,7 +207,7 @@ export const simpleMerge = (tree, branch) => {
 };
 
 /**
- * @function module:ReduxLite#partialArray
+ * @function module:SimpleSharedState#partialArray
  * @description This is a helper for making partial arrays from a one-liner. You would use this
  * in your reducers when forming the new branch.
  *
@@ -217,7 +217,7 @@ export const simpleMerge = (tree, branch) => {
  * @returns {array}
  *
  * @example
- * import { partialArray } from "reduxlite";
+ * import { partialArray } from "simple-shared-state";
  *
  * const array = partialArray(2, "thing");
  * console.log(array); // [ <2 empty items>, 'thing' ]
