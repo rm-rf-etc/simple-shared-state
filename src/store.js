@@ -221,9 +221,9 @@ export const simpleMerge = (tree, branch) => {
  * @example
  * import { partialArray } from "simple-shared-state";
  *
- * const array = partialArray(2, "thing");
- * console.log(array); // [ <2 empty items>, 'thing' ]
- * console.log(simpleMerge([ 0, 1, 2, 3 ], array)); // [ 0, 1, 'thing', 3 ]
+ * const change = partialArray(2, "thing");
+ * console.log(change); // [ <2 empty items>, 'thing' ]
+ * console.log(simpleMerge([ 0, 1, 2, 3 ], change)); // [ 0, 1, 'thing', 3 ]
  */
 export const partialArray = (pos, thing) => {
 	const array = [];
