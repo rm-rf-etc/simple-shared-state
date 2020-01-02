@@ -91,7 +91,7 @@ export default class Store {
 		 * // To change email, call dispatch with a branch. The branch you provide must include the full path
 		 * // from the root of the state, to the value you want to change.
 		 * store.dispatch({
-		 *   email: "me@simple-shared-state.com",
+		 *   email: "me@simplesharedstate.com",
 		 * });
 		 *
 		 * // To update likes:

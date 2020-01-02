@@ -1,8 +1,9 @@
 {
   "name": "simple-shared-state",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "",
   "main": "src/index.js",
+  "homepage": "https://simplesharedstate.com",
   "scripts": {
     "lint": "eslint .",
     "test": "jest --watchAll",
