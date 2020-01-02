@@ -107,9 +107,9 @@ export default class Store {
 		 *   counters: deleted,
 		 * });
 		 *
-		 * // To update items in arrays, you can use `sss.partialArray`:
+		 * // To update items in arrays, you can use `partialArray`:
 		 * store.dispatch({
-		 *   todoList: sss.partialArray(1, {
+		 *   todoList: partialArray(1, {
 		 *     label: "buy oat milk (because it requires 80 times less water than almond milk)",
 		 *   }),
 		 * });
@@ -187,9 +187,11 @@ export const deleted = new Number(0);
  * same root type as `tree`.
  *
  * @example
+ * import { simpleMerge } from "simple-shared-state";
+ *
  * const obj = { a: 1 };
  *
- * sss.simpleMerge(obj, { b: 2 });
+ * simpleMerge(obj, { b: 2 });
  * // returns { a: 1, b: 2 }
  *
  * console.log(obj); // { a: 1, b: 2 }
