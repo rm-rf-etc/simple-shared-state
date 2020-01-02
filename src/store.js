@@ -74,8 +74,10 @@ export default class Store {
 		 * state.
 		 *
 		 * @example
-		 * // Your state:
-		 * {
+		 * import { createStore } from "simple-shared-state";
+		 *
+		 * // Create a store with state:
+		 * const store = createStore({
 		 *   email: "user@example.com",
 		 *   counters: {
 		 *     likes: 1,
@@ -84,7 +86,7 @@ export default class Store {
 		 *     { label: "buy oat milk" },
 		 *     { label: "buy cat food" },
 		 *   ],
-		 * }
+		 * });
 		 *
 		 * // To change email, call dispatch with a branch. The branch you provide must include the full path
 		 * // from the root of the state, to the value you want to change.

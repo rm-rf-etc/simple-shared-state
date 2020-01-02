@@ -14,7 +14,7 @@ import { createStore } from "simple-shared-state";
 const initialState = {
   user: {
     name: "Alice",
-    slogan: "SimpleSharedState makes apps fun again",
+    slogan: "simple-shared-state makes apps fun again",
   },
 };
 const store = createStore(initialState);
@@ -31,17 +31,17 @@ Then call dispatch to update state and trigger the watch handler.
 ```javascript
 store.dispatch({
   user: {
-    slogan: "SimpleSharedState is better than cat memes",
+    slogan: "simple-shared-state is better than cat memes",
   },
 });
-// 'user snapshot:' { name: 'Alice', slogan: 'SimpleSharedState is better than cat memes' }
+// 'user snapshot:' { name: 'Alice', slogan: 'simple-shared-state is better than cat memes' }
 ```
 
 ## Status
 
 SimpleSharedState was first born in late Dec. 2019. There's still more testing needed, particularly on performance with react.
-But your willingness to try out simple-shared-state and report back your experience would greatly help me in developing its API.
-The main goal of simple-shared-state is to reduce codebase verbosity in a flux/redux-like architecture.
+But your willingness to try out SimpleSharedState and report back your experience would greatly help me in developing its API.
+The main goal of SimpleSharedState is to reduce codebase verbosity in a flux/redux-like architecture.
 
 ## Concepts
 
