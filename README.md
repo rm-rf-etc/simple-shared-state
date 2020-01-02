@@ -5,6 +5,20 @@ Redux is verbose. SimpleSharedState is brief.
 - Documentation: [https://simplesharedstate.com](https://simplesharedstate.com)
 - Git Repo: [https://github.com/rm-rf-etc/simple-shared-state](https://github.com/rm-rf-etc/simple-shared-state)
 
+## Get It
+
+```
+npm install simple-shared-state
+```
+
+If using script tags:
+```html
+<script src="https://unpkg.com/simple-shared-state"></script>
+<script>
+  const store = SimpleSharedState.createStore({});
+</script>
+```
+
 ## Basic Use
 
 First create a store.
@@ -46,7 +60,7 @@ The main goal of SimpleSharedState is to reduce codebase verbosity in a flux/red
 ## Concepts
 
 Redux and SimpleSharedState have slightly different scope. If you're comparing one to the other in terms of performance, note
-that SimpleSharedState has more features (with a little less than half the code). The included test suite has some performance
+that SimpleSharedState has more features (with roughly a third the character count). The included test suite has some performance
 tests if you're interested, and you can test the build result with `yarn build && yarn test-dist`.
 
 Terms like `reducers` and `action creators` will be reused for developer familiarity, but a "reducer" in SimpleSharedState is

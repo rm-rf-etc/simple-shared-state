@@ -7,7 +7,7 @@ module.exports = [
 		output: {
 			library: "SimpleSharedState",
 			libraryTarget: "umd",
-			filename: "simple-shared-state.min.js",
+			filename: "simple-shared-state.umd.js",
 			path: path.resolve(__dirname, "dist"),
 			globalObject: 'Function("return this")()',
 		},
