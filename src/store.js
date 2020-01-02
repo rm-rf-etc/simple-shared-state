@@ -8,7 +8,9 @@ export default class Store {
 
 	constructor(initialState = {}, devtool = null) {
 		let stateTree = { ...initialState };
+		let isDispatching = false;
 		const listeners = new Set();
+		const afterListeners = new Set();
 
 		/**
 		 * @method module:SimpleSharedState.Store#watch
@@ -40,6 +42,18 @@ export default class Store {
 				handler,
 			});
 			return snapshot;
+		};
+
+		/**
+		 * @method module:SimpleSharedState.Store#afterDispatch
+		 *
+		 * @description Listen for the after-dispatch event. Gets called with no arguments after ever dispatch
+		 * completes (dispatch is complete after all state watchers have been called).
+		 *
+		 * @param {function} - A callback function.
+		 */
+		this.afterDispatch = (callback) => {
+			if (typeof callback === "function") afterListeners.add(callback);
 		};
 
 		/**
@@ -114,9 +128,14 @@ export default class Store {
 		 * });
 		 */
 		this.dispatch = (branch) => {
+			if (isDispatching) {
+				throw new Error("can't dispatch while dispatching");
+			}
 			if (!branch || Object.getPrototypeOf(branch) !== objectPrototype) {
 				throw new Error("dispatch expects plain object");
 			}
+
+			isDispatching = true;
 
 			listeners.forEach((lisnr) => {
 				let changed;
@@ -128,9 +147,11 @@ export default class Store {
 				lisnr.snapshot = simpleMerge(lisnr.snapshot, changed);
 				lisnr.handler(lisnr.snapshot);
 			});
-			Promise.resolve().then(() => {
-				simpleMerge(stateTree, branch);
-			});
+
+			simpleMerge(stateTree, branch);
+			isDispatching = false;
+
+			afterListeners.forEach((callback) => callback());
 		};
 
 		/**
