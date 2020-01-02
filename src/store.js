@@ -1,4 +1,3 @@
-import keys from "lodash.keys";
 /**
  * @class module:SimpleSharedState.Store
  */
@@ -137,7 +136,7 @@ export default class Store {
 		/**
 		 * @method module:SimpleSharedState.Store#getState
 		 *
-		 * @returns {Object} a copy of the state tree.
+		 * @returns {Object} A copy of the state tree.
 		 */
 		this.getState = () => {
 			return { ...stateTree };
@@ -191,14 +190,13 @@ export const deleted = new Number(0);
  *
  * const obj = { a: 1 };
  *
- * simpleMerge(obj, { b: 2 });
- * // returns { a: 1, b: 2 }
+ * simpleMerge(obj, { b: 2 }); // returns { a: 1, b: 2 }
  *
  * console.log(obj); // { a: 1, b: 2 }
  */
 export const simpleMerge = (tree, branch) => {
 	if (tree && branch && typeof tree === "object") {
-		keys(branch).forEach((key) => {
+		Object.keys(branch).forEach((key) => {
 			if (branch[key] === deleted) {
 				delete tree[key];
 			} else {
@@ -225,9 +223,7 @@ export const simpleMerge = (tree, branch) => {
  *
  * const array = partialArray(2, "thing");
  * console.log(array); // [ <2 empty items>, 'thing' ]
- * console.log(array[0]); // undefined
- * console.log(array[1]); // undefined
- * console.log(array[2]); // 'thing'
+ * console.log(simpleMerge([ 0, 1, 2, 3 ], array)); // [ 0, 1, 'thing', 3 ]
  */
 export const partialArray = (pos, thing) => {
 	const array = [];

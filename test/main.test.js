@@ -309,7 +309,18 @@ describe("simpleMerge", () => {
 	};
 	beforeEach(() => {
 		state = { ...target };
-	})
+	});
+
+	it("correctly merges partial arrays", () => {
+		const array = [1, 2, 3, 4, 5];
+		const changes = [];
+		changes[1] = "change1";
+		changes[3] = "change2";
+
+		const expected = [1, "change1", 3, "change2", 5];
+		expect(sss.simpleMerge(array, changes)).toEqual(expected);
+		expect(array).toEqual(expected);
+	});
 
 	it("can update simple values in objects in arrays", () => {
 		const change = {
