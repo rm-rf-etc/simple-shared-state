@@ -7,7 +7,7 @@ module.exports = [
 		output: {
 			library: "SimpleSharedState",
 			libraryTarget: "umd",
-			filename: "simple-shared-state.umd.js",
+			filename: "simple-shared-state.es6.umd.js",
 			path: path.resolve(__dirname, "dist"),
 			globalObject: 'Function("return this")()',
 		},
@@ -18,7 +18,7 @@ module.exports = [
 		output: {
 			library: "SimpleSharedState",
 			libraryTarget: "umd",
-			filename: "simple-shared-state-ie-compat.umd.js",
+			filename: "simple-shared-state.es5.umd.js",
 			path: path.resolve(__dirname, "dist"),
 			globalObject: 'Function("return this")()',
 		},

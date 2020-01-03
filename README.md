@@ -19,11 +19,11 @@ If using script tags:
 </script>
 ```
 
-### For IE 11
+### Support for Internet Explorer
 
-Use `dist/simple-shared-state-ie-compat.umd.js`. For example:
+Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@0.0.17/dist/simple-shared-state-ie-compat.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@0.0.18/dist/simple-shared-state.es5.umd.js"></script>
 ```
 
 ## Basic Use

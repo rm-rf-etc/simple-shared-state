@@ -7,7 +7,7 @@ const objectPrototype = Object.getPrototypeOf({});
 export default class Store {
 
 	constructor(initialState = {}, devtool = null) {
-		let stateTree = { ...initialState };
+		let stateTree = Object.assign({}, initialState);
 		let isDispatching = false;
 		const listeners = new Map();
 		const snapshots = new Map();
@@ -136,8 +136,8 @@ export default class Store {
 				}
 
 				const snapshot = snapshots.get(selector);
-				simpleMerge(snapshot, changed);
-				handler(snapshot);
+				const newSnapshot = simpleMerge(snapshot, changed);
+				handler(newSnapshot);
 			});
 
 			simpleMerge(stateTree, branch);
