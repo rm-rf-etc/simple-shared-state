@@ -160,7 +160,7 @@ export default class Store {
 		 * @returns {Object} A copy of the state tree.
 		 */
 		this.getState = () => {
-			return { ...stateTree };
+			return Object.assign({}, stateTree);
 		};
 
 		if (devtool && typeof devtool === 'function') {

@@ -1,6 +1,6 @@
 {
   "name": "simple-shared-state",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "",
   "module": "src/index.js",
   "main": "dist/simple-shared-state.umd.js",
@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "test": "jest --watchAll",
     "test-dist": "JEST_TEST_TARGET=../dist/simple-shared-state.umd.js jest --watchAll",
+    "test-dist-ie": "JEST_TEST_TARGET=../dist/simple-shared-state-ie-compat.umd.js jest --watchAll",
     "test-once": "jest",
     "doc": "jsdoc -c ./jsdoc.json -t templates/",
     "doc2md": "jsdoc2md ./src/index.js ./src/store.js | pbcopy",
@@ -31,7 +32,9 @@
     "url": "https://github.com/rm-rf-etc/simple-shared-state"
   },
   "devDependencies": {
+    "@babel/plugin-transform-object-assign": "^7.7.4",
     "@babel/preset-env": "^7.7.7",
+    "babel-loader": "^8.0.6",
     "esm": "^3.2.25",
     "jest": "^24.9.0",
     "minami": "^1.2.3",
