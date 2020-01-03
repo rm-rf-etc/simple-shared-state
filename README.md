@@ -19,6 +19,13 @@ If using script tags:
 </script>
 ```
 
+### For IE 11
+
+Use `dist/simple-shared-state-ie-compat.umd.js`. For example:
+```html
+<script src="https://unpkg.com/simple-shared-state@0.0.17/dist/simple-shared-state-ie-compat.umd.js"></script>
+```
+
 ## Basic Use
 
 First create a store.

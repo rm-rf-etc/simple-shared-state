@@ -9,7 +9,8 @@ export default class Store {
 	constructor(initialState = {}, devtool = null) {
 		let stateTree = { ...initialState };
 		let isDispatching = false;
-		const listeners = new Set();
+		const listeners = new Map();
+		const snapshots = new Map();
 		const afterListeners = new Set();
 
 		/**
@@ -27,7 +28,7 @@ export default class Store {
 			if (typeof selector !== 'function' || typeof handler !== 'function') {
 				throw new Error("selector and handler must be functions");
 			}
-			if (Array.from(listeners).some((lisnr) => lisnr.selector === selector)) {
+			if (listeners.has(selector)) {
 				throw new Error("Cannot reuse selector");
 			}
 
@@ -36,11 +37,8 @@ export default class Store {
 				snapshot = selector(stateTree);
 			} catch (_) {}
 
-			listeners.add({
-				snapshot,
-				selector,
-				handler,
-			});
+			listeners.set(selector, handler);
+			snapshots.set(selector, snapshot);
 			return snapshot;
 		};
 
@@ -66,15 +64,7 @@ export default class Store {
 		 * a call to #watch.
 		 */
 		this.unwatch = (selector) => {
-			if (typeof selector !== 'function') throw new Error("unwatch expects a function");
-
-			Array.from(listeners).some((lisnr) => {
-				if (lisnr.selector === selector) {
-					listeners.delete(lisnr);
-					return true;
-				}
-				return false;
-			});
+			listeners.delete(selector);
 		};
 
 		/**
@@ -137,15 +127,17 @@ export default class Store {
 
 			isDispatching = true;
 
-			listeners.forEach((lisnr) => {
+			listeners.forEach((handler, selector) => {
 				let changed;
 				try {
-					changed = lisnr.selector(branch);
+					changed = selector(branch);
 				} catch (_) {
 					return;
 				}
-				lisnr.snapshot = simpleMerge(lisnr.snapshot, changed);
-				lisnr.handler(lisnr.snapshot);
+
+				const snapshot = snapshots.get(selector);
+				simpleMerge(snapshot, changed);
+				handler(snapshot);
 			});
 
 			simpleMerge(stateTree, branch);
