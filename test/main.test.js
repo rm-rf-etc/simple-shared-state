@@ -151,6 +151,50 @@ describe("createStore", () => {
 		expect(spy2).toHaveBeenCalled();
 	});
 
+	it("calls afterDispatch once per dispatch", () => {
+		const spy1 = jest.fn();
+		const spy2 = jest.fn();
+		const spy3 = jest.fn();
+		const spy4 = jest.fn();
+		const spy5 = jest.fn();
+		const spy6 = jest.fn();
+		store.watch((state) => state.friends["1"].name, spy1);
+		store.watch((state) => state.friends["1"].age, spy2);
+		store.watch((state) => state.friends["2"].name, spy3);
+		store.watch((state) => state.friends["2"].age, spy4);
+		store.watch((state) => state.friends, spy5);
+		store.afterDispatch(spy6);
+
+		store.dispatch({
+			friends: {
+				"1": {
+					name: "Jim",
+					age: 31,
+				},
+				"2": {
+					name: "Jake",
+					age: 23,
+				},
+			},
+		});
+
+		expect(spy1.mock.calls).toEqual([["Jim"]]);
+		expect(spy2.mock.calls).toEqual([[31]]);
+		expect(spy3.mock.calls).toEqual([["Jake"]]);
+		expect(spy4.mock.calls).toEqual([[23]]);
+		expect(spy5.mock.calls).toEqual([[{
+			"1": {
+				name: "Jim",
+				age: 31,
+			},
+			"2": {
+				name: "Jake",
+				age: 23,
+			},
+		}]]);
+		expect(spy6.mock.calls).toEqual([[]]);
+	});
+
 	it("should throw when attempting to reuse existing selector", () => {
 		const selector = (state) => state.friends["1"];
 

@@ -47,8 +47,8 @@ export default class Store {
 		/**
 		 * @method module:SimpleSharedState.Store#afterDispatch
 		 *
-		 * @description Listen for the after-dispatch event. Gets called with no arguments after ever dispatch
-		 * completes (dispatch is complete after all state watchers have been called).
+		 * @description Listen for the after-dispatch event, which gets called with no arguments after every
+		 * dispatch completes. Dispatch is complete after all watchers have been called.
 		 *
 		 * @param {function} - A callback function.
 		 */
