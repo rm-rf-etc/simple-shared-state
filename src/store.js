@@ -11,7 +11,7 @@ export default class Store {
 		let isDispatching = false;
 		const listeners = new Map();
 		const snapshots = new Map();
-		const afterListeners = new Set();
+		const onDispatchListeners = new Set();
 
 		/**
 		 * @method module:SimpleSharedState.Store#watch
@@ -51,7 +51,7 @@ export default class Store {
 		 * @param {function} handler - A callback function.
 		 */
 		this.watchDispatch = (handler) => {
-			if (typeof handler === "function") afterListeners.add(handler);
+			if (typeof handler === "function") onDispatchListeners.add(handler);
 		};
 
 		/**
@@ -62,7 +62,7 @@ export default class Store {
 		 * @param {function} handler - A callback function.
 		 */
 		this.unwatchDispatch = (handler) => {
-			afterListeners.delete(handler);
+			onDispatchListeners.delete(handler);
 		};
 
 		/**
@@ -157,7 +157,7 @@ export default class Store {
 			simpleMerge(stateTree, branch);
 			isDispatching = false;
 
-			afterListeners.forEach((callback) => callback());
+			onDispatchListeners.forEach((callback) => callback());
 		};
 
 		/**
