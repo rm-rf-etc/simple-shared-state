@@ -3,6 +3,7 @@
  */
 
 const objectPrototype = Object.getPrototypeOf({});
+const noop = () => {};
 
 export default class Store {
 
@@ -11,12 +12,12 @@ export default class Store {
 		let isDispatching = false;
 		const listeners = new Map();
 		const snapshots = new Map();
-		const onDispatchListeners = new Set();
+		const dispatchListeners = new Set();
 
 		/**
 		 * @method module:SimpleSharedState.Store#watch
-		 * @param {function} - selector A pure function which takes state and returns a piece of that state.
-		 * @param {function} - handler The listener which will receive the piece of state when changes occur.
+		 * @param {function} selector - A pure function which takes state and returns a piece of that state.
+		 * @param {function} handler - The listener which will receive the piece of state when changes occur.
 		 *
 		 * @description Creates a state listener which is associated with a globally unique selector. If watch
 		 * receives a selector which has already been passed before, watch will throw. Selectors are tested
@@ -43,6 +44,40 @@ export default class Store {
 		};
 
 		/**
+		 * @method module:SimpleSharedState.Store#watchBatch
+		 * @param {function} selectors - A Set or Array of selector functions. Refer to {@link module:SimpleSharedState.Store#watch}
+		 * for details about selector functions.
+		 * @param {function} handler - The listener which will receive the Array of state snapshots.
+		 *
+		 * @description
+		 */
+		this.watchBatch = (selectors, handler) => {
+			if (!selectors || typeof selectors.forEach !== "function") {
+				throw new Error("selectors must be a list of functions");
+			}
+			if (typeof handler !== "function") throw new Error("handler is not a function");
+
+			const snapshotsArray = [];
+
+			let i = 0;
+			selectors.forEach((fn) => {
+				if (typeof fn !== "function") throw new Error("selector must be a function");
+
+				let pos = i++; // pos = 0, i += 1
+				const snapshot = this.watch(fn, (snapshot) => snapshotsArray[pos] = snapshot);
+				snapshotsArray[pos] = snapshot;
+			});
+
+			const watchHandler = () => handler(snapshotsArray);
+			this.watchDispatch(watchHandler);
+
+			return () => {
+				this.unwatchDispatch(watchHandler);
+				selectors.forEach((fn) => this.unwatch(fn));
+			};
+		};
+
+		/**
 		 * @method module:SimpleSharedState.Store#watchDispatch
 		 *
 		 * @description Listen for the after-dispatch event, which gets called with no arguments after every
@@ -51,7 +86,7 @@ export default class Store {
 		 * @param {function} handler - A callback function.
 		 */
 		this.watchDispatch = (handler) => {
-			if (typeof handler === "function") onDispatchListeners.add(handler);
+			if (typeof handler === "function") dispatchListeners.add(handler);
 		};
 
 		/**
@@ -62,7 +97,7 @@ export default class Store {
 		 * @param {function} handler - A callback function.
 		 */
 		this.unwatchDispatch = (handler) => {
-			onDispatchListeners.delete(handler);
+			dispatchListeners.delete(handler);
 		};
 
 		/**
@@ -157,7 +192,7 @@ export default class Store {
 			simpleMerge(stateTree, branch);
 			isDispatching = false;
 
-			onDispatchListeners.forEach((callback) => callback());
+			dispatchListeners.forEach((callback) => callback());
 		};
 
 		/**

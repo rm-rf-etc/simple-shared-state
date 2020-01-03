@@ -118,6 +118,98 @@ describe("SimpleSharedState Performance", () => {
 });
 
 function testBundle(bundle) {
+
+	describe("simpleMerge", () => {
+		let state;
+		const target = {
+			a: [
+				{ thing: 1 },
+				{ thing: 2 },
+			],
+			b: {
+				asdf1: "!",
+				asdf2: 0,
+				bool: false,
+			},
+		};
+		beforeEach(() => {
+			state = { ...target };
+		});
+
+		it("correctly merges partial arrays", () => {
+			const array = [1, 2, 3, 4, 5];
+			const changes = [];
+			changes[1] = "change1";
+			changes[3] = "change2";
+
+			const expected = [1, "change1", 3, "change2", 5];
+			expect(bundle.simpleMerge(array, changes)).toEqual(expected);
+			expect(array).toEqual(expected);
+		});
+
+		it("can update simple values in objects in arrays", () => {
+			const change = {
+				a: bundle.partialArray(1, { thing: 3 }),
+			};
+			expect(change.a[1].thing).toEqual(3);
+			expect(target.a[1].thing).toEqual(2);
+
+			bundle.simpleMerge(state, change);
+			expect(state.a[1].thing).toEqual(3);
+		});
+
+		it("can change simple values to other data types inside nested objects", () => {
+			bundle.simpleMerge(state, {
+				b: {
+					bool: "true",
+				},
+			});
+			expect(state.b.bool).toEqual("true");
+		});
+
+		it("can replace simple values in arrays with new objects", () => {
+			bundle.simpleMerge(state, {
+				a: bundle.partialArray(1, {
+					thing: {
+						new_thing: 1,
+					},
+				}),
+			});
+			expect(state.a[1].thing).toEqual({ new_thing: 1 });
+		});
+
+		it("can append new items to arrays", () => {
+			bundle.simpleMerge(state, {
+				a: bundle.partialArray(2, {
+					thing: "was added",
+				}),
+			});
+			expect(state.a[2]).toEqual({ thing: "was added" });
+		});
+
+		it("doesn't fail on null values", () => {
+			bundle.simpleMerge(state, {
+				a: bundle.partialArray(1, null),
+			});
+			expect(state.a[1]).toEqual(null);
+		});
+
+		it("doesn't fail for values of 0", () => {
+			bundle.simpleMerge(state, {
+				a: 0,
+				b: {
+					asdf1: 0,
+					asdf2: {
+						stuff: "stuff",
+					},
+				},
+			});
+			expect(state.a).toEqual(0);
+			expect(state.b.asdf1).toEqual(0);
+			expect(state.b.asdf2).toEqual({ stuff: "stuff" });
+		});
+	});
+
 	describe("createStore", () => {
 		let store = {};
 
@@ -375,96 +467,40 @@ function testBundle(bundle) {
 				name: "Bob",
 			});
 		});
-	});
 
-	describe("simpleMerge", () => {
-		let state;
-		const target = {
-			a: [
-				{ thing: 1 },
-				{ thing: 2 },
-			],
-			b: {
-				asdf1: "!",
-				asdf2: 0,
-				bool: false,
-			},
-		};
-		beforeEach(() => {
-			state = { ...target };
-		});
-
-		it("correctly merges partial arrays", () => {
-			const array = [1, 2, 3, 4, 5];
-			const changes = [];
-			changes[1] = "change1";
-			changes[3] = "change2";
-
-			const expected = [1, "change1", 3, "change2", 5];
-			expect(bundle.simpleMerge(array, changes)).toEqual(expected);
-			expect(array).toEqual(expected);
-		});
-
-		it("can update simple values in objects in arrays", () => {
-			const change = {
-				a: bundle.partialArray(1, { thing: 3 }),
-			};
-			expect(change.a[1].thing).toEqual(3);
-			expect(target.a[1].thing).toEqual(2);
-
-			bundle.simpleMerge(state, change);
-			expect(state.a[1].thing).toEqual(3);
-		});
-
-		it("can change simple values to other data types inside nested objects", () => {
-			bundle.simpleMerge(state, {
-				b: {
-					bool: "true",
-				},
-			});
-			expect(state.b.bool).toEqual("true");
-		});
-
-		it("can replace simple values in arrays with new objects", () => {
-			bundle.simpleMerge(state, {
-				a: bundle.partialArray(1, {
-					thing: {
-						new_thing: 1,
+		it("watchBatch called only once for a list of selectors", () => {
+			const spy = jest.fn();
+			const removeWatcher = store.watchBatch([
+				(state) => state.friends[1].age,
+				(state) => state.friends[1].name,
+				(state) => state.friends[2].age,
+				(state) => state.friends[2].name,
+			], spy);
+			store.dispatch({
+				friends: {
+					"1": {
+						name: "Will",
 					},
-				}),
-			});
-			expect(state.a[1].thing).toEqual({ new_thing: 1 });
-		});
-
-		it("can append new items to arrays", () => {
-			bundle.simpleMerge(state, {
-				a: bundle.partialArray(2, {
-					thing: "was added",
-				}),
-			});
-			expect(state.a[2]).toEqual({ thing: "was added" });
-		});
-
-		it("doesn't fail on null values", () => {
-			bundle.simpleMerge(state, {
-				a: bundle.partialArray(1, null),
-			});
-			expect(state.a[1]).toEqual(null);
-		});
-
-		it("doesn't fail for values of 0", () => {
-			bundle.simpleMerge(state, {
-				a: 0,
-				b: {
-					asdf1: 0,
-					asdf2: {
-						stuff: "stuff",
+					"2": {
+						age: 56,
 					},
 				},
 			});
-			expect(state.a).toEqual(0);
-			expect(state.b.asdf1).toEqual(0);
-			expect(state.b.asdf2).toEqual({ stuff: "stuff" });
+			expect(spy.mock.calls.length).toEqual(1);
+			expect(spy.mock.calls).toEqual([[
+				[25, "Will", 56, "Bob"],
+			]]);
+
+			// verify that we can remove the watcher
+			removeWatcher();
+			store.dispatch({
+				friends: {
+					"1": {
+						age: 29,
+					},
+				},
+			});
+			expect(spy.mock.calls.length).toEqual(1);
 		});
 	});
 }
