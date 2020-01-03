@@ -185,19 +185,20 @@ function testBundle(bundle) {
 			]]);
 		});
 
-		it("calls afterDispatch once per dispatch", () => {
+		it("can watch & unwatch dispatch events", () => {
 			const spy1 = jest.fn();
 			const spy2 = jest.fn();
 			const spy3 = jest.fn();
 			const spy4 = jest.fn();
 			const spy5 = jest.fn();
 			const spy6 = jest.fn();
+			const friendsSelector = (state) => state.friends;
 			store.watch((state) => state.friends[1].name, spy1);
 			store.watch((state) => state.friends[1].age, spy2);
 			store.watch((state) => state.friends[2].name, spy3);
 			store.watch((state) => state.friends[2].age, spy4);
-			store.watch((state) => state.friends, spy5);
-			store.afterDispatch(spy6);
+			store.watch(friendsSelector, spy5);
+			store.watchDispatch(spy6);
 
 			store.dispatch({
 				friends: {
@@ -226,6 +227,43 @@ function testBundle(bundle) {
 					age: 23,
 				},
 			}]]);
+			expect(spy6.mock.calls).toEqual([[]]);
+
+			store.unwatchDispatch(spy6);
+			// call a 2nd time to verify it doesn't throw
+			store.unwatchDispatch(spy6);
+
+			// we can't use spy5 anymore because references to objects from past calls
+			// will show the current state, therefore spy5.mock.calls will be wrong.
+			store.unwatch(friendsSelector);
+			const spy7 = jest.fn();
+			store.watch(friendsSelector, spy7);
+
+			store.dispatch({
+				friends: {
+					"1": {
+						name: "Peter",
+					},
+				},
+			});
+
+			// has been called once more
+			expect(spy1.mock.calls).toEqual([["Jim"], ["Peter"]]);
+			expect(spy7.mock.calls).toEqual([[{
+				"1": {
+					name: "Peter",
+					age: 31,
+				},
+				"2": {
+					name: "Jake",
+					age: 23,
+				},
+			}]]);
+
+			// has not been called again
+			expect(spy2.mock.calls).toEqual([[31]]);
+			expect(spy3.mock.calls).toEqual([["Jake"]]);
+			expect(spy4.mock.calls).toEqual([[23]]);
 			expect(spy6.mock.calls).toEqual([[]]);
 		});
 

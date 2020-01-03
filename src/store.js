@@ -43,15 +43,26 @@ export default class Store {
 		};
 
 		/**
-		 * @method module:SimpleSharedState.Store#afterDispatch
+		 * @method module:SimpleSharedState.Store#watchDispatch
 		 *
 		 * @description Listen for the after-dispatch event, which gets called with no arguments after every
 		 * dispatch completes. Dispatch is complete after all watchers have been called.
 		 *
-		 * @param {function} - A callback function.
+		 * @param {function} handler - A callback function.
 		 */
-		this.afterDispatch = (callback) => {
-			if (typeof callback === "function") afterListeners.add(callback);
+		this.watchDispatch = (handler) => {
+			if (typeof handler === "function") afterListeners.add(handler);
+		};
+
+		/**
+		 * @method module:SimpleSharedState.Store#unwatchDispatch
+		 *
+		 * @description Remove dispatch event watcher.
+		 *
+		 * @param {function} handler - A callback function.
+		 */
+		this.unwatchDispatch = (handler) => {
+			afterListeners.delete(handler);
 		};
 
 		/**
@@ -65,6 +76,7 @@ export default class Store {
 		 */
 		this.unwatch = (selector) => {
 			listeners.delete(selector);
+			snapshots.delete(selector);
 		};
 
 		/**
@@ -135,9 +147,11 @@ export default class Store {
 					return;
 				}
 
-				const snapshot = snapshots.get(selector);
-				const newSnapshot = simpleMerge(snapshot, changed);
-				handler(newSnapshot);
+				if (changed !== undefined) {
+					const snapshot = snapshots.get(selector);
+					const newSnapshot = simpleMerge(snapshot, changed);
+					handler(newSnapshot);
+				}
 			});
 
 			simpleMerge(stateTree, branch);
