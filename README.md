@@ -23,7 +23,7 @@ If using script tags:
 
 Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@1.0.0/dist/simple-shared-state.es5.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@1.0.4/dist/simple-shared-state.es5.umd.js"></script>
 ```
 
 ## Basic Use
@@ -67,7 +67,7 @@ The main goal of SimpleSharedState is to reduce codebase verbosity in a flux/red
 ## Concepts
 
 Redux and SimpleSharedState have slightly different scope. If you're comparing one to the other in terms of performance, note
-that SimpleSharedState has more features (with roughly a third the character count). The included test suite has some performance
+that SimpleSharedState has more features (with roughly half the character count). The included test suite has some performance
 tests if you're interested, and you can test the build result with `yarn build && yarn test-dist`.
 
 Terms like `reducers` and `action creators` will be reused for developer familiarity, but a "reducer" in SimpleSharedState is

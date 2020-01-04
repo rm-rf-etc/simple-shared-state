@@ -3,6 +3,7 @@
  */
 
 const objectPrototype = Object.getPrototypeOf({});
+const { isArray } = Array;
 
 export default class Store {
 
@@ -49,7 +50,7 @@ export default class Store {
 		/**
 		 * @method module:SimpleSharedState.Store#watchBatch
 		 * @param {Array<function>|Set<function>} selectors - A Set or Array of selector functions. Refer to
-		 * [Store#watch]{@link SimpleSharedState.Store#watch} for details about selector functions.
+		 * [Store#watch]{@link module:SimpleSharedState.Store#watch} for details about selector functions.
 		 * @param {function} handler - The listener which will receive the Array of state snapshots.
 		 * @returns {function} A callback that removes the dispatch watcher and cleans up after itself.
 		 *
@@ -116,13 +117,13 @@ export default class Store {
 
 			const watchHandler = () => {
 				if (changed) {
-					handler(snapshotsArray);
+					handler(snapshotsArray.map(thingCopier));
 					changed = false;
 				}
 			};
 			dispatchListeners.add(watchHandler);
 
-			handler(snapshotsArray);
+			handler(snapshotsArray.map(thingCopier));
 
 			return () => {
 				dispatchListeners.delete(watchHandler);
@@ -335,3 +336,7 @@ export const partialArray = (pos, thing) => {
 	array[pos] = thing;
 	return array;
 };
+
+function thingCopier(thing) {
+	return !thing || typeof thing !== 'object' ? thing : Object.assign(isArray(thing) ? [] : {}, thing);
+}

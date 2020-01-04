@@ -282,9 +282,7 @@ function testBundle(bundle) {
 
 			it("unwatch removes watch listeners", () => {
 				const spy = jest.fn();
-
-				const friendsSelector = (state) => state.friends;
-				const unwatch = store.watch(friendsSelector, spy);
+				const unwatch = store.watch((state) => state.friends, spy);
 
 				store.dispatch({
 					friends: {
@@ -422,6 +420,8 @@ function testBundle(bundle) {
 						},
 					},
 				});
+				expect(spy.mock.calls).toEqual([["Howard"]]);
+
 				store.dispatch({
 					friends: {
 						"1": bundle.deleted,
@@ -431,6 +431,35 @@ function testBundle(bundle) {
 				expect(spy.mock.calls).toEqual([
 					["Howard"],
 					[undefined],
+				]);
+
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Matt",
+							age: 35,
+						},
+					},
+				});
+
+				expect(spy.mock.calls).toEqual([
+					["Howard"],
+					[undefined],
+					["Matt"],
+				]);
+
+				// testing that this call doesn't trigger the watcher
+				store.dispatch({
+					friends: {
+						"1": {
+							age: 34,
+						},
+					},
+				});
+				expect(spy.mock.calls).toEqual([
+					["Howard"],
+					[undefined],
+					["Matt"],
 				]);
 			});
 		});
@@ -445,7 +474,7 @@ function testBundle(bundle) {
 					(state) => state.friends[2].name,
 				], spy);
 				expect(spy.mock.calls.length).toEqual(1);
-				expect(spy.mock.calls[0][0]).toEqual([25, "Alice", 28, "Bob"]);
+				expect(spy.mock.calls).toEqual([[[25, "Alice", 28, "Bob"]]]);
 				store.dispatch({
 					friends: {
 						"1": {
@@ -457,7 +486,10 @@ function testBundle(bundle) {
 					},
 				});
 				expect(spy.mock.calls.length).toEqual(2);
-				expect(spy.mock.calls[1][0]).toEqual([25, "Will", 56, "Bob"]);
+				expect(spy.mock.calls).toEqual([
+					[[25, "Alice", 28, "Bob"]],
+					[[25, "Will", 56, "Bob"]],
+				]);
 
 				// verify that we can remove the watcher
 				removeWatcher();
