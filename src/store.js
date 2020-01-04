@@ -55,8 +55,8 @@ export default class Store {
 		 * @returns {function} A callback that removes the dispatch watcher and cleans up after itself.
 		 *
 		 * @description Creates a dispatch listener from a list of selectors. Each selector yields a snapshot,
-		 * which is stored in an array and updated whenever the state changes. When dispatch happens, your `handler`
-		 * function will be called with the array of snapshots.
+		 * which is stored in an array and updated whenever the state changes. When dispatch happens, your
+		 * `handler` function will be called with the array of snapshots, ***if*** any snapshots have changed.
 		 *
 		 * @example
 		 * import { createStore, partialArray, deleted } from "simple-shared-state";
