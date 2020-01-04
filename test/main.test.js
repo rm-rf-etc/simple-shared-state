@@ -86,40 +86,40 @@ describe("Redux Performance", () => {
 	});
 });
 
-describe("SimpleSharedState Performance", () => {
-	let store = bundles.esm.createStore({
-		a: [
-			{
-				thing1: 1,
-				thing2: -1,
-				thing3: "ignored",
-			},
-		],
-		b: {
-			ignored: "asdf",
-		},
-	});
+function testBundle(bundle) {
 
-	it(`run dispatch ${(_100_000).toLocaleString()} times`, (done) => {
-		store.watch((state) => state.a[0], (state) => {
-			if (state.thing1 === _100_000) {
-				done();
+	describe("SimpleSharedState Performance", () => {
+		const store = bundle.createStore({
+			a: [
+				{
+					thing1: 1,
+					thing2: -1,
+					thing3: "ignored",
+				},
+			],
+			b: {
+				ignored: "asdf",
+			},
+		});
+
+		it(`run dispatch ${(_100_000).toLocaleString()} times`, (done) => {
+			store.watch((state) => state.a[0], (state) => {
+				if (state.thing1 === _100_000) {
+					done();
+				}
+			});
+			for (var i = 0; i < _100_000; i++) {
+				store.dispatch({
+					a: [
+						{
+							thing1: i+1,
+							thing2: -(i+1),
+						},
+					],
+				});
 			}
 		});
-		for (var i = 0; i < _100_000; i++) {
-			store.dispatch({
-				a: [
-					{
-						thing1: i+1,
-						thing2: -(i+1),
-					},
-				],
-			});
-		}
 	});
-});
-
-function testBundle(bundle) {
 
 	describe("simpleMerge", () => {
 		let state;
@@ -444,6 +444,8 @@ function testBundle(bundle) {
 					(state) => state.friends[2].age,
 					(state) => state.friends[2].name,
 				], spy);
+				expect(spy.mock.calls.length).toEqual(1);
+				expect(spy.mock.calls[0][0]).toEqual([25, "Alice", 28, "Bob"]);
 				store.dispatch({
 					friends: {
 						"1": {
@@ -454,13 +456,12 @@ function testBundle(bundle) {
 						},
 					},
 				});
-				expect(spy.mock.calls.length).toEqual(1);
-				expect(spy.mock.calls).toEqual([[
-					[25, "Will", 56, "Bob"],
-				]]);
+				expect(spy.mock.calls.length).toEqual(2);
+				expect(spy.mock.calls[1][0]).toEqual([25, "Will", 56, "Bob"]);
 
 				// verify that we can remove the watcher
 				removeWatcher();
+
 				store.dispatch({
 					friends: {
 						"1": {
@@ -468,7 +469,36 @@ function testBundle(bundle) {
 						},
 					},
 				});
+				expect(spy.mock.calls.length).toEqual(2);
+			});
+
+			it("is not called repeatedly for inapplicable selectors", () => {
+				const spy = jest.fn();
+				store.watchBatch([
+					(s) => s.something,
+					(s) => s.nothing.here,
+					(s) => s.none.state.here,
+				], spy);
+
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Susan",
+						},
+					},
+				});
+				store.dispatch({
+					friends: {
+						"1": {
+							age: 26,
+						},
+					},
+				});
+
 				expect(spy.mock.calls.length).toEqual(1);
+				expect(spy.mock.calls).toEqual([[
+					[undefined, undefined, undefined],
+				]]);
 			});
 		});
 

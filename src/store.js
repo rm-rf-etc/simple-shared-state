@@ -72,7 +72,7 @@ export default class Store {
 		 * store.dispatch({ people: partialArray(1, "John") });
 		 * // [ 'Alice', 'John' ]
 		 *
-		 * store.dispatch({ people: partialArray([ "Janet", "Jake", "James" ] });
+		 * store.dispatch({ people: [ "Janet", "Jake", "James" ] });
 		 * // [ 'Janet', 'Jake' ]
 		 * // notice "James" is not present, that's because of our selectors
 		 *
@@ -82,6 +82,9 @@ export default class Store {
 		 * unwatch();
 		 * store.dispatch({ people: [ "Justin", "Howard", deleted ] });
 		 * // nothing happens, the watcher was removed
+		 *
+		 * console.log(store.getState());
+		 * // { people: [ 'Justin', 'Josh', <1 empty item> ] }
 		 */
 		this.watchBatch = (selectors, handler) => {
 			if (!selectors || typeof selectors.forEach !== "function") {
@@ -92,6 +95,7 @@ export default class Store {
 			const snapshotsArray = [];
 
 			let i = 0;
+			let changed = false;
 			selectors.forEach((fn) => {
 				if (typeof fn !== "function") {
 					selectors.forEach((fn) => listeners.delete(fn));
@@ -99,12 +103,26 @@ export default class Store {
 				}
 
 				let pos = i++; // pos = 0, i += 1
-				snapshotsArray[pos] = fn(stateTree);
-				this.watch(fn, (snapshot) => snapshotsArray[pos] = snapshot);
+				try {
+					snapshotsArray[pos] = fn(stateTree);
+				} catch (_) {
+					snapshotsArray[pos] = undefined;
+				}
+				this.watch(fn, (snapshot) => {
+					snapshotsArray[pos] = snapshot;
+					changed = true;
+				});
 			});
 
-			const watchHandler = () => handler(snapshotsArray);
+			const watchHandler = () => {
+				if (changed) {
+					handler(snapshotsArray);
+					changed = false;
+				}
+			};
 			dispatchListeners.add(watchHandler);
+
+			handler(snapshotsArray);
 
 			return () => {
 				dispatchListeners.delete(watchHandler);
