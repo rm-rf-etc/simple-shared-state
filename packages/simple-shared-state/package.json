@@ -1,0 +1,44 @@
+{
+  "name": "simple-shared-state",
+  "version": "1.0.4",
+  "description": "",
+  "workspaces": true,
+  "module": "src/index.js",
+  "main": "dist/simple-shared-state.es6.umd.js",
+  "unpkg": "dist/simple-shared-state.es6.umd.js",
+  "homepage": "https://simplesharedstate.com",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "jest --watchAll",
+    "doc": "jsdoc -c ./jsdoc.json -t templates/",
+    "build": "webpack ./src/index.js"
+  },
+  "keywords": [
+    "shared state",
+    "redux",
+    "mobx",
+    "react",
+    "context",
+    "context api"
+  ],
+  "author": "Rob Christian <rm.rf.etc@gmail.com>",
+  "license": "ISC",
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rm-rf-etc/simple-shared-state"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-transform-object-assign": "^7.7.4",
+    "@babel/preset-env": "^7.7.7",
+    "babel-loader": "^8.0.6",
+    "docdash": "^1.1.1",
+    "esm": "^3.2.25",
+    "jest": "^24.9.0",
+    "redux": "^4.0.5",
+    "taffydb": "^2.7.3",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  }
+}
