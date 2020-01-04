@@ -1899,6 +1899,11 @@ diffie-hellman@^5.0.0:
     miller-rabin "^4.0.0"
     randombytes "^2.0.0"
 
+docdash@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/docdash/-/docdash-1.1.1.tgz#89924e57938388fc3d1fa900927acfced7f3b24f"
+  integrity sha512-WQkkr01zL6kcIfq9YCSXtqqevM6NYoTXLdl+Td0OYCEcX0RgsuEMeqHXQaXFt+p6Lo15RIgA5XhLAn7RL+erhA==
+
 domain-browser@^1.1.1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/domain-browser/-/domain-browser-1.2.0.tgz#3d31f50191a6749dd1375a7f522e823d42e54eda"
@@ -3556,11 +3561,6 @@ mimic-fn@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-2.1.0.tgz#7ed2c2ccccaf84d3ffcb7a69b57711fc2083401b"
   integrity sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==
-
-minami@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/minami/-/minami-1.2.3.tgz#99b6dcdfb2f0a54da1c9c8f7aa3a327787aaf9f8"
-  integrity sha1-mbbc37LwpU2hycj3qjoyd4eq+fg=
 
 minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   version "1.0.1"

@@ -9,9 +9,7 @@
   "scripts": {
     "lint": "eslint .",
     "test": "jest --watchAll",
-    "test-once": "jest",
     "doc": "jsdoc -c ./jsdoc.json -t templates/",
-    "doc2md": "jsdoc2md ./src/index.js ./src/store.js | pbcopy",
     "build": "webpack ./src/index.js"
   },
   "keywords": [
@@ -33,9 +31,9 @@
     "@babel/plugin-transform-object-assign": "^7.7.4",
     "@babel/preset-env": "^7.7.7",
     "babel-loader": "^8.0.6",
+    "docdash": "^1.1.1",
     "esm": "^3.2.25",
     "jest": "^24.9.0",
-    "minami": "^1.2.3",
     "redux": "^4.0.5",
     "taffydb": "^2.7.3",
     "webpack": "^4.41.5",
