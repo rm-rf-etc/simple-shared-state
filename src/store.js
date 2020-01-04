@@ -80,7 +80,7 @@ export default class Store {
 		 * // { people: [ 'Janet', 'Jake', 'James' ] }
 		 *
 		 * unwatch();
-		 * store.dispatch({ people: [ "Justin", "Howard", deleted ] });
+		 * store.dispatch({ people: [ "Justin", "Josh", deleted ] });
 		 * // nothing happens, the watcher was removed
 		 *
 		 * console.log(store.getState());
