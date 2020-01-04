@@ -3,7 +3,6 @@
  */
 
 const objectPrototype = Object.getPrototypeOf({});
-const noop = () => {};
 
 export default class Store {
 
@@ -18,12 +17,12 @@ export default class Store {
 		 * @method module:SimpleSharedState.Store#watch
 		 * @param {function} selector - A pure function which takes state and returns a piece of that state.
 		 * @param {function} handler - The listener which will receive the piece of state when changes occur.
+		 * @returns {function} A function to call to remove the listener.
 		 *
-		 * @description Creates a state listener which is associated with a globally unique selector. If watch
-		 * receives a selector which has already been passed before, watch will throw. Selectors are tested
-		 * for equality using `===`, which means you can have any number of identical selectors, so long as
-		 * each is a unique JavaScript reference. Refer to the test "createStore", "should throw when ..."
-		 * for examples.
+		 * @description Creates a state listener which is associated with the selector. Every selector must
+		 * be globally unique, as they're stored internally in a Set. If `watch` receives a selector which
+		 * has already been passed before, `watch` will throw. Refer to the tests for more examples. `watch`
+		 * returns a function which, when called, removes the watcher / listener.
 		 */
 		this.watch = (selector, handler) => {
 			if (typeof selector !== 'function' || typeof handler !== 'function') {
@@ -40,16 +39,49 @@ export default class Store {
 
 			listeners.set(selector, handler);
 			snapshots.set(selector, snapshot);
-			return snapshot;
+
+			return () => {
+				listeners.delete(selector);
+				snapshots.delete(selector);
+			};
 		};
 
 		/**
 		 * @method module:SimpleSharedState.Store#watchBatch
-		 * @param {function} selectors - A Set or Array of selector functions. Refer to {@link module:SimpleSharedState.Store#watch}
-		 * for details about selector functions.
+		 * @param {Array<function>|Set<function>} selectors - A Set or Array of selector functions. Refer to
+		 * [Store#watch]{@link SimpleSharedState.Store#watch} for details about selector functions.
 		 * @param {function} handler - The listener which will receive the Array of state snapshots.
+		 * @returns {function} A callback that removes the dispatch watcher and cleans up after itself.
 		 *
-		 * @description
+		 * @description Creates a dispatch listener from a list of selectors. Each selector yields a snapshot,
+		 * which is stored in an array and updated whenever the state changes. When dispatch happens, your `handler`
+		 * function will be called with the array of snapshots.
+		 *
+		 * @example
+		 * import { createStore, partialArray, deleted } from "simple-shared-state";
+		 *
+		 * const store = createStore({
+		 *   people: ["Alice", "Bob"],
+		 * });
+		 *
+		 * const unwatch = store.watchBatch([
+		 *   (state) => state.people[0],
+		 *   (state) => state.people[1],
+		 * ], (values) => console.log(values));
+		 *
+		 * store.dispatch({ people: partialArray(1, "John") });
+		 * // [ 'Alice', 'John' ]
+		 *
+		 * store.dispatch({ people: partialArray([ "Janet", "Jake", "James" ] });
+		 * // [ 'Janet', 'Jake' ]
+		 * // notice "James" is not present, that's because of our selectors
+		 *
+		 * console.log(store.getState());
+		 * // { people: [ 'Janet', 'Jake', 'James' ] }
+		 *
+		 * unwatch();
+		 * store.dispatch({ people: [ "Justin", "Howard", deleted ] });
+		 * // nothing happens, the watcher was removed
 		 */
 		this.watchBatch = (selectors, handler) => {
 			if (!selectors || typeof selectors.forEach !== "function") {
@@ -61,19 +93,22 @@ export default class Store {
 
 			let i = 0;
 			selectors.forEach((fn) => {
-				if (typeof fn !== "function") throw new Error("selector must be a function");
+				if (typeof fn !== "function") {
+					selectors.forEach((fn) => listeners.delete(fn));
+					throw new Error("selector must be a function");
+				}
 
 				let pos = i++; // pos = 0, i += 1
-				const snapshot = this.watch(fn, (snapshot) => snapshotsArray[pos] = snapshot);
-				snapshotsArray[pos] = snapshot;
+				snapshotsArray[pos] = fn(stateTree);
+				this.watch(fn, (snapshot) => snapshotsArray[pos] = snapshot);
 			});
 
 			const watchHandler = () => handler(snapshotsArray);
-			this.watchDispatch(watchHandler);
+			dispatchListeners.add(watchHandler);
 
 			return () => {
-				this.unwatchDispatch(watchHandler);
-				selectors.forEach((fn) => this.unwatch(fn));
+				dispatchListeners.delete(watchHandler);
+				selectors.forEach((fn) => listeners.delete(fn));
 			};
 		};
 
@@ -86,32 +121,9 @@ export default class Store {
 		 * @param {function} handler - A callback function.
 		 */
 		this.watchDispatch = (handler) => {
-			if (typeof handler === "function") dispatchListeners.add(handler);
-		};
-
-		/**
-		 * @method module:SimpleSharedState.Store#unwatchDispatch
-		 *
-		 * @description Remove dispatch event watcher.
-		 *
-		 * @param {function} handler - A callback function.
-		 */
-		this.unwatchDispatch = (handler) => {
-			dispatchListeners.delete(handler);
-		};
-
-		/**
-		 * @method module:SimpleSharedState.Store#unwatch
-		 *
-		 * @description Remove a previously added state listener. You must provide a reference to the same selector
-		 * function as was previously provided when calling #watch.
-		 *
-		 * @param {function} selector - A unique reference to a selector function which was previously provided in
-		 * a call to #watch.
-		 */
-		this.unwatch = (selector) => {
-			listeners.delete(selector);
-			snapshots.delete(selector);
+			if (typeof handler !== "function") throw new Error("handler must be a function");
+			dispatchListeners.add(handler);
+			return () => dispatchListeners.delete(handler);
 		};
 
 		/**
@@ -173,23 +185,33 @@ export default class Store {
 			}
 
 			isDispatching = true;
+			simpleMerge(stateTree, branch);
 
 			listeners.forEach((handler, selector) => {
-				let changed;
+				let change = inapplicable;
 				try {
-					changed = selector(branch);
+					// attempt selector only on the branch
+					change = selector(branch);
+
+					// if this fails then something was deleted
+					selector(stateTree);
+
+					// If this line runs then selector didn't fail, so therefore,
+					// if change is `undefined`, the selector is inapplicable, so
+					// exit early.
+					if (change === undefined) return;
 				} catch (_) {
-					return;
+					// something was deleted, so proceed with `undefined`
+					change = undefined;
 				}
 
-				if (changed !== undefined) {
-					const snapshot = snapshots.get(selector);
-					const newSnapshot = simpleMerge(snapshot, changed);
+				const snapshot = snapshots.get(selector);
+				if (change !== inapplicable && change !== snapshot) {
+					const newSnapshot = simpleMerge(snapshot, change);
 					handler(newSnapshot);
 				}
 			});
 
-			simpleMerge(stateTree, branch);
 			isDispatching = false;
 
 			dispatchListeners.forEach((callback) => callback());
@@ -235,7 +257,10 @@ export default class Store {
  *
  * // state: { a: 1 }
  */
-export const deleted = new Number(0);
+export const deleted = new Number();
+
+// Internal use only.
+const inapplicable = new Number();
 
 /**
  * @function module:SimpleSharedState#simpleMerge

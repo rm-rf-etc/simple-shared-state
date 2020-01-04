@@ -1,7 +1,9 @@
 import * as redux from "redux";
-const sss = require("../src/index");
-const sssES5 = require("../dist/simple-shared-state.es5.umd");
-const sssES6 = require("../dist/simple-shared-state.es6.umd");
+const bundles = {
+	esm: require("../src/index"),
+	es5: require("../dist/simple-shared-state.es5.umd"),
+	es6: require("../dist/simple-shared-state.es6.umd"),
+};
 
 const _100_000 = 100000;
 const _50_000_000 = 50000000;
@@ -85,7 +87,7 @@ describe("Redux Performance", () => {
 });
 
 describe("SimpleSharedState Performance", () => {
-	let store = sss.createStore({
+	let store = bundles.esm.createStore({
 		a: [
 			{
 				thing1: 1,
@@ -210,7 +212,7 @@ function testBundle(bundle) {
 		});
 	});
 
-	describe("createStore", () => {
+	describe("Store", () => {
 		let store = {};
 
 		beforeEach(() => {
@@ -228,289 +230,289 @@ function testBundle(bundle) {
 			});
 		});
 
-		it("dispatch invokes listeners", () => {
-			const spy1 = jest.fn();
-			const spy2 = jest.fn();
-			store.watch((state) => state.friends["1"].name, spy1);
-			store.watch((state) => state.friends["1"].name, spy2);
-			store.dispatch({
-				friends: {
+		describe("watch", () => {
+			it("dispatch invokes listeners", () => {
+				const spy1 = jest.fn();
+				const spy2 = jest.fn();
+				store.watch((state) => state.friends[1].name, spy1);
+				store.watch((state) => state.friends[1].name, spy2);
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Carrol",
+						},
+					},
+				});
+				expect(spy1).toHaveBeenCalled();
+				expect(spy2).toHaveBeenCalled();
+			});
+
+			it("emits nested objects for selectors having a partial path", () => {
+				const spy1 = jest.fn();
+				const spy2 = jest.fn();
+				const spy3 = jest.fn();
+				store.watch((state) => state.friends, spy1);
+				store.watch((state) => state.friends[1], spy2);
+				store.watch((state) => state.friends[1].name, spy3);
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Carrol",
+						},
+					},
+				});
+				expect(spy1.mock.calls).toEqual([[{
 					"1": {
 						name: "Carrol",
-					},
-				},
-			});
-			expect(spy1).toHaveBeenCalled();
-			expect(spy2).toHaveBeenCalled();
-		});
-
-		it("emits nested objects for selectors having a partial path", () => {
-			const spy1 = jest.fn();
-			const spy2 = jest.fn();
-			const spy3 = jest.fn();
-			store.watch((state) => state.friends, spy1);
-			store.watch((state) => state.friends["1"], spy2);
-			store.watch((state) => state.friends["1"].name, spy3);
-			store.dispatch({
-				friends: {
-					"1": {
-						name: "Carrol",
-					},
-				},
-			});
-			expect(spy1.mock.calls).toEqual([[{
-				"1": {
-					name: "Carrol",
-					age: 25,
-				},
-				"2": {
-					name: "Bob",
-					age: 28,
-				},
-			}]]);
-			expect(spy2.mock.calls).toEqual([[{
-				name: "Carrol",
-				age: 25,
-			}]]);
-			expect(spy3.mock.calls).toEqual([[
-				"Carrol",
-			]]);
-		});
-
-		it("can watch & unwatch dispatch events", () => {
-			const spy1 = jest.fn();
-			const spy2 = jest.fn();
-			const spy3 = jest.fn();
-			const spy4 = jest.fn();
-			const spy5 = jest.fn();
-			const spy6 = jest.fn();
-			const friendsSelector = (state) => state.friends;
-			store.watch((state) => state.friends[1].name, spy1);
-			store.watch((state) => state.friends[1].age, spy2);
-			store.watch((state) => state.friends[2].name, spy3);
-			store.watch((state) => state.friends[2].age, spy4);
-			store.watch(friendsSelector, spy5);
-			store.watchDispatch(spy6);
-
-			store.dispatch({
-				friends: {
-					"1": {
-						name: "Jim",
-						age: 31,
+						age: 25,
 					},
 					"2": {
-						name: "Jake",
-						age: 23,
+						name: "Bob",
+						age: 28,
 					},
-				},
+				}]]);
+				expect(spy2.mock.calls).toEqual([[{
+					name: "Carrol",
+					age: 25,
+				}]]);
+				expect(spy3.mock.calls).toEqual([[
+					"Carrol",
+				]]);
 			});
 
-			expect(spy1.mock.calls).toEqual([["Jim"]]);
-			expect(spy2.mock.calls).toEqual([[31]]);
-			expect(spy3.mock.calls).toEqual([["Jake"]]);
-			expect(spy4.mock.calls).toEqual([[23]]);
-			expect(spy5.mock.calls).toEqual([[{
-				"1": {
-					name: "Jim",
-					age: 31,
-				},
-				"2": {
-					name: "Jake",
-					age: 23,
-				},
-			}]]);
-			expect(spy6.mock.calls).toEqual([[]]);
+			it("unwatch removes watch listeners", () => {
+				const spy = jest.fn();
 
-			store.unwatchDispatch(spy6);
-			// call a 2nd time to verify it doesn't throw
-			store.unwatchDispatch(spy6);
+				const friendsSelector = (state) => state.friends;
+				const unwatch = store.watch(friendsSelector, spy);
 
-			// we can't use spy5 anymore because references to objects from past calls
-			// will show the current state, therefore spy5.mock.calls will be wrong.
-			store.unwatch(friendsSelector);
-			const spy7 = jest.fn();
-			store.watch(friendsSelector, spy7);
-
-			store.dispatch({
-				friends: {
-					"1": {
-						name: "Peter",
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Jim",
+							age: 31,
+						},
 					},
-				},
+				});
+
+				expect(spy.mock.calls.length).toEqual(1);
+
+				unwatch();
+
+				store.dispatch({
+					friends: {
+						"2": {
+							name: "Peter",
+						},
+					},
+				});
+
+				// has been called once more
+				expect(spy.mock.calls.length).toEqual(1);
 			});
 
-			// has been called once more
-			expect(spy1.mock.calls).toEqual([["Jim"], ["Peter"]]);
-			expect(spy7.mock.calls).toEqual([[{
-				"1": {
-					name: "Peter",
-					age: 31,
-				},
-				"2": {
-					name: "Jake",
-					age: 23,
-				},
-			}]]);
+			it("should throw when attempting to reuse existing selector", () => {
+				const selector = (state) => state.friends[1];
 
-			// has not been called again
-			expect(spy2.mock.calls).toEqual([[31]]);
-			expect(spy3.mock.calls).toEqual([["Jake"]]);
-			expect(spy4.mock.calls).toEqual([[23]]);
-			expect(spy6.mock.calls).toEqual([[]]);
-		});
+				expect(() => {
+					store.watch(selector, console.log);
+					store.watch(selector, console.log);
+				}).toThrow();
 
-		it("should throw when attempting to reuse existing selector", () => {
-			const selector = (state) => state.friends["1"];
-
-			expect(() => {
-				store.watch(selector, console.log);
-				store.watch(selector, console.log);
-			}).toThrow();
-
-			expect(store.watch((state) => state.friends["1"], console.log)).toEqual({
-				name: "Alice",
-				age: 25,
-			});
-			expect(store.watch((state) => state.friends["1"], console.log)).toEqual({
-				name: "Alice",
-				age: 25,
+				expect(typeof store.watch((state) => state.friends[1], console.log)).toEqual("function");
+				expect(typeof store.watch((state) => state.friends[1], console.log)).toEqual("function");
 			});
 		});
 
-		it("can unwatch previously watched", () => {
-			const spy1 = jest.fn();
-			const selector = (state) => state.friends["1"].name;
-			store.watch(selector, spy1);
-			store.dispatch({
-				friends: {
-					"1": {
-						name: "Carrol",
+		describe("watchDispatch", () => {
+			it("can watch & unwatch dispatch events", () => {
+				const spy = jest.fn();
+				const unwatch = store.watchDispatch(spy);
+
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Jim",
+						},
 					},
-				},
-			});
-			store.dispatch({
-				friends: {
-					"1": {
-						name: "Susan",
+				});
+				expect(spy.mock.calls.length).toEqual(1);
+
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Jessica",
+						},
 					},
-				},
-			});
-			store.dispatch({
-				friends: {
-					"1": {
-						name: "Dianne",
+				});
+				expect(spy.mock.calls.length).toEqual(2);
+
+				unwatch();
+
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Willard",
+						},
 					},
-				},
+				});
+				expect(spy.mock.calls.length).toEqual(2);
 			});
-			store.unwatch(selector, spy1);
-			store.dispatch({
-				friends: {
-					"1": {
-						name: "Edward",
-					},
-				},
-			});
-			expect(spy1.mock.calls).toEqual([
-				["Carrol"],
-				["Susan"],
-				["Dianne"],
-			]);
 		});
 
-		it("can remove items from arrays", () => {
-			const spy1 = jest.fn();
-			store.watch((state) => state.friends, spy1);
-			store.dispatch({
-				friends: {
+		describe("dispatch with `deleted`", () => {
+			it("can remove items from arrays", () => {
+				const spy1 = jest.fn();
+				store.watch((state) => state.friends, spy1);
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Susan",
+							age: 25,
+						},
+						"2": bundle.deleted,
+					},
+				});
+				expect(spy1.mock.calls).toEqual([[{
 					"1": {
 						name: "Susan",
 						age: 25,
 					},
-					"2": bundle.deleted,
-				},
+				}]]);
+				expect(store.getState().friends["2"]).toEqual(undefined);
 			});
-			expect(spy1.mock.calls).toEqual([[{
-				"1": {
-					name: "Susan",
-					age: 25,
-				},
-			}]]);
-			expect(store.getState().friends["2"]).toEqual(undefined);
-		});
 
-		it("can remove items from objects", () => {
-			const spy1 = jest.fn();
-			store.watch((state) => state.friends, spy1);
-			store.dispatch({
-				friends: {
+			it("can remove items from objects", () => {
+				const spy1 = jest.fn();
+				store.watch((state) => state.friends, spy1);
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Susan",
+							age: bundle.deleted,
+						},
+						"2": {
+							age: bundle.deleted,
+						},
+					},
+				});
+				expect(spy1.mock.calls).toEqual([[{
 					"1": {
 						name: "Susan",
-						age: bundle.deleted,
 					},
 					"2": {
-						age: bundle.deleted,
+						name: "Bob",
 					},
-				},
-			});
-			expect(spy1.mock.calls).toEqual([[{
-				"1": {
+				}]]);
+				expect(store.getState().friends[1]).toEqual({
 					name: "Susan",
-				},
-				"2": {
+				});
+				expect(store.getState().friends["2"]).toEqual({
 					name: "Bob",
-				},
-			}]]);
-			expect(store.getState().friends["1"]).toEqual({
-				name: "Susan",
+				});
 			});
-			expect(store.getState().friends["2"]).toEqual({
-				name: "Bob",
+
+			it("watchers receive `undefined` when state is deleted", () => {
+				const spy = jest.fn();
+				store.watch((state) => state.friends[1].name, spy);
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Howard",
+						},
+					},
+				});
+				store.dispatch({
+					friends: {
+						"1": bundle.deleted,
+					},
+				});
+
+				expect(spy.mock.calls).toEqual([
+					["Howard"],
+					[undefined],
+				]);
 			});
 		});
 
-		it("watchBatch called only once for a list of selectors", () => {
-			const spy = jest.fn();
-			const removeWatcher = store.watchBatch([
-				(state) => state.friends[1].age,
-				(state) => state.friends[1].name,
-				(state) => state.friends[2].age,
-				(state) => state.friends[2].name,
-			], spy);
-			store.dispatch({
-				friends: {
-					"1": {
-						name: "Will",
+		describe("watchBatch", () => {
+			it("is called only once for a list of selectors", () => {
+				const spy = jest.fn();
+				const removeWatcher = store.watchBatch([
+					(state) => state.friends[1].age,
+					(state) => state.friends[1].name,
+					(state) => state.friends[2].age,
+					(state) => state.friends[2].name,
+				], spy);
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Will",
+						},
+						"2": {
+							age: 56,
+						},
 					},
-					"2": {
-						age: 56,
-					},
-				},
-			});
-			expect(spy.mock.calls.length).toEqual(1);
-			expect(spy.mock.calls).toEqual([[
-				[25, "Will", 56, "Bob"],
-			]]);
+				});
+				expect(spy.mock.calls.length).toEqual(1);
+				expect(spy.mock.calls).toEqual([[
+					[25, "Will", 56, "Bob"],
+				]]);
 
-			// verify that we can remove the watcher
-			removeWatcher();
-			store.dispatch({
-				friends: {
-					"1": {
-						age: 29,
+				// verify that we can remove the watcher
+				removeWatcher();
+				store.dispatch({
+					friends: {
+						"1": {
+							age: 29,
+						},
 					},
-				},
+				});
+				expect(spy.mock.calls.length).toEqual(1);
 			});
-			expect(spy.mock.calls.length).toEqual(1);
+		});
+
+		describe("erroneous selectors", () => {
+			it("does not spam the listener with `undefined` on every dispatch event", () => {
+				const spy = jest.fn();
+				store.watch((state) => state.not.valid.selector, spy);
+				store.dispatch({
+					friends: {
+						"1": {
+							name: "Josh",
+						},
+					},
+				});
+				store.dispatch({
+					friends: {
+						"3": {
+							name: "Ronald",
+							age: 5,
+						},
+					},
+				});
+				store.dispatch({
+					friends: {
+						"1": {
+							age: 41,
+						},
+						"2": {
+							age: 7,
+						},
+					},
+				});
+				expect(spy.mock.calls.length).toEqual(0);
+			});
 		});
 	});
 }
 
 describe("raw source code", () => {
-	testBundle(sss);
+	testBundle(bundles.esm);
 });
 describe("ES6", () => {
-	testBundle(sssES6);
+	testBundle(bundles.es6);
 });
 describe("ES5", () => {
-	testBundle(sssES5);
+	testBundle(bundles.es5);
 });

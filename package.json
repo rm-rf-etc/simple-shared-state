@@ -1,6 +1,6 @@
 {
   "name": "simple-shared-state",
-  "version": "0.0.21",
+  "version": "1.0.0",
   "description": "",
   "module": "src/index.js",
   "main": "dist/simple-shared-state.es6.umd.js",
