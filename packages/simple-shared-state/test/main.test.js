@@ -231,6 +231,22 @@ function testBundle(bundle) {
 			});
 		});
 
+		describe("dispatch", () => {
+			it("provides copy of state if called with a function", () => {
+				const spy = jest.fn();
+				store.watch((state) => state.count, spy);
+
+				const increment = () => {
+					store.dispatch((state) => ({ count: state.count + 1 }));
+				};
+
+				for (let i=0; i<8; i++) increment();
+				store.dispatch({ count: 0 });
+
+				expect(spy.mock.calls).toEqual([ [2], [3], [4], [5], [6], [7], [8], [9], [0] ]);
+			});
+		});
+
 		describe("watch", () => {
 			it("dispatch works with values counting down to zero and up from below zero", () => {
 				/*
@@ -587,12 +603,6 @@ function testBundle(bundle) {
 	});
 }
 
-describe("raw source code", () => {
-	testBundle(bundles.esm);
-});
-describe("ES6", () => {
-	testBundle(bundles.es6);
-});
-describe("ES5", () => {
-	testBundle(bundles.es5);
-});
+describe("raw source code", () => testBundle(bundles.esm));
+describe("ES6", () => testBundle(bundles.es6));
+describe("ES5", () => testBundle(bundles.es5));

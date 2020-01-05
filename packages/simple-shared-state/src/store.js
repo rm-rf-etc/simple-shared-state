@@ -148,8 +148,9 @@ export default class Store {
 		/**
 		 * @method module:SimpleSharedState.Store#dispatch
 		 *
-		 * @param {object} branch - A JavaScript object. The object may contain any Array or JS primitive, but
-		 * must be a plain JS object ({}) at the top level, otherwise dispatch will throw.
+		 * @param {object|function} arg - A JavaScript object, or a function which takes state and returns a
+		 * JavaScript object. The object may contain any Array or JS primitive, but must be a plain JS object ({})
+		 * at the top level, otherwise dispatch will throw.
 		 *
 		 * @description Takes a state branch, which is any plain JS object that represents the desired change to
 		 * state.
@@ -175,12 +176,12 @@ export default class Store {
 		 *   email: "me@simplesharedstate.com",
 		 * });
 		 *
-		 * // To update likes:
-		 * store.dispatch({
+		 * // To increment likes:
+		 * store.dispatch((state) => ({
 		 *   counters: {
-		 *     likes: 2,
+		 *     likes: state.counters.likes + 1,
 		 *   },
-		 * });
+		 * }));
 		 *
 		 * // To delete any piece of state, use a reference to `store.deleted` as the value in the branch.
 		 * // To remove `counters` from the state entirely:
@@ -195,10 +196,11 @@ export default class Store {
 		 *   }),
 		 * });
 		 */
-		this.dispatch = (branch) => {
-			if (isDispatching) {
-				throw new Error("can't dispatch while dispatching");
-			}
+		this.dispatch = (arg) => {
+			if (isDispatching) throw new Error("can't dispatch while dispatching");
+
+			const branch = typeof arg === "function" ? arg(Object.assign({}, stateTree)) : arg;
+
 			if (!branch || Object.getPrototypeOf(branch) !== objectPrototype) {
 				throw new Error("dispatch expects plain object");
 			}
@@ -230,17 +232,16 @@ export default class Store {
 				if (change !== inapplicable && change !== snapshot) {
 					const newSnapshot = simpleMerge(snapshot, change);
 
-					// Relates to test "watch > dispatch works with values counting down to zero and
-					// up from below zero" v
+					// Relates to test "watch > dispatch works with values counting down
+					// to zero and up from below zero"
 					snapshots.set(selector, newSnapshot);
 
 					handler(newSnapshot);
 				}
 			});
 
-			isDispatching = false;
-
 			dispatchListeners.forEach((callback) => callback());
+			isDispatching = false;
 		};
 
 		/**

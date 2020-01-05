@@ -4,8 +4,8 @@ export default (store, selectors) => {
 	const [state, setState] = useState([]);
 
 	useEffect(() => {
-		const unwatch = store.watchBatch(selectors, (newSnapshots) => {
-			setState(newSnapshots.slice());
+		const unwatch = store.watchBatch(selectors, (array) => {
+			setState(array.slice());
 		});
 		return unwatch;
 	}, []);

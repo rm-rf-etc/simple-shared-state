@@ -6,7 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "react",
+    "hooks",
+    "simple-shared-state",
+    "redux",
+    "mobx",
+    "context api",
+    "context"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
