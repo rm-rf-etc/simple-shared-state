@@ -6,6 +6,7 @@ const store = createStore({
 	organization: {},
 	counters: {
 		count1: 0,
+		count2: 0,
 	},
 });
 

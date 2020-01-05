@@ -5,7 +5,7 @@ export default (store, selectors) => {
 
 	useEffect(() => {
 		const unwatch = store.watchBatch(selectors, (newSnapshots) => {
-			setState(Object.assign([], newSnapshots));
+			setState(newSnapshots.slice());
 		});
 		return unwatch;
 	}, []);
