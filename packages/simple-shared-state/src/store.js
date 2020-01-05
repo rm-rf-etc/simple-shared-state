@@ -59,7 +59,7 @@ export default class Store {
 		 * `handler` function will be called with the array of snapshots, ***if*** any snapshots have changed.
 		 *
 		 * @example
-		 * import { createStore, partialArray, deleted } from "simple-shared-state";
+		 * import { createStore, partialArray } from "simple-shared-state";
 		 *
 		 * const store = createStore({
 		 *   people: ["Alice", "Bob"],
@@ -81,7 +81,7 @@ export default class Store {
 		 * // { people: [ 'Janet', 'Jake', 'James' ] }
 		 *
 		 * unwatch();
-		 * store.dispatch({ people: [ "Justin", "Josh", deleted ] });
+		 * store.dispatch({ people: [ "Justin", "Josh", store.deleted ] });
 		 * // nothing happens, the watcher was removed
 		 *
 		 * console.log(store.getState());
@@ -155,7 +155,7 @@ export default class Store {
 		 * state.
 		 *
 		 * @example
-		 * import { createStore, deleted } from "simple-shared-state";
+		 * import { createStore } from "simple-shared-state";
 		 *
 		 * // Create a store with state:
 		 * const store = createStore({
@@ -182,10 +182,10 @@ export default class Store {
 		 *   },
 		 * });
 		 *
-		 * // To delete any piece of state, use a reference to `deleted` as the value in the branch.
+		 * // To delete any piece of state, use a reference to `store.deleted` as the value in the branch.
 		 * // To remove `counters` from the state entirely:
 		 * store.dispatch({
-		 *   counters: deleted,
+		 *   counters: store.deleted,
 		 * });
 		 *
 		 * // To update items in arrays, you can use `partialArray`:
@@ -208,6 +208,7 @@ export default class Store {
 
 			listeners.forEach((handler, selector) => {
 				let change = inapplicable;
+
 				try {
 					// attempt selector only on the branch
 					change = selector(branch);
@@ -225,8 +226,14 @@ export default class Store {
 				}
 
 				const snapshot = snapshots.get(selector);
+
 				if (change !== inapplicable && change !== snapshot) {
 					const newSnapshot = simpleMerge(snapshot, change);
+
+					// Relates to test "watch > dispatch works with values counting down to zero and
+					// up from below zero" v
+					snapshots.set(selector, newSnapshot);
+
 					handler(newSnapshot);
 				}
 			});
@@ -253,8 +260,8 @@ export default class Store {
 };
 
 /**
- * @memberof module:SimpleSharedState
- * @const {number} deleted - A globally unique object to reference when you want to delete
+ * @function module:SimpleSharedState#deleted
+ * @returns {number} deleted - A globally unique object to reference when you want to delete
  * things from state.
  *
  * @example
@@ -264,7 +271,6 @@ export default class Store {
  * deleted === deleted; // true
  *
  * @example
- * // Use `deleted` to remove items from state.
  * import { createStore, deleted } from "simple-shared-state";
  *
  * const store = createStore({ a: 1, b: 2 });
@@ -287,8 +293,8 @@ const inapplicable = new Number();
  * cuts some corners for the sake of speed. Not knocking lodash at all, but lodash.merge is
  * likely intended for a wider set of use cases. For simple-shared-state, we choose speed over safety.
  *
- * @param {*} tree - any JS primitive or plain object or plain array. Tree will be mutated.
- * @param {*} branch - any JS primitive or plain object or plain array, but should share the
+ * @param {object} tree - any JS primitive or plain object or plain array. Tree will be mutated.
+ * @param {object} branch - any JS primitive or plain object or plain array, but should share the
  * same root type as `tree`.
  *
  * @example

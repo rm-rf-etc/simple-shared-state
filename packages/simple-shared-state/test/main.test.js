@@ -226,11 +226,31 @@ function testBundle(bundle) {
 						name: "Bob",
 						age: 28,
 					},
-				}
+				},
+				count: 1,
 			});
 		});
 
 		describe("watch", () => {
+			it("dispatch works with values counting down to zero and up from below zero", () => {
+				/*
+				 * This addresses a specific bug that I found while developing `useSimpleSharedState`.
+				 */
+				const spy = jest.fn();
+				store.watch((state) => state.count, spy);
+
+				store.dispatch({ count: 2 });
+				store.dispatch({ count: 1 });
+				store.dispatch({ count: 0 });
+				store.dispatch({ count: -1 });
+				store.dispatch({ count: -2 });
+				store.dispatch({ count: -1 });
+				store.dispatch({ count: -0 });
+				store.dispatch({ count: 1 });
+				store.dispatch({ count: 2 });
+				expect(spy.mock.calls).toEqual([ [2], [1], [0], [-1], [-2], [-1], [-0], [1], [2] ]);
+			});
+
 			it("dispatch invokes listeners", () => {
 				const spy1 = jest.fn();
 				const spy2 = jest.fn();
@@ -313,12 +333,12 @@ function testBundle(bundle) {
 				const selector = (state) => state.friends[1];
 
 				expect(() => {
-					store.watch(selector, console.log);
-					store.watch(selector, console.log);
+					store.watch(selector, () => {});
+					store.watch(selector, () => {});
 				}).toThrow();
 
-				expect(typeof store.watch((state) => state.friends[1], console.log)).toEqual("function");
-				expect(typeof store.watch((state) => state.friends[1], console.log)).toEqual("function");
+				expect(typeof store.watch((state) => state.friends[1], () => {})).toEqual("function");
+				expect(typeof store.watch((state) => state.friends[1], () => {})).toEqual("function");
 			});
 		});
 
@@ -364,20 +384,18 @@ function testBundle(bundle) {
 				store.watch((state) => state.friends, spy1);
 				store.dispatch({
 					friends: {
-						"1": {
-							name: "Susan",
-							age: 25,
-						},
+						"1": undefined,
 						"2": bundle.deleted,
 					},
 				});
 				expect(spy1.mock.calls).toEqual([[{
-					"1": {
-						name: "Susan",
-						age: 25,
-					},
+					"1": undefined,
 				}]]);
-				expect(store.getState().friends["2"]).toEqual(undefined);
+				expect(store.getState().friends.hasOwnProperty("1")).toEqual(true);
+				expect(store.getState().friends.hasOwnProperty("2")).toEqual(false);
+
+				store.dispatch({ friends: bundle.deleted });
+				expect(store.getState().hasOwnProperty("friends")).toEqual(false);
 			});
 
 			it("can remove items from objects", () => {
@@ -387,27 +405,27 @@ function testBundle(bundle) {
 					friends: {
 						"1": {
 							name: "Susan",
-							age: bundle.deleted,
+							age: undefined, // age will remain in state with value `undefined`
 						},
 						"2": {
-							age: bundle.deleted,
+							age: bundle.deleted, // age will be removed from state
 						},
 					},
 				});
 				expect(spy1.mock.calls).toEqual([[{
 					"1": {
 						name: "Susan",
+						age: undefined,
 					},
 					"2": {
 						name: "Bob",
 					},
 				}]]);
-				expect(store.getState().friends[1]).toEqual({
-					name: "Susan",
-				});
-				expect(store.getState().friends["2"]).toEqual({
-					name: "Bob",
-				});
+				expect(store.getState().friends[1]).toEqual({ name: "Susan" });
+				expect(store.getState().friends[1].hasOwnProperty("age")).toEqual(true); // proof it remains
+
+				expect(store.getState().friends[2]).toEqual({ name: "Bob" });
+				expect(store.getState().friends[2].hasOwnProperty("age")).toEqual(false); // proof it was removed
 			});
 
 			it("watchers receive `undefined` when state is deleted", () => {
