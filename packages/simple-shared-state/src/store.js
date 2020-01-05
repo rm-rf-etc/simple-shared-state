@@ -260,8 +260,8 @@ export default class Store {
 };
 
 /**
- * @function module:SimpleSharedState#deleted
- * @returns {number} deleted - A globally unique object to reference when you want to delete
+ * @memberof module:SimpleSharedState
+ * @const {number} deleted - A globally unique object to reference when you want to delete
  * things from state.
  *
  * @example
