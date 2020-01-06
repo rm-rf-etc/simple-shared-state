@@ -8,12 +8,12 @@ const store = createStore({
 }, ({ getState }) => ({
 	counterOneSet: (value) => ({
 		counters: {
-			count1: value,
+			count1: +value,
 		},
 	}),
 	counterTwoSet: (value) => ({
 		counters: {
-			count2: value,
+			count2: +value,
 		},
 	}),
 	counterOneIncrement: () => ({
