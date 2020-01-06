@@ -74,8 +74,8 @@ export default class Store {
 		 * JavaScript object. The object may contain any Array or JS primitive, but must be a plain JS object ({})
 		 * at the top level, otherwise dispatch will throw.
 		 *
-		 * @description Takes a state branch, which is any plain JS object that represents the desired change to
-		 * state.
+		 * @description Takes a branch (or a function which takes state and returns a branch), which is any plain
+		 * JS object that represents the desired change to state.
 		 *
 		 * @example
 		 * import { createStore } from "simple-shared-state";
