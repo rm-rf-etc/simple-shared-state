@@ -77,4 +77,3 @@ not the same as a "reducer" in Redux.
 
 - Buckets for batching dispatch events and creation of action creators
 - Network connector for concise async handling (no thunks for us)
-- Redux DevTools integration

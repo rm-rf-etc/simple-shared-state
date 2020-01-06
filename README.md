@@ -23,7 +23,7 @@ If using script tags:
 
 Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@1.0.4/dist/simple-shared-state.es5.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@1.1.1/dist/simple-shared-state.es5.umd.js"></script>
 ```
 
 ## Basic Use
@@ -77,4 +77,3 @@ not the same as a "reducer" in Redux.
 
 - Buckets for batching dispatch events and creation of action creators
 - Network connector for concise async handling (no thunks for us)
-- Redux DevTools integration
