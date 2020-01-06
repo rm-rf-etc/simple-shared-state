@@ -6,6 +6,16 @@ const store = createStore({
 		count2: 0,
 	},
 }, ({ getState }) => ({
+	counterOneSet: (value) => ({
+		counters: {
+			count1: value,
+		},
+	}),
+	counterTwoSet: (value) => ({
+		counters: {
+			count2: value,
+		},
+	}),
 	counterOneIncrement: () => ({
 		counters: {
 			count1: getState(s => s.counters.count1)+ 1,

@@ -297,8 +297,8 @@ export default class Store {
 				if (devtool) {
 					actionType = actionName.replace(/([A-Z])/g, "_$1").toUpperCase();
 				}
-				this.actions[actionName] = () => {
-					this.dispatch(actionType, actions[actionName]);
+				this.actions[actionName] = (...args) => {
+					this.dispatch(actionType, actions[actionName].apply(null, args));
 				};
 			});
 		}
