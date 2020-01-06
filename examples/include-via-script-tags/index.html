@@ -19,6 +19,15 @@
 			stuff: {
 				a: 1,
 			},
+			function() {
+				return {
+					doSomething: function() {
+						return {
+							stuff: { a: 5, b: 2 },
+						};
+					}
+				}
+			},
 		});
 
 		store.watchBatch([
@@ -29,12 +38,7 @@
 			console.log(state);
 		});
 
-		store.dispatch({
-			stuff: {
-				a: 5,
-				b: 2,
-			},
-		});
+		store.actions.doSomething();
 	</script>
 </body>
 </html>
