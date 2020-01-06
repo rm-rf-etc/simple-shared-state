@@ -109,7 +109,7 @@ function testBundle(bundle) {
 				}
 			});
 			for (var i = 0; i < _100_000; i++) {
-				store.dispatch({
+				store.dispatch("", {
 					a: [
 						{
 							thing1: i+1,
@@ -228,6 +228,57 @@ function testBundle(bundle) {
 					},
 				},
 				count: 1,
+			}, (store) => ({
+				increment: () => ({
+					count: store.getState(s => s.count) + 1,
+				}),
+			}));
+		});
+
+		it("creates actions from provided function and passing in reference to store", () => {
+			const spy = jest.fn();
+			store.watch((state) => state.count, spy);
+			store.actions.increment();
+			expect(spy.mock.calls).toEqual([[2]]);
+		});
+
+		describe("getState", () => {
+			it("uses optional selector function or returns entire state copy", () => {
+				let state = store.getState();
+				const expectedState = {
+					friends: {
+						"1": {
+							name: "Alice",
+							age: 25,
+						},
+						"2": {
+							name: "Bob",
+							age: 28,
+						},
+					},
+					count: 1,
+				};
+				expect(state).toEqual(expectedState);
+				state = null;
+				expect(state).toEqual(null);
+				expect(store.getState()).toEqual(expectedState);
+				expect(store.getState(s => s.friends)).toEqual({
+					"1": {
+						name: "Alice",
+						age: 25,
+					},
+					"2": {
+						name: "Bob",
+						age: 28,
+					},
+				});
+				let friends = store.getState(s => s.friends);
+				friends = null;
+				expect(friends).toEqual(null);
+				expect(store.getState(s => s.friends[1])).toEqual({
+					name: "Alice",
+					age: 25,
+				});
 			});
 		});
 
@@ -237,11 +288,11 @@ function testBundle(bundle) {
 				store.watch((state) => state.count, spy);
 
 				const increment = () => {
-					store.dispatch((state) => ({ count: state.count + 1 }));
+					store.dispatch("", (state) => ({ count: state.count + 1 }));
 				};
 
 				for (let i=0; i<8; i++) increment();
-				store.dispatch({ count: 0 });
+				store.dispatch("", { count: 0 });
 
 				expect(spy.mock.calls).toEqual([ [2], [3], [4], [5], [6], [7], [8], [9], [0] ]);
 			});
@@ -255,15 +306,15 @@ function testBundle(bundle) {
 				const spy = jest.fn();
 				store.watch((state) => state.count, spy);
 
-				store.dispatch({ count: 2 });
-				store.dispatch({ count: 1 });
-				store.dispatch({ count: 0 });
-				store.dispatch({ count: -1 });
-				store.dispatch({ count: -2 });
-				store.dispatch({ count: -1 });
-				store.dispatch({ count: -0 });
-				store.dispatch({ count: 1 });
-				store.dispatch({ count: 2 });
+				store.dispatch("", { count: 2 });
+				store.dispatch("", { count: 1 });
+				store.dispatch("", { count: 0 });
+				store.dispatch("", { count: -1 });
+				store.dispatch("", { count: -2 });
+				store.dispatch("", { count: -1 });
+				store.dispatch("", { count: -0 });
+				store.dispatch("", { count: 1 });
+				store.dispatch("", { count: 2 });
 				expect(spy.mock.calls).toEqual([ [2], [1], [0], [-1], [-2], [-1], [-0], [1], [2] ]);
 			});
 
@@ -272,7 +323,7 @@ function testBundle(bundle) {
 				const spy2 = jest.fn();
 				store.watch((state) => state.friends[1].name, spy1);
 				store.watch((state) => state.friends[1].name, spy2);
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Carrol",
@@ -290,7 +341,7 @@ function testBundle(bundle) {
 				store.watch((state) => state.friends, spy1);
 				store.watch((state) => state.friends[1], spy2);
 				store.watch((state) => state.friends[1].name, spy3);
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Carrol",
@@ -320,7 +371,7 @@ function testBundle(bundle) {
 				const spy = jest.fn();
 				const unwatch = store.watch((state) => state.friends, spy);
 
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Jim",
@@ -333,7 +384,7 @@ function testBundle(bundle) {
 
 				unwatch();
 
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"2": {
 							name: "Peter",
@@ -363,7 +414,7 @@ function testBundle(bundle) {
 				const spy = jest.fn();
 				const unwatch = store.watchDispatch(spy);
 
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Jim",
@@ -372,7 +423,7 @@ function testBundle(bundle) {
 				});
 				expect(spy.mock.calls.length).toEqual(1);
 
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Jessica",
@@ -383,7 +434,7 @@ function testBundle(bundle) {
 
 				unwatch();
 
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Willard",
@@ -398,7 +449,7 @@ function testBundle(bundle) {
 			it("can remove items from arrays", () => {
 				const spy1 = jest.fn();
 				store.watch((state) => state.friends, spy1);
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": undefined,
 						"2": bundle.deleted,
@@ -410,14 +461,14 @@ function testBundle(bundle) {
 				expect(store.getState().friends.hasOwnProperty("1")).toEqual(true);
 				expect(store.getState().friends.hasOwnProperty("2")).toEqual(false);
 
-				store.dispatch({ friends: bundle.deleted });
+				store.dispatch("", { friends: bundle.deleted });
 				expect(store.getState().hasOwnProperty("friends")).toEqual(false);
 			});
 
 			it("can remove items from objects", () => {
 				const spy1 = jest.fn();
 				store.watch((state) => state.friends, spy1);
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Susan",
@@ -447,7 +498,7 @@ function testBundle(bundle) {
 			it("watchers receive `undefined` when state is deleted", () => {
 				const spy = jest.fn();
 				store.watch((state) => state.friends[1].name, spy);
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Howard",
@@ -456,7 +507,7 @@ function testBundle(bundle) {
 				});
 				expect(spy.mock.calls).toEqual([["Howard"]]);
 
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": bundle.deleted,
 					},
@@ -467,7 +518,7 @@ function testBundle(bundle) {
 					[undefined],
 				]);
 
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Matt",
@@ -483,7 +534,7 @@ function testBundle(bundle) {
 				]);
 
 				// testing that this call doesn't trigger the watcher
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							age: 34,
@@ -509,7 +560,7 @@ function testBundle(bundle) {
 				], spy);
 				expect(spy.mock.calls.length).toEqual(1);
 				expect(spy.mock.calls).toEqual([[[25, "Alice", 28, "Bob"]]]);
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Will",
@@ -528,7 +579,7 @@ function testBundle(bundle) {
 				// verify that we can remove the watcher
 				removeWatcher();
 
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							age: 29,
@@ -546,14 +597,14 @@ function testBundle(bundle) {
 					(s) => s.none.state.here,
 				], spy);
 
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Susan",
 						},
 					},
 				});
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							age: 26,
@@ -572,14 +623,14 @@ function testBundle(bundle) {
 			it("does not spam the listener with `undefined` on every dispatch event", () => {
 				const spy = jest.fn();
 				store.watch((state) => state.not.valid.selector, spy);
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							name: "Josh",
 						},
 					},
 				});
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"3": {
 							name: "Ronald",
@@ -587,7 +638,7 @@ function testBundle(bundle) {
 						},
 					},
 				});
-				store.dispatch({
+				store.dispatch("", {
 					friends: {
 						"1": {
 							age: 41,

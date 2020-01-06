@@ -5,6 +5,28 @@ const store = createStore({
 		count1: 0,
 		count2: 0,
 	},
-}, window.__REDUX_DEVTOOLS_EXTENSION__);
+}, ({ getState }) => ({
+	counterOneIncrement: () => ({
+		counters: {
+			count1: getState(s => s.counters.count1)+ 1,
+		},
+	}),
+	counterOneDecrement: () => ({
+		counters: {
+			count1: getState(s => s.counters.count1)- 1,
+		},
+	}),
+	counterTwoIncrement: () => ({
+		counters: {
+			count2: getState(s => s.counters.count2) + 1,
+		},
+	}),
+	counterTwoDecrement: () => ({
+		counters: {
+			count2: getState(s => s.counters.count2) - 1,
+		},
+	}),
+}),
+window.__REDUX_DEVTOOLS_EXTENSION__);
 
 export default store;
