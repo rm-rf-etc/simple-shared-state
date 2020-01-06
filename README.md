@@ -23,7 +23,7 @@ If using script tags:
 
 Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@1.1.1/dist/simple-shared-state.es5.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@1.1.2/dist/simple-shared-state.es5.umd.js"></script>
 ```
 
 ## Basic Use
