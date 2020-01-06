@@ -58,7 +58,7 @@ export default class Store {
 
 		if (useDevtool && useDevtool.connect && typeof useDevtool.connect === "function") {
 			// this adapts SimpleSharedState to work with redux devtools
-			devtool = devtool.connect();
+			devtool = useDevtool.connect();
 			devtool.subscribe((message) => {
 				if (message.type === "DISPATCH" && message.payload.type === "JUMP_TO_STATE") {
 					applyBranch(JSON.parse(message.state));
