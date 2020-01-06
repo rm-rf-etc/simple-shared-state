@@ -7,12 +7,130 @@ const { isArray } = Array;
 
 export default class Store {
 
-	constructor(initialState = {}, devtool = null) {
+	constructor(initialState = {}, useDevtool = null) {
 		let stateTree = Object.assign({}, initialState);
-		let isDispatching = false;
+		let dispatching = false;
+		let devtool;
 		const listeners = new Map();
 		const snapshots = new Map();
 		const dispatchListeners = new Set();
+
+		const applyBranch = (branch) => {
+			dispatching = true;
+			stateTree = Object.assign({}, stateTree);
+			simpleMerge(stateTree, branch);
+
+			listeners.forEach((handler, selector) => {
+				let change = inapplicable;
+
+				try {
+					// attempt selector only on the branch
+					change = selector(branch);
+
+					// if this fails then something was deleted
+					selector(stateTree);
+
+					// If this line runs then selector didn't fail, so therefore,
+					// if change is `undefined`, the selector is inapplicable, so
+					// exit early.
+					if (change === undefined) return;
+				} catch (_) {
+					// something was deleted, so proceed with `undefined`
+					change = undefined;
+				}
+
+				const snapshot = snapshots.get(selector);
+
+				if (change !== inapplicable && change !== snapshot) {
+					const newSnapshot = simpleMerge(snapshot, change);
+
+					// Relates to test "watch > dispatch works with values counting down
+					// to zero and up from below zero"
+					snapshots.set(selector, newSnapshot);
+
+					handler(newSnapshot);
+				}
+			});
+
+			dispatchListeners.forEach((callback) => callback());
+			dispatching = false;
+		};
+
+		if (useDevtool && useDevtool.connect && typeof useDevtool.connect === "function") {
+			// this adapts SimpleSharedState to work with redux devtools
+			devtool = devtool.connect();
+			devtool.subscribe((message) => {
+				if (message.type === "DISPATCH" && message.payload.type === "JUMP_TO_STATE") {
+					applyBranch(JSON.parse(message.state));
+				}
+			});
+			devtool.init(stateTree);
+		}
+
+		/**
+		 * @method module:SimpleSharedState.Store#dispatch
+		 *
+		 * @param {object|function} arg - A JavaScript object, or a function which takes state and returns a
+		 * JavaScript object. The object may contain any Array or JS primitive, but must be a plain JS object ({})
+		 * at the top level, otherwise dispatch will throw.
+		 *
+		 * @description Takes a state branch, which is any plain JS object that represents the desired change to
+		 * state.
+		 *
+		 * @example
+		 * import { createStore } from "simple-shared-state";
+		 *
+		 * // Create a store with state:
+		 * const store = createStore({
+		 *   email: "user@example.com",
+		 *   counters: {
+		 *     likes: 1,
+		 *   },
+		 *   todoList: [
+		 *     { label: "buy oat milk" },
+		 *     { label: "buy cat food" },
+		 *   ],
+		 * });
+		 *
+		 * // To change email, call dispatch with a branch. The branch you provide must include the full path
+		 * // from the root of the state, to the value you want to change.
+		 * store.dispatch({
+		 *   email: "me@simplesharedstate.com",
+		 * });
+		 *
+		 * // To increment likes:
+		 * store.dispatch((state) => ({
+		 *   counters: {
+		 *     likes: state.counters.likes + 1,
+		 *   },
+		 * }));
+		 *
+		 * // To delete any piece of state, use a reference to `store.deleted` as the value in the branch.
+		 * // To remove `counters` from the state entirely:
+		 * store.dispatch({
+		 *   counters: store.deleted,
+		 * });
+		 *
+		 * // To update items in arrays, you can use `partialArray`:
+		 * store.dispatch({
+		 *   todoList: partialArray(1, {
+		 *     label: "buy oat milk (because it requires 80 times less water than almond milk)",
+		 *   }),
+		 * });
+		 */
+		this.dispatch = (arg) => {
+			if (dispatching) throw new Error("can't dispatch while dispatching");
+
+			const branch = typeof arg === "function" ? arg(this.getState()) : arg;
+
+			if (!branch || Object.getPrototypeOf(branch) !== objectPrototype) {
+				throw new Error("dispatch expects plain object");
+			}
+
+			applyBranch(branch);
+
+			if (devtool) devtool.send("change", this.getState());
+		};
 
 		/**
 		 * @method module:SimpleSharedState.Store#watch
@@ -26,7 +144,7 @@ export default class Store {
 		 * returns a function which, when called, removes the watcher / listener.
 		 */
 		this.watch = (selector, handler) => {
-			if (typeof selector !== 'function' || typeof handler !== 'function') {
+			if (typeof selector !== "function" || typeof handler !== "function") {
 				throw new Error("selector and handler must be functions");
 			}
 			if (listeners.has(selector)) {
@@ -146,105 +264,6 @@ export default class Store {
 		};
 
 		/**
-		 * @method module:SimpleSharedState.Store#dispatch
-		 *
-		 * @param {object|function} arg - A JavaScript object, or a function which takes state and returns a
-		 * JavaScript object. The object may contain any Array or JS primitive, but must be a plain JS object ({})
-		 * at the top level, otherwise dispatch will throw.
-		 *
-		 * @description Takes a state branch, which is any plain JS object that represents the desired change to
-		 * state.
-		 *
-		 * @example
-		 * import { createStore } from "simple-shared-state";
-		 *
-		 * // Create a store with state:
-		 * const store = createStore({
-		 *   email: "user@example.com",
-		 *   counters: {
-		 *     likes: 1,
-		 *   },
-		 *   todoList: [
-		 *     { label: "buy oat milk" },
-		 *     { label: "buy cat food" },
-		 *   ],
-		 * });
-		 *
-		 * // To change email, call dispatch with a branch. The branch you provide must include the full path
-		 * // from the root of the state, to the value you want to change.
-		 * store.dispatch({
-		 *   email: "me@simplesharedstate.com",
-		 * });
-		 *
-		 * // To increment likes:
-		 * store.dispatch((state) => ({
-		 *   counters: {
-		 *     likes: state.counters.likes + 1,
-		 *   },
-		 * }));
-		 *
-		 * // To delete any piece of state, use a reference to `store.deleted` as the value in the branch.
-		 * // To remove `counters` from the state entirely:
-		 * store.dispatch({
-		 *   counters: store.deleted,
-		 * });
-		 *
-		 * // To update items in arrays, you can use `partialArray`:
-		 * store.dispatch({
-		 *   todoList: partialArray(1, {
-		 *     label: "buy oat milk (because it requires 80 times less water than almond milk)",
-		 *   }),
-		 * });
-		 */
-		this.dispatch = (arg) => {
-			if (isDispatching) throw new Error("can't dispatch while dispatching");
-
-			const branch = typeof arg === "function" ? arg(Object.assign({}, stateTree)) : arg;
-
-			if (!branch || Object.getPrototypeOf(branch) !== objectPrototype) {
-				throw new Error("dispatch expects plain object");
-			}
-
-			isDispatching = true;
-			simpleMerge(stateTree, branch);
-
-			listeners.forEach((handler, selector) => {
-				let change = inapplicable;
-
-				try {
-					// attempt selector only on the branch
-					change = selector(branch);
-
-					// if this fails then something was deleted
-					selector(stateTree);
-
-					// If this line runs then selector didn't fail, so therefore,
-					// if change is `undefined`, the selector is inapplicable, so
-					// exit early.
-					if (change === undefined) return;
-				} catch (_) {
-					// something was deleted, so proceed with `undefined`
-					change = undefined;
-				}
-
-				const snapshot = snapshots.get(selector);
-
-				if (change !== inapplicable && change !== snapshot) {
-					const newSnapshot = simpleMerge(snapshot, change);
-
-					// Relates to test "watch > dispatch works with values counting down
-					// to zero and up from below zero"
-					snapshots.set(selector, newSnapshot);
-
-					handler(newSnapshot);
-				}
-			});
-
-			dispatchListeners.forEach((callback) => callback());
-			isDispatching = false;
-		};
-
-		/**
 		 * @method module:SimpleSharedState.Store#getState
 		 *
 		 * @returns {Object} A copy of the state tree.
@@ -252,11 +271,6 @@ export default class Store {
 		this.getState = () => {
 			return Object.assign({}, stateTree);
 		};
-
-		if (devtool && typeof devtool === 'function') {
-			const devtoolStore = devtool((state) => state);
-			this.watch((state) => state, devtoolStore.dispatch);
-		}
 	}
 };
 
@@ -345,5 +359,5 @@ export const partialArray = (pos, thing) => {
 };
 
 function thingCopier(thing) {
-	return !thing || typeof thing !== 'object' ? thing : Object.assign(isArray(thing) ? [] : {}, thing);
+	return !thing || typeof thing !== "object" ? thing : Object.assign(isArray(thing) ? [] : {}, thing);
 }

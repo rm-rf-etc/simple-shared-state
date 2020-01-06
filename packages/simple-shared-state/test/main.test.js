@@ -603,6 +603,6 @@ function testBundle(bundle) {
 	});
 }
 
-describe("raw source code", () => testBundle(bundles.esm));
+describe("Source", () => testBundle(bundles.esm));
 describe("ES6", () => testBundle(bundles.es6));
 describe("ES5", () => testBundle(bundles.es5));
