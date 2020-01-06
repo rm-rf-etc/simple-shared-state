@@ -270,8 +270,8 @@ export default class Store {
 		/**
 		 * @method module:SimpleSharedState.Store#getState
 		 *
-		 * @param {function} selector - A function which returns a piece of the state. Error handling not
-		 * required, your selector will run inside a `try{} catch{}` block.
+		 * @param {function} [selector] - Optional but recommended function which returns a piece of the state.
+		 * Error handling not required, your selector will run inside a `try{} catch{}` block.
 		 * @returns {*} A copy of the state tree, or a copy of the piece returned from the selector, or
 		 * undefined if the selector fails.
 		 */
