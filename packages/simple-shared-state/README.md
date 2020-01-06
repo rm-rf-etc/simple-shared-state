@@ -5,6 +5,7 @@ Redux is verbose. SimpleSharedState is brief.
 - Documentation: [https://simplesharedstate.com](https://simplesharedstate.com)
 - Git Repo: [https://github.com/rm-rf-etc/simple-shared-state](https://github.com/rm-rf-etc/simple-shared-state)
 
+
 ## Get It
 
 ```
@@ -23,8 +24,9 @@ If using script tags:
 
 Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@2.0.0/dist/simple-shared-state.es5.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@2.0.1/dist/simple-shared-state.es5.umd.js"></script>
 ```
+
 
 ## Basic Use
 
@@ -38,9 +40,17 @@ const initialState = {
     slogan: "simple-shared-state makes apps fun again",
   },
 };
-const store = createStore(initialState);
+const actions = () => ({
+  changeSlogan: (newSlogan) => ({
+    user: {
+      slogan: newSlogan,
+    },
+  }),
+});
+const store = createStore(initialState, actions);
 ```
-Then create a watcher.
+Then create a watcher. Don't worry about error handling in selectors, just return
+the state that you want.
 ```javascript
 const selector = (state) => state.user;
 
@@ -48,21 +58,33 @@ store.watch(selector, (state) => {
   console.log("user snapshot:", state);
 });
 ```
-Then call dispatch to update state and trigger the watch handler.
+Then call your action to update state and trigger the watch handler.
 ```javascript
-store.dispatch({
-  user: {
-    slogan: "simple-shared-state is better than cat memes",
-  },
-});
+store.actions.changeSlogan("simple-shared-state is better than cat memes");
 // 'user snapshot:' { name: 'Alice', slogan: 'simple-shared-state is better than cat memes' }
 ```
+
+
+## Redux Devtools
+
+Works with devtools, of course. Just pass in the reference like this:
+```javascript
+const store = createStore(initialState, actions, window.__REDUX_DEVTOOLS_EXTENSION__);
+```
+
+
+## React Hooks
+
+Not published yet but coming in the next couple days. See [use-simple-shared-state](https://github.com/rm-rf-etc/simple-shared-state/blob/master/packages/use-simple-shared-state/index.js)
+for a working hook example, `useSimpleSharedState`.
+
 
 ## Status
 
 SimpleSharedState was first born in late Dec. 2019. There's still more testing needed, particularly on performance with react.
 But your willingness to try out SimpleSharedState and report back your experience would greatly help me in developing its API.
 The main goal of SimpleSharedState is to reduce codebase verbosity in a flux/redux-like architecture.
+
 
 ## Concepts
 
@@ -75,5 +97,4 @@ not the same as a "reducer" in Redux.
 
 ## Future Work
 
-- Buckets for batching dispatch events and creation of action creators
 - Network connector for concise async handling (no thunks for us)

@@ -9,26 +9,26 @@
 <body>
 	<!--
 		Choose from the following examples, depending on your requirements:
-		https://unpkg.com/simple-shared-state@2.0.0/dist/simple-shared-state.es5.umd.js
-		https://unpkg.com/simple-shared-state@2.0.0/dist/simple-shared-state.es6.umd.js
+		https://unpkg.com/simple-shared-state@2.0.1/dist/simple-shared-state.es5.umd.js
+		https://unpkg.com/simple-shared-state@2.0.1/dist/simple-shared-state.es6.umd.js
 		https://unpkg.com/simple-shared-state
 	-->
-	<script src="https://unpkg.com/simple-shared-state@2.0.0/dist/simple-shared-state.es5.umd.js"></script>
+	<script src="https://unpkg.com/simple-shared-state@2.0.1/dist/simple-shared-state.es5.umd.js"></script>
 	<script>
-		const store = SimpleSharedState.createStore({
+		var actions = function() {
+			return {
+				doSomething: function() {
+					return {
+						stuff: { a: 5, b: 2 },
+					};
+				}
+			}
+		};
+		var store = SimpleSharedState.createStore({
 			stuff: {
 				a: 1,
 			},
-			function() {
-				return {
-					doSomething: function() {
-						return {
-							stuff: { a: 5, b: 2 },
-						};
-					}
-				}
-			},
-		});
+		}, actions);
 
 		store.watchBatch([
 			function(state){ return state.stuff; },
