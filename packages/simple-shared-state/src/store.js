@@ -293,10 +293,8 @@ export default class Store {
 			const actions = getActions(this);
 
 			Object.keys(actions).forEach((actionName) => {
-				let actionType = "";
-				if (devtool) {
-					actionType = actionName.replace(/([A-Z])/g, "_$1").toUpperCase();
-				}
+				const actionType = devtool ? `${actionName}()` : "";
+
 				this.actions[actionName] = (...args) => {
 					this.dispatch(actionType, actions[actionName].apply(null, args));
 				};

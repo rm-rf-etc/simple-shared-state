@@ -24,7 +24,7 @@ If using script tags:
 
 Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@2.1.0/dist/simple-shared-state.es5.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@2.1.1/dist/simple-shared-state.es5.umd.js"></script>
 ```
 
 
@@ -94,6 +94,7 @@ tests if you're interested, and you can test the build result with `yarn build &
 
 Terms like `reducers` and `action creators` will be reused for developer familiarity, but a "reducer" in SimpleSharedState is
 not the same as a "reducer" in Redux.
+
 
 ## Future Work
 
