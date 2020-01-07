@@ -467,7 +467,9 @@ function testBundle(bundle) {
 
 			it("can remove items from objects", () => {
 				const spy1 = jest.fn();
+				const spy2 = jest.fn();
 				store.watch((state) => state.friends, spy1);
+				store.watch((state) => state.friends[2].age, spy2);
 				store.dispatch("", {
 					friends: {
 						"1": {
@@ -488,11 +490,44 @@ function testBundle(bundle) {
 						name: "Bob",
 					},
 				}]]);
+
+				// spy2 should have only been called once
+				expect(spy2.mock.calls).toEqual([[undefined]]);
+
 				expect(store.getState().friends[1]).toEqual({ name: "Susan" });
 				expect(store.getState().friends[1].hasOwnProperty("age")).toEqual(true); // proof it remains
 
 				expect(store.getState().friends[2]).toEqual({ name: "Bob" });
 				expect(store.getState().friends[2].hasOwnProperty("age")).toEqual(false); // proof it was removed
+
+				store.dispatch("", {
+					friends: {
+						"2": {
+							age: bundle.deleted,
+						},
+					},
+				});
+				store.dispatch("", {
+					friends: {
+						"2": bundle.deleted,
+					},
+				});
+
+				// spy2 should have only been called once
+				expect(spy2.mock.calls).toEqual([[undefined]]);
+
+				store.dispatch("", {
+					friends: {
+						"2": {
+							name: "Jorge",
+							age: 41,
+						},
+					},
+				});
+
+
+				// spy2 should have only been called once
+				expect(spy2.mock.calls).toEqual([[undefined], [41]]);
 			});
 
 			it("watchers receive `undefined` when state is deleted", () => {

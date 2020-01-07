@@ -21,27 +21,28 @@ export default class Store {
 			simpleMerge(stateTree, branch);
 
 			listeners.forEach((handler, selector) => {
-				let change = inapplicable;
+				let change;
 
 				try {
 					// attempt selector only on the branch
 					change = selector(branch);
 
-					// if this fails then something was deleted
-					selector(stateTree);
-
-					// If this line runs then selector didn't fail, so therefore,
-					// if change is `undefined`, the selector is inapplicable, so
-					// exit early.
-					if (change === undefined) return;
+					if (change === undefined) {
+						// if this fails then something was deleted
+						selector(stateTree);
+						// If this line runs then selector didn't fail, so therefore,
+						// the selector is inapplicable, so exit early.
+						return;
+					}
 				} catch (_) {
-					// something was deleted, so proceed with `undefined`
-					change = undefined;
+					// if here, something was deleted and change is undefined
 				}
+				if (change === deleted) change = undefined;
 
 				const snapshot = snapshots.get(selector);
 
-				if (change !== inapplicable && change !== snapshot) {
+				// this covers the condition where both are undefined
+				if (change !== snapshot) {
 					const newSnapshot = simpleMerge(snapshot, change);
 
 					// Relates to test "watch > dispatch works with values counting down
@@ -332,7 +333,7 @@ export default class Store {
 export const deleted = new Number();
 
 // Internal use only.
-const inapplicable = new Number();
+// const inapplicable = new Number();
 
 /**
  * @function module:SimpleSharedState#simpleMerge
