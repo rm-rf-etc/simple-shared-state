@@ -2,10 +2,10 @@
 
 Redux is verbose. SimpleSharedState is brief.
 
-- Documentation: [https://simplesharedstate.com](https://simplesharedstate.com)
-- Git Repo: [https://github.com/rm-rf-etc/simple-shared-state](https://github.com/rm-rf-etc/simple-shared-state)
-- Try it live: https://simple-shared-state.stackblitz.io/
-- Edit with online IDE: https://stackblitz.com/edit/simple-shared-state
+- Docs: [https://simplesharedstate.com](https://simplesharedstate.com)
+- Repo: [https://github.com/rm-rf-etc/simple-shared-state](https://github.com/rm-rf-etc/simple-shared-state)
+- Example app: https://simple-shared-state.stackblitz.io/
+- Edit online: https://stackblitz.com/edit/simple-shared-state
 
 
 ## Get It
