@@ -5,9 +5,9 @@ module.exports = [
 		entry: "./src/index.js",
 		mode: "production",
 		output: {
-			library: "SimpleSharedStateReact",
+			library: "useSharedState",
 			libraryTarget: "umd",
-			filename: "use-simple-shared-state.es6.umd.js",
+			filename: "use-shared-state.es6.umd.js",
 			path: path.resolve(__dirname, "dist"),
 			globalObject: 'Function("return this")()',
 		},
@@ -16,9 +16,9 @@ module.exports = [
 		entry: "./src/index.js",
 		mode: "production",
 		output: {
-			library: "SimpleSharedStateReact",
+			library: "useSharedState",
 			libraryTarget: "umd",
-			filename: "simple-shared-state.es5.umd.js",
+			filename: "use-shared-state.es5.umd.js",
 			path: path.resolve(__dirname, "dist"),
 			globalObject: 'Function("return this")()',
 		},
@@ -31,7 +31,6 @@ module.exports = [
 						loader: "babel-loader",
 						options: {
 							presets: ["@babel/preset-env"],
-							plugins: ["@babel/plugin-transform-object-assign"]
 						}
 					}
 				}

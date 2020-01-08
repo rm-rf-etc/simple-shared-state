@@ -34,9 +34,10 @@ export default class Store {
 						// meaning something was deleted, so we should proceed to catch block.
 
 						return;
-						// if ^this line runs, selector didn't throw, so exit
+						// if ^this line runs, selector didn't throw, so exit early
 					}
-				} catch (_) { /* if here, something was deleted and change is undefined */ }
+				}
+				catch (_) { /* if here, something was deleted and change is undefined */ }
 
 				if (change === deleted) change = undefined;
 
