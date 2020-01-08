@@ -28,29 +28,28 @@ export default class Store {
 					change = selector(branch);
 
 					if (change === undefined) {
-						// if this fails then something was deleted
+
 						selector(stateTree);
-						// If this line runs then selector didn't fail, so therefore,
-						// the selector is inapplicable, so exit early.
+						// If ^this line throws, then **current state is also not applicable**,
+						// meaning something was deleted, so we should proceed to catch block.
+
 						return;
+						// if ^this line runs, selector didn't throw, so exit
 					}
-				} catch (_) {
-					// if here, something was deleted and change is undefined
-				}
+				} catch (_) { /* if here, something was deleted and change is undefined */ }
+
 				if (change === deleted) change = undefined;
 
 				const snapshot = snapshots.get(selector);
 
-				// this covers the condition where both are undefined
-				if (change !== snapshot) {
-					const newSnapshot = simpleMerge(snapshot, change);
+				// this test also covers the scenario where both are undefined
+				if (change === snapshot) return;
 
-					// Relates to test "watch > dispatch works with values counting down
-					// to zero and up from below zero"
-					snapshots.set(selector, newSnapshot);
-
-					handler(newSnapshot);
-				}
+				const newSnapshot = simpleMerge(snapshot, change);
+				// Relates to test "watch > dispatch works with values counting down
+				// to zero and up from below zero"
+				snapshots.set(selector, newSnapshot);
+				handler(newSnapshot);
 			});
 
 			dispatchListeners.forEach((callback) => callback());
