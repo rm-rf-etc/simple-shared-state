@@ -21,36 +21,52 @@ export default class Store {
 			simpleMerge(stateTree, branch);
 
 			listeners.forEach((handler, selector) => {
+				const submit = (value) => {
+					snapshots.set(selector, value);
+					handler(value);
+				};
 				let change;
+				const snapshot = snapshots.get(selector);
 
 				try {
 					// attempt selector only on the branch
 					change = selector(branch);
 
-					if (change === undefined) {
+					switch(change) {
+						case snapshot:
+							return;
+						case deleted:
+							if (snapshot !== undefined) submit(undefined);
+							return;
+						case pop:
+							submit(selector(stateTree));
+							return;
+						case shift:
+							submit(selector(stateTree));
+							return;
+						case undefined:
+							change = selector(stateTree);
+							// If ^this line throws, then **current state is also not applicable**,
+							// meaning something was deleted, so we should proceed to catch block.
 
-						selector(stateTree);
-						// If ^this line throws, then **current state is also not applicable**,
-						// meaning something was deleted, so we should proceed to catch block.
-
-						return;
-						// if ^this line runs, selector didn't throw, so exit early
+							return;
+							// if `return` runs, then selector didn't throw, so exit early
 					}
 				}
-				catch (_) { /* if here, something was deleted and change is undefined */ }
-
-				if (change === deleted) change = undefined;
-
-				const snapshot = snapshots.get(selector);
+				catch (_) {
+					try {
+						selector(stateTree);
+						return;
+					} catch (_) {}
+					// return;
+				}
 
 				// this test also covers the scenario where both are undefined
 				if (change === snapshot) return;
 
-				const newSnapshot = simpleMerge(snapshot, change);
+				submit(simpleMerge(snapshot, change));
 				// Relates to test "watch > dispatch works with values counting down
 				// to zero and up from below zero"
-				snapshots.set(selector, newSnapshot);
-				handler(newSnapshot);
 			});
 
 			dispatchListeners.forEach((callback) => callback());
@@ -240,7 +256,7 @@ export default class Store {
 
 			const watchHandler = () => {
 				if (changed) {
-					handler(snapshotsArray.map(thingCopier));
+					handler(snapshotsArray.slice()); //map(thingCopier));
 					changed = false;
 				}
 			};
@@ -331,6 +347,8 @@ export default class Store {
  * // state: { a: 1 }
  */
 export const deleted = new Number();
+const shift = [].shift;
+const pop = [].pop;
 
 // Internal use only.
 // const inapplicable = new Number();
@@ -357,6 +375,14 @@ export const deleted = new Number();
 export const simpleMerge = (tree, branch) => {
 	if (tree && branch && typeof tree === "object") {
 		Object.keys(branch).forEach((key) => {
+			if (branch[key] === pop && isArray(tree[key])) {
+				tree[key] = tree[key].slice(0, tree[key].length - 1);
+				return;
+			}
+			if (branch[key] === shift && isArray(tree[key])) {
+				tree[key] = tree[key].slice(1, tree[key].length);
+				return;
+			}
 			if (branch[key] === deleted) {
 				delete tree[key];
 			} else {

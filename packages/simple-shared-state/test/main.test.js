@@ -227,6 +227,11 @@ function testBundle(bundle) {
 						age: 28,
 					},
 				},
+				emptyArray: [],
+				todos: [
+					{ id: 1, label: "buy oat milk" },
+					{ id: 2, label: "buy cat food" },
+				],
 				count: 1,
 			}, (store) => ({
 				increment: () => ({
@@ -256,6 +261,11 @@ function testBundle(bundle) {
 							age: 28,
 						},
 					},
+					emptyArray: [],
+					todos: [
+						{ id: 1, label: "buy oat milk" },
+						{ id: 2, label: "buy cat food" },
+					],
 					count: 1,
 				};
 				expect(state).toEqual(expectedState);
@@ -316,6 +326,16 @@ function testBundle(bundle) {
 				store.dispatch("", { count: 1 });
 				store.dispatch("", { count: 2 });
 				expect(spy.mock.calls).toEqual([ [2], [1], [0], [-1], [-2], [-1], [-0], [1], [2] ]);
+			});
+
+			it("watch selectors work for empty arrays", () => {
+				const spy = jest.fn();
+				store.watchBatch([
+					(state) => state.emptyArray,
+					(state) => state.count,
+				], spy);
+				expect(spy.mock.calls.length).toEqual(1);
+				expect(spy.mock.calls[0]).toEqual([[[], 1]]);
 			});
 
 			it("dispatch invokes listeners", () => {
@@ -540,7 +560,7 @@ function testBundle(bundle) {
 						},
 					},
 				});
-				expect(spy.mock.calls).toEqual([["Howard"]]);
+				expect(spy.mock.calls[0]).toEqual(["Howard"]);
 
 				store.dispatch("", {
 					friends: {
@@ -548,10 +568,7 @@ function testBundle(bundle) {
 					},
 				});
 
-				expect(spy.mock.calls).toEqual([
-					["Howard"],
-					[undefined],
-				]);
+				expect(spy.mock.calls[1]).toEqual([undefined]);
 
 				store.dispatch("", {
 					friends: {
@@ -585,6 +602,40 @@ function testBundle(bundle) {
 		});
 
 		describe("watchBatch", () => {
+			it("array.pop of a sibling array leaves adjacent properties unaffected", () => {
+				const spy = jest.fn();
+				store.watchBatch([
+					(state) => state.friends[1],
+					(state) => state.count,
+					(state) => state.todos,
+				], spy);
+
+				expect(spy.mock.calls[0]).toEqual([[
+					{
+						age: 25,
+						name: "Alice",
+					},
+					1,
+					[
+						{ id: 1, label: "buy oat milk" },
+						{ id: 2, label: "buy cat food" },
+					],
+				]]);
+
+				store.dispatch("", { todos: [].pop });
+
+				expect(spy.mock.calls[1]).toEqual([[
+					{
+						age: 25,
+						name: "Alice"
+					},
+					1,
+					[
+						{ id: 1, label: "buy oat milk" },
+					],
+				]]);
+			});
+
 			it("is called only once for a list of selectors", () => {
 				const spy = jest.fn();
 				const removeWatcher = store.watchBatch([

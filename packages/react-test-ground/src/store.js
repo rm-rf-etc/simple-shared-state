@@ -1,10 +1,11 @@
-import { createStore } from "simple-shared-state";
+import { createStore, partialArray } from "simple-shared-state";
 
 const initialState = {
 	counters: {
 		count1: 0,
 		count2: 0,
 	},
+	todos: [],
 };
 
 const actions = ({ getState }) => ({
@@ -26,8 +27,13 @@ const actions = ({ getState }) => ({
 	decrementCounter2: () => ({
 		counters: { count2: getState(s => s.counters.count2) - 1 },
 	}),
+	pushTodo: (label) => ({
+		todos: partialArray(getState(s => s.todos).length, {
+			label,
+			key: Math.random().toString().split(".")[1],
+		}),
+	}),
+	popTodo: () => ({ todos: [].pop }),
 });
 
-const store = createStore(initialState, actions, window.__REDUX_DEVTOOLS_EXTENSION__);
-
-export default store;
+export default createStore(initialState, actions, window.__REDUX_DEVTOOLS_EXTENSION__);

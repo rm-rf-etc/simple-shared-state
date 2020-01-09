@@ -10,5 +10,15 @@ export default (store, selectors) => {
 		return unwatch;
 	}, []);
 
-	return state;
+	if (state.length) return state;
+
+	const storeState = store.getState();
+	return selectors.map((fn) => {
+		let snapshot;
+		try {
+			snapshot = fn(storeState);
+		} catch (_) {}
+
+		return snapshot;
+	});
 };
