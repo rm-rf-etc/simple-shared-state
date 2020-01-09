@@ -1,9 +1,15 @@
+import merge, { deleted, Swappable } from "./merge";
+
+const shift = [].shift;
+const pop = [].pop;
+const { isArray } = Array;
+
 /**
  * @class module:SimpleSharedState.Store
  */
 
 const objectPrototype = Object.getPrototypeOf({});
-const { isArray } = Array;
+
 
 export default class Store {
 
@@ -18,7 +24,7 @@ export default class Store {
 		const applyBranch = (branch) => {
 			dispatching = true;
 			stateTree = Object.assign({}, stateTree);
-			simpleMerge(stateTree, branch);
+			merge(stateTree, branch);
 
 			listeners.forEach((handler, selector) => {
 				const submit = (value) => {
@@ -58,13 +64,12 @@ export default class Store {
 						selector(stateTree);
 						return;
 					} catch (_) {}
-					// return;
 				}
 
 				// this test also covers the scenario where both are undefined
 				if (change === snapshot) return;
 
-				submit(simpleMerge(snapshot, change));
+				submit(merge(snapshot, change));
 				// Relates to test "watch > dispatch works with values counting down
 				// to zero and up from below zero"
 			});
@@ -321,83 +326,60 @@ export default class Store {
 };
 
 /**
- * @memberof module:SimpleSharedState
- * @const {number} deleted - A globally unique object to reference when you want to delete
- * things from state.
+ * @function module:SimpleSharedState#swapArray
+ *
+ * @description If you need to splice out intermediary elements from an array in state, a new
+ * array will have to be used to replace the existing array. To accomplish this, wrap the new
+ * array in `swapArray()`. `simple-shared-state` will detect the wrapper and replace the
+ * existing array with the new.
+ *
+ * @param {Array} arr - Any array.
  *
  * @example
- * // `deleted` is essentially just a Symbol, but works in IE.
- * const deleted = new Number(0);
- * deleted === 0; // false
- * deleted === deleted; // true
+ * import { createStore, swapArray } from "simple-shared-state";
  *
- * @example
- * import { createStore, deleted } from "simple-shared-state";
+ * const initialState = {
+ *   list: [
+ *     { id: 0, text: "A" },
+ *     { id: 1, text: "B" },
+ *     { id: 2, text: "C" },
+ *   ],
+ * };
  *
- * const actions = () => ({
- *   removeB: () => ({
- *     b: deleted,
- *   }),
+ * // This is how you remove an item by its ID
+ * const actions = ({ getState }) => ({
+ *
+ *   removeByID: (id) => {
+ *     const oldList = getState(s => s.list);
+ *     const idx = oldList.findIndex((item) => item.id === id);
+ *     const newList = oldList.slice(0, idx).concat(oldList.slice(idx + 1, oldList.length));
+ *
+ *     return {
+ *       list: swapArray(newList),
+ *     };
+ *   },
+ *
  * });
- * const store = createStore({ a: 1, b: 2 }, actions);
- * console.log(store.getState()); // { a: 1, b: 2 }
  *
- * store.actions.removeB();
+ * const store = createStore(initialState, actions);
  *
- * // state: { a: 1 }
+ * console.log(store.getState());
+ * // { list:
+ * //   [ { id: 0, text: 'A' },
+ * //     { id: 1, text: 'B' },
+ * //     { id: 2, text: 'C' } ] }
+ *
+ * store.actions.removeByID(1);
+ *
+ * console.log(store.getState());
+ * // { list: [ { id: 0, text: 'A' }, { id: 2, text: 'C' } ] }
  */
-export const deleted = new Number();
-const shift = [].shift;
-const pop = [].pop;
-
-// Internal use only.
-// const inapplicable = new Number();
-
-/**
- * @function module:SimpleSharedState#simpleMerge
- * @description This is for internal use. It's a simplified alternative to lodash.merge, and
- * cuts some corners for the sake of speed. Not knocking lodash at all, but lodash.merge is
- * likely intended for a wider set of use cases. For simple-shared-state, we choose speed over safety.
- *
- * @param {object} tree - any JS primitive or plain object or plain array. Tree will be mutated.
- * @param {object} branch - any JS primitive or plain object or plain array, but should share the
- * same root type as `tree`.
- *
- * @example
- * import { simpleMerge } from "simple-shared-state";
- *
- * const obj = { a: 1 };
- *
- * simpleMerge(obj, { b: 2 }); // returns { a: 1, b: 2 }
- *
- * console.log(obj); // { a: 1, b: 2 }
- */
-export const simpleMerge = (tree, branch) => {
-	if (tree && branch && typeof tree === "object") {
-		Object.keys(branch).forEach((key) => {
-			if (branch[key] === pop && isArray(tree[key])) {
-				tree[key] = tree[key].slice(0, tree[key].length - 1);
-				return;
-			}
-			if (branch[key] === shift && isArray(tree[key])) {
-				tree[key] = tree[key].slice(1, tree[key].length);
-				return;
-			}
-			if (branch[key] === deleted) {
-				delete tree[key];
-			} else {
-				tree[key] = simpleMerge(tree[key], branch[key]);
-			}
-		});
-		return tree;
-	}
-	return branch;
-};
+export const swapArray = (arr) => new Swappable(arr);
 
 /**
  * @function module:SimpleSharedState#partialArray
- * @description This is a helper for making partial arrays from a one-liner. You would use this
- * in your reducers when forming the new branch.
+ * @description This is a helper for making partial arrays from a one-liner. A partial array is
+ * used to update a single element in an array.
  *
  * @param {number} pos - the position where `thing` will be placed in the resulting array.
  * @param {object|array|number|boolean|string} thing - any JS primitive which you want to place
@@ -410,6 +392,41 @@ export const simpleMerge = (tree, branch) => {
  * const change = partialArray(2, "thing");
  * console.log(change); // [ <2 empty items>, 'thing' ]
  * console.log(simpleMerge([ 0, 1, 2, 3 ], change)); // [ 0, 1, 'thing', 3 ]
+ *
+ * @example
+ * import { createStore, partialArray } from "simple-shared-state";
+ *
+ * const initialState = {
+ *   list: [
+ *     { text: "some text" },
+ *     { text: "some more text" },
+ *     { text: "far too much text" },
+ *   ],
+ * };
+ *
+ * const actions = () => ({
+ *   tableFlip: () => ({
+ *     list: partialArray(1, {
+ *       text: "(╯°□°)╯︵ ┻━┻",
+ *     },
+ *   }),
+ * });
+ *
+ * const store = createStore(initialState, actions);
+ *
+ * console.log(store.getState());
+ * // { list:
+ * //   [ { text: 'some text' },
+ * //     { text: 'some more text' },
+ * //     { text: 'far too much text' } ] }
+ *
+ * store.actions.tableFlip();
+ *
+ * console.log(store.getState());
+ * // { list:
+ * //   [ { text: 'some text' },
+ * //     { text: '(╯°□°)╯︵ ┻━┻' },
+ * //     { text: 'far too much text' } ] }
  */
 export const partialArray = (pos, thing) => {
 	const array = [];

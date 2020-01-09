@@ -1,4 +1,5 @@
 import * as redux from "redux";
+import merge from "../src/merge";
 const bundles = {
 	esm: require("../src/index"),
 	es5: require("../dist/simple-shared-state.es5.umd"),
@@ -121,7 +122,7 @@ function testBundle(bundle) {
 		});
 	});
 
-	describe("simpleMerge", () => {
+	describe("merge", () => {
 		let state;
 		const target = {
 			a: [
@@ -145,7 +146,7 @@ function testBundle(bundle) {
 			changes[3] = "change2";
 
 			const expected = [1, "change1", 3, "change2", 5];
-			expect(bundle.simpleMerge(array, changes)).toEqual(expected);
+			expect(merge(array, changes)).toEqual(expected);
 			expect(array).toEqual(expected);
 		});
 
@@ -156,12 +157,12 @@ function testBundle(bundle) {
 			expect(change.a[1].thing).toEqual(3);
 			expect(target.a[1].thing).toEqual(2);
 
-			bundle.simpleMerge(state, change);
+			merge(state, change);
 			expect(state.a[1].thing).toEqual(3);
 		});
 
 		it("can change simple values to other data types inside nested objects", () => {
-			bundle.simpleMerge(state, {
+			merge(state, {
 				b: {
 					bool: "true",
 				},
@@ -170,7 +171,7 @@ function testBundle(bundle) {
 		});
 
 		it("can replace simple values in arrays with new objects", () => {
-			bundle.simpleMerge(state, {
+			merge(state, {
 				a: bundle.partialArray(1, {
 					thing: {
 						new_thing: 1,
@@ -181,7 +182,7 @@ function testBundle(bundle) {
 		});
 
 		it("can append new items to arrays", () => {
-			bundle.simpleMerge(state, {
+			merge(state, {
 				a: bundle.partialArray(2, {
 					thing: "was added",
 				}),
@@ -190,14 +191,14 @@ function testBundle(bundle) {
 		});
 
 		it("doesn't fail on null values", () => {
-			bundle.simpleMerge(state, {
+			merge(state, {
 				a: bundle.partialArray(1, null),
 			});
 			expect(state.a[1]).toEqual(null);
 		});
 
 		it("doesn't fail for values of 0", () => {
-			bundle.simpleMerge(state, {
+			merge(state, {
 				a: 0,
 				b: {
 					asdf1: 0,
@@ -237,6 +238,9 @@ function testBundle(bundle) {
 				increment: () => ({
 					count: store.getState(s => s.count) + 1,
 				}),
+				replaceTodos: () => ({
+					todos: bundle.swapArray([ true, "false" ]),
+				})
 			}));
 		});
 
@@ -462,6 +466,28 @@ function testBundle(bundle) {
 					},
 				});
 				expect(spy.mock.calls.length).toEqual(2);
+			});
+		});
+
+		describe("dispatch with swapArray", () => {
+			it("replaces old arrays with new ones", () => {
+				expect(store.getState(s => s.todos)).toEqual([
+					{ id: 1, label: "buy oat milk" },
+					{ id: 2, label: "buy cat food" },
+				]);
+				store.actions.replaceTodos();
+				expect(store.getState(s => s.todos)).toEqual([ true, "false" ]);
+				expect(store.getState(s => s.friends)).toEqual({
+					"1": {
+						name: "Alice",
+						age: 25,
+					},
+					"2": {
+						name: "Bob",
+						age: 28,
+					},
+				});
+				expect(store.getState(s => s.emptyArray)).toEqual([]);
 			});
 		});
 
@@ -741,5 +767,5 @@ function testBundle(bundle) {
 }
 
 describe("Source", () => testBundle(bundles.esm));
-describe("ES6", () => testBundle(bundles.es6));
-describe("ES5", () => testBundle(bundles.es5));
+// describe("ES6", () => testBundle(bundles.es6));
+// describe("ES5", () => testBundle(bundles.es5));

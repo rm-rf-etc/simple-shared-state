@@ -1,5 +1,6 @@
 import Store from "./store";
-export { partialArray, simpleMerge, deleted } from "./store";
+export { partialArray, swapArray } from "./store";
+export { deleted } from "./merge";
 
 /** @module SimpleSharedState */
 
