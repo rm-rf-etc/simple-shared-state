@@ -1,6 +1,6 @@
 {
   "name": "simple-shared-state",
-  "version": "2.3.1",
+  "version": "3.0.0",
   "description": "",
   "workspaces": true,
   "module": "src/index.js",

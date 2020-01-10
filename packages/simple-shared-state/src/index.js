@@ -1,6 +1,4 @@
 import Store from "./store";
-export { partialArray, swapArray } from "./store";
-export { deleted } from "./merge";
 
 /** @module SimpleSharedState */
 
@@ -18,3 +16,5 @@ export { deleted } from "./merge";
 export const createStore = (initialState = {}, actions, devtool = null) => (
 	new Store(initialState, actions, devtool)
 );
+export { partialArray } from "./store";
+export { deleted } from "./merge";

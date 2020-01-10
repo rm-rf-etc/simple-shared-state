@@ -43,7 +43,7 @@ const App = () => {
           {todos.map((todo) => (
             <li key={todo.key}>
               {todo.label}
-              <button onClick={() => removeTodo(todo.id)}>&times;</button>
+              <button onClick={() => removeTodo(todo.key)}>&times;</button>
             </li>
           ))}
         </ul>

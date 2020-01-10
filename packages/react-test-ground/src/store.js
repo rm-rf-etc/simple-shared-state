@@ -1,4 +1,4 @@
-import { createStore, partialArray, swapArray } from "simple-shared-state";
+import { createStore, partialArray } from "simple-shared-state";
 
 const initialState = {
 	counters: {
@@ -26,7 +26,6 @@ const actions = ({ getState }) => ({
 		const len = getState(s => s.todos.length);
 		return {
 			todos: partialArray(len, {
-				id: len,
 				label,
 				key: Math.random().toString().split(".")[1],
 			}),
@@ -35,12 +34,13 @@ const actions = ({ getState }) => ({
 	popTodo: () => ({
 		todos: [].pop,
 	}),
-	removeTodo: (id) => {
+	removeTodo: (key) => {
 		const todos = getState(s => s.todos);
-		const idx = todos.findIndex((todo) => todo.id === id);
+		const idx = todos.findIndex((todo) => todo.key === key);
 		const newArray = todos.slice(0, idx).concat(todos.slice(idx + 1, todos.length));
+
 		return {
-			todos: swapArray(newArray),
+			todos: newArray,
 		};
 	},
 });

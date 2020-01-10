@@ -1,4 +1,4 @@
-# SimpleSharedState
+# Simple Shared State
 
 Redux is verbose. SimpleSharedState is brief.
 
@@ -6,6 +6,14 @@ Redux is verbose. SimpleSharedState is brief.
 - Repo: [https://github.com/rm-rf-etc/simple-shared-state](https://github.com/rm-rf-etc/simple-shared-state)
 - Example app: https://simple-shared-state.stackblitz.io/
 - Edit online: https://stackblitz.com/edit/simple-shared-state
+
+
+## Status
+
+SimpleSharedState is still relatively experimental. Versions are following semver, but the version being greater
+than 1.0 doesn't mean it's considered production ready just yet. Please review the project source and tests to
+determine if it's viable for your project. More elaborate tests are needed to test SimpleSharedState performance
+against Redux.
 
 
 ## Get It
@@ -26,7 +34,7 @@ If using script tags:
 
 Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@2.3.0/dist/simple-shared-state.es5.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@3.0.0/dist/simple-shared-state.es5.umd.js"></script>
 ```
 
 
@@ -81,13 +89,6 @@ Not published yet but coming in the next couple days. See [use-simple-shared-sta
 for a working hook example, `useSimpleSharedState`.
 
 
-## Status
-
-SimpleSharedState was first born in late Dec. 2019. There's still more testing needed, particularly on performance with react.
-But your willingness to try out SimpleSharedState and report back your experience would greatly help me in developing its API.
-The main goal of SimpleSharedState is to reduce codebase verbosity in a flux/redux-like architecture.
-
-
 ## Concepts
 
 Redux and SimpleSharedState have slightly different scope. If you're comparing one to the other in terms of performance, note
@@ -99,4 +100,4 @@ not the same as a "reducer" in Redux.
 
 ## Future Work
 
-- Network connector for concise async handling (no thunks for us)
+- Atoms for stateful, network-bound event handling (not thunks)

@@ -239,8 +239,8 @@ function testBundle(bundle) {
 					count: store.getState(s => s.count) + 1,
 				}),
 				replaceTodos: () => ({
-					todos: bundle.swapArray([ true, "false" ]),
-				})
+					todos: [ true, "false" ],
+				}),
 			}));
 		});
 
@@ -469,12 +469,15 @@ function testBundle(bundle) {
 			});
 		});
 
-		describe("dispatch with swapArray", () => {
-			it("replaces old arrays with new ones", () => {
+		describe("dispatch with complete arrays", () => {
+			it("replaces old array with new ones", () => {
+				const spy = jest.fn();
 				expect(store.getState(s => s.todos)).toEqual([
 					{ id: 1, label: "buy oat milk" },
 					{ id: 2, label: "buy cat food" },
 				]);
+				store.watch((state) => state.todos, spy);
+
 				store.actions.replaceTodos();
 				expect(store.getState(s => s.todos)).toEqual([ true, "false" ]);
 				expect(store.getState(s => s.friends)).toEqual({
@@ -488,6 +491,9 @@ function testBundle(bundle) {
 					},
 				});
 				expect(store.getState(s => s.emptyArray)).toEqual([]);
+
+				expect(spy.mock.calls.length).toEqual(1);
+				expect(spy.mock.calls[0]).toEqual([[ true, "false" ]]);
 			});
 		});
 
@@ -767,5 +773,5 @@ function testBundle(bundle) {
 }
 
 describe("Source", () => testBundle(bundles.esm));
-// describe("ES6", () => testBundle(bundles.es6));
-// describe("ES5", () => testBundle(bundles.es5));
+describe("ES6", () => testBundle(bundles.es6));
+describe("ES5", () => testBundle(bundles.es5));

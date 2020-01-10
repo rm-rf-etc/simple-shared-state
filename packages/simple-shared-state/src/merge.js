@@ -1,6 +1,6 @@
-const shift = [].shift;
-const pop = [].pop;
-const { isArray } = Array;
+export const shift = [].shift;
+export const pop = [].pop;
+export const { isArray } = Array;
 
 /**
  * @memberof module:SimpleSharedState
@@ -30,17 +30,17 @@ const { isArray } = Array;
  */
 export const deleted = new Number();
 
-export class Swappable {
-	constructor(array) {
-		this.wrapped = array;
+export class PartialArray extends Array {
+	constructor(pos, value) {
+		super();
+		if (typeof pos !== "number") return;
+		this[pos] = value;
 	}
 }
+PartialArray.prototype.isPartial = true;
 
 const merge = (tree, branch) => {
 	if (tree && branch && typeof tree === "object") {
-		if (Object.getPrototypeOf(branch) === Swappable.prototype) {
-			return branch.wrapped.slice();
-		}
 		Object.keys(branch).forEach((key) => {
 			if (branch[key] === pop && isArray(tree[key])) {
 				tree[key] = tree[key].slice(0, tree[key].length - 1);
@@ -50,15 +50,19 @@ const merge = (tree, branch) => {
 				tree[key] = tree[key].slice(1, tree[key].length);
 				return;
 			}
-			if (branch[key] && Object.getPrototypeOf(branch[key]) === Swappable.prototype) {
-				tree[key] = branch[key].wrapped.slice();
-				return;
-			}
 			if (branch[key] === deleted) {
 				delete tree[key];
-			} else {
-				tree[key] = merge(tree[key], branch[key]);
+				return;
 			}
+			if (isArray(branch[key])) {
+				if (branch[key].isPartial) {
+					tree[key] = merge(tree[key], branch[key]);
+				} else {
+					tree[key] = branch[key].slice();
+				}
+				return;
+			}
+			tree[key] = merge(tree[key], branch[key]);
 		});
 		return tree;
 	}

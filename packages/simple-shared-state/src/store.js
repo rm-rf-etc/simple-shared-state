@@ -1,8 +1,10 @@
-import merge, { deleted, Swappable } from "./merge";
-
-const shift = [].shift;
-const pop = [].pop;
-const { isArray } = Array;
+import merge, {
+	deleted,
+	PartialArray,
+	pop,
+	shift,
+	isArray,
+} from "./merge";
 
 /**
  * @class module:SimpleSharedState.Store
@@ -27,10 +29,6 @@ export default class Store {
 			merge(stateTree, branch);
 
 			listeners.forEach((handler, selector) => {
-				const submit = (value) => {
-					snapshots.set(selector, value);
-					handler(value);
-				};
 				let change;
 				const snapshot = snapshots.get(selector);
 
@@ -54,24 +52,30 @@ export default class Store {
 							change = selector(stateTree);
 							// If ^this line throws, then **current state is also not applicable**,
 							// meaning something was deleted, so we should proceed to catch block.
-
 							return;
-							// if `return` runs, then selector didn't throw, so exit early
+							// If `return` runs, then selector didn't throw, so exit early.
 					}
 				}
 				catch (_) {
 					try {
 						selector(stateTree);
+						// If ^selector works on new state then exit early.
 						return;
 					} catch (_) {}
 				}
 
-				// this test also covers the scenario where both are undefined
+				// This test also covers the scenario where both are undefined.
 				if (change === snapshot) return;
 
-				submit(merge(snapshot, change));
-				// Relates to test "watch > dispatch works with values counting down
-				// to zero and up from below zero"
+				if (isArray(change) && !change.isPartial) {
+					submit(change);
+				} else {
+					submit(merge(snapshot, change));
+				}
+				function submit(value) {
+					snapshots.set(selector, value);
+					handler(value);
+				}
 			});
 
 			dispatchListeners.forEach((callback) => callback());
@@ -261,13 +265,13 @@ export default class Store {
 
 			const watchHandler = () => {
 				if (changed) {
-					handler(snapshotsArray.slice()); //map(thingCopier));
+					handler(snapshotsArray.slice());
 					changed = false;
 				}
 			};
 			dispatchListeners.add(watchHandler);
 
-			handler(snapshotsArray.map(thingCopier));
+			handler(snapshotsArray.slice());
 
 			return () => {
 				dispatchListeners.delete(watchHandler);
@@ -301,7 +305,7 @@ export default class Store {
 			if (selector && typeof selector === "function") {
 				let piece;
 				try {
-					piece = thingCopier(selector(stateTree));
+					piece = copy(selector(stateTree));
 				} catch (_) {}
 
 				return piece;
@@ -324,57 +328,6 @@ export default class Store {
 		}
 	}
 };
-
-/**
- * @function module:SimpleSharedState#swapArray
- *
- * @description If you need to splice out intermediary elements from an array in state, a new
- * array will have to be used to replace the existing array. To accomplish this, wrap the new
- * array in `swapArray()`. `simple-shared-state` will detect the wrapper and replace the
- * existing array with the new.
- *
- * @param {Array} arr - Any array.
- *
- * @example
- * import { createStore, swapArray } from "simple-shared-state";
- *
- * const initialState = {
- *   list: [
- *     { id: 0, text: "A" },
- *     { id: 1, text: "B" },
- *     { id: 2, text: "C" },
- *   ],
- * };
- *
- * // This is how you remove an item by its ID
- * const actions = ({ getState }) => ({
- *
- *   removeByID: (id) => {
- *     const oldList = getState(s => s.list);
- *     const idx = oldList.findIndex((item) => item.id === id);
- *     const newList = oldList.slice(0, idx).concat(oldList.slice(idx + 1, oldList.length));
- *
- *     return {
- *       list: swapArray(newList),
- *     };
- *   },
- *
- * });
- *
- * const store = createStore(initialState, actions);
- *
- * console.log(store.getState());
- * // { list:
- * //   [ { id: 0, text: 'A' },
- * //     { id: 1, text: 'B' },
- * //     { id: 2, text: 'C' } ] }
- *
- * store.actions.removeByID(1);
- *
- * console.log(store.getState());
- * // { list: [ { id: 0, text: 'A' }, { id: 2, text: 'C' } ] }
- */
-export const swapArray = (arr) => new Swappable(arr);
 
 /**
  * @function module:SimpleSharedState#partialArray
@@ -428,12 +381,8 @@ export const swapArray = (arr) => new Swappable(arr);
  * //     { text: '(╯°□°)╯︵ ┻━┻' },
  * //     { text: 'far too much text' } ] }
  */
-export const partialArray = (pos, thing) => {
-	const array = [];
-	array[pos] = thing;
-	return array;
-};
+export const partialArray = (pos, thing) => new PartialArray(pos, thing);
 
-function thingCopier(thing) {
+function copy(thing) {
 	return !thing || typeof thing !== "object" ? thing : Object.assign(isArray(thing) ? [] : {}, thing);
 }
