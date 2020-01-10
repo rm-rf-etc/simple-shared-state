@@ -85,14 +85,13 @@ const store = createStore(initialState, actions, window.__REDUX_DEVTOOLS_EXTENSI
 
 ## React Hooks
 
-Not published yet but coming in the next couple days. See [use-simple-shared-state](https://github.com/rm-rf-etc/simple-shared-state/blob/master/packages/use-simple-shared-state/index.js)
-for a working hook example, `useSimpleSharedState`.
+[useSimpleSharedState](https://npmjs.com/package/use-simple-shared-state)
 
 
 ## Concepts
 
 Redux and SimpleSharedState have slightly different scope. If you're comparing one to the other in terms of performance, note
-that SimpleSharedState has more features (with roughly half the character count). The included test suite has some performance
+that SimpleSharedState has more features (with roughly 2/3 the bundle size). The included test suite has some performance
 tests if you're interested, and you can test the build result with `yarn build && yarn test`.
 
 Terms like `reducers` and `action creators` will be reused for developer familiarity, but a "reducer" in SimpleSharedState is
