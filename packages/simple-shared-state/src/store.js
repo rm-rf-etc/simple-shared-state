@@ -22,19 +22,19 @@ export default class Store {
 		this.listeners = new Map();
 		this.snapshots = new Map();
 		this.dispatchListeners = new Set();
+		this.actions = {};
 
 		if (useDevtool && useDevtool.connect && typeof useDevtool.connect === "function") {
 			// this adapts SimpleSharedState to work with redux devtools
 			this.devtool = useDevtool.connect();
 			this.devtool.subscribe((message) => {
 				if (message.type === "DISPATCH" && message.payload.type === "JUMP_TO_STATE") {
-					applyBranch(JSON.parse(message.state));
+					this._applyBranch(JSON.parse(message.state));
 				}
 			});
 			this.devtool.init(this.stateTree);
 		}
 
-		this.actions = {};
 		if (getActions && typeof getActions === "function") {
 			const actions = getActions(this);
 
@@ -48,7 +48,7 @@ export default class Store {
 		}
 	}
 
-	applyBranch(branch) {
+	_applyBranch(branch) {
 		this.dispatching = true;
 		this.stateTree = Object.assign({}, this.stateTree);
 		merge(this.stateTree, branch);
@@ -323,7 +323,7 @@ export default class Store {
 			throw new Error("dispatch expects plain object");
 		}
 
-		this.applyBranch(branch);
+		this._applyBranch(branch);
 
 		if (this.devtool) this.devtool.send(actionName, this.getState());
 	};
