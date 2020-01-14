@@ -4,8 +4,8 @@ Redux is verbose. SimpleSharedState is brief.
 
 - Docs: [https://simplesharedstate.com](https://simplesharedstate.com)
 - Repo: [https://github.com/rm-rf-etc/simple-shared-state](https://github.com/rm-rf-etc/simple-shared-state)
-- Example app: https://simple-shared-state.stackblitz.io/
-- Edit online: https://stackblitz.com/edit/simple-shared-state
+- Example app: [https://simple-shared-state.stackblitz.io/](https://simple-shared-state.stackblitz.io/)
+- Edit online: [https://stackblitz.com/edit/simple-shared-state](https://stackblitz.com/edit/simple-shared-state)
 
 
 ## Status
@@ -34,7 +34,7 @@ If using script tags:
 
 Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@3.0.0/dist/simple-shared-state.es5.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@4.0.0/dist/simple-shared-state.es5.umd.js"></script>
 ```
 
 

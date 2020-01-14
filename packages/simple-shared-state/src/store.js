@@ -1,4 +1,5 @@
-import merge, {
+import {
+	merge,
 	deleted,
 	PartialArray,
 	pop,
@@ -7,13 +8,22 @@ import merge, {
 } from "./merge";
 
 /**
- * @class module:SimpleSharedState.Store
+ * @module SimpleSharedState
  */
 
 const objectPrototype = Object.getPrototypeOf({});
 
-
-export default class Store {
+/**
+ * @description Create a new store instance.
+ *
+ * @constructor
+ * @param {object} initialState - Any plain JS object (Arrays not allowed at the top level).
+ * @param {function} [actions] - A function, which takes a reference to `store`, and returns an object of
+ * actions for invoking changes to state.
+ * @param {function} [devtool] - Provide a reference to `window.__REDUX_DEVTOOLS_EXTENSION__` to enable
+ * redux devtools.
+ */
+export class Store {
 
 	constructor(initialState = {}, getActions, useDevtool) {
 		this.devtool;
@@ -118,7 +128,7 @@ export default class Store {
 	 * has already been passed before, `watch` will throw. Refer to the tests for more examples. `watch`
 	 * returns a function which, when called, removes the watcher / listener.
 	 */
-	watch(selector, handler) {
+	watch(selector, handler, runNow = true) {
 		if (typeof selector !== "function" || typeof handler !== "function") {
 			throw new Error("selector and handler must be functions");
 		}
@@ -129,6 +139,7 @@ export default class Store {
 		let snapshot;
 		try {
 			snapshot = selector(this.stateTree);
+			if (runNow) handler(snapshot);
 		} catch (_) {}
 
 		this.listeners.set(selector, handler);
@@ -205,7 +216,7 @@ export default class Store {
 			this.watch(fn, (snapshot) => {
 				snapshotsArray[pos] = snapshot;
 				changed = true;
-			});
+			}, false);
 		});
 
 		const watchHandler = () => {

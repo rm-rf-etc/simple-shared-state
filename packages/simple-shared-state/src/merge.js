@@ -1,8 +1,13 @@
+/**
+ * @module SimpleSharedState
+ */
+
 export const shift = [].shift;
 export const pop = [].pop;
 export const { isArray } = Array;
 
 /**
+ * @member deleted
  * @memberof module:SimpleSharedState
  * @const {number} deleted - A globally unique object to reference when you want to delete
  * things from state.
@@ -30,16 +35,14 @@ export const { isArray } = Array;
  */
 export const deleted = new Number();
 
-export class PartialArray extends Array {
+export class PartialArray {
 	constructor(pos, value) {
-		super();
-		if (typeof pos !== "number") return;
 		this[pos] = value;
 	}
 }
 PartialArray.prototype.isPartial = true;
 
-const merge = (tree, branch) => {
+export const merge = (tree, branch) => {
 	if (tree && branch && typeof tree === "object") {
 		Object.keys(branch).forEach((key) => {
 			if (branch[key] === pop && isArray(tree[key])) {
@@ -54,12 +57,12 @@ const merge = (tree, branch) => {
 				delete tree[key];
 				return;
 			}
+			if (branch[key] && branch[key].isPartial) {
+				tree[key] = merge(tree[key], branch[key]);
+				return;
+			}
 			if (isArray(branch[key])) {
-				if (branch[key].isPartial) {
-					tree[key] = merge(tree[key], branch[key]);
-				} else {
-					tree[key] = branch[key].slice();
-				}
+				tree[key] = branch[key].slice();
 				return;
 			}
 			tree[key] = merge(tree[key], branch[key]);
@@ -68,5 +71,3 @@ const merge = (tree, branch) => {
 	}
 	return branch;
 };
-
-export default merge;

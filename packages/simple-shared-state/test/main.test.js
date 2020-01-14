@@ -1,5 +1,4 @@
 import * as redux from "redux";
-import merge from "../src/merge";
 const bundles = {
 	esm: require("../src/index"),
 	es5: require("../dist/simple-shared-state.es5.umd"),
@@ -90,7 +89,7 @@ describe("Redux Performance", () => {
 function testBundle(bundle) {
 
 	describe("SimpleSharedState Performance", () => {
-		const store = bundle.createStore({
+		const store = new bundle.Store({
 			a: [
 				{
 					thing1: 1,
@@ -146,7 +145,7 @@ function testBundle(bundle) {
 			changes[3] = "change2";
 
 			const expected = [1, "change1", 3, "change2", 5];
-			expect(merge(array, changes)).toEqual(expected);
+			expect(bundle.merge(array, changes)).toEqual(expected);
 			expect(array).toEqual(expected);
 		});
 
@@ -154,15 +153,18 @@ function testBundle(bundle) {
 			const change = {
 				a: bundle.partialArray(1, { thing: 3 }),
 			};
+			expect(Array.isArray(change.a)).toEqual(false);
 			expect(change.a[1].thing).toEqual(3);
 			expect(target.a[1].thing).toEqual(2);
 
-			merge(state, change);
+			bundle.merge(state, change);
 			expect(state.a[1].thing).toEqual(3);
+			expect(Array.isArray(state.a)).toEqual(true);
+			expect(JSON.stringify(state.a)).toEqual('[{"thing":1},{"thing":3}]');
 		});
 
 		it("can change simple values to other data types inside nested objects", () => {
-			merge(state, {
+			bundle.merge(state, {
 				b: {
 					bool: "true",
 				},
@@ -171,7 +173,7 @@ function testBundle(bundle) {
 		});
 
 		it("can replace simple values in arrays with new objects", () => {
-			merge(state, {
+			bundle.merge(state, {
 				a: bundle.partialArray(1, {
 					thing: {
 						new_thing: 1,
@@ -182,7 +184,7 @@ function testBundle(bundle) {
 		});
 
 		it("can append new items to arrays", () => {
-			merge(state, {
+			bundle.merge(state, {
 				a: bundle.partialArray(2, {
 					thing: "was added",
 				}),
@@ -191,14 +193,14 @@ function testBundle(bundle) {
 		});
 
 		it("doesn't fail on null values", () => {
-			merge(state, {
+			bundle.merge(state, {
 				a: bundle.partialArray(1, null),
 			});
 			expect(state.a[1]).toEqual(null);
 		});
 
 		it("doesn't fail for values of 0", () => {
-			merge(state, {
+			bundle.merge(state, {
 				a: 0,
 				b: {
 					asdf1: 0,
@@ -217,7 +219,7 @@ function testBundle(bundle) {
 		let store = {};
 
 		beforeEach(() => {
-			store = bundle.createStore({
+			store = new bundle.Store({
 				friends: {
 					"1": {
 						name: "Alice",
@@ -246,7 +248,7 @@ function testBundle(bundle) {
 
 		it("creates actions from provided function and passing in reference to store", () => {
 			const spy = jest.fn();
-			store.watch((state) => state.count, spy);
+			store.watch((state) => state.count, spy, false);
 			store.actions.increment();
 			expect(spy.mock.calls).toEqual([[2]]);
 		});
@@ -299,7 +301,7 @@ function testBundle(bundle) {
 		describe("dispatch", () => {
 			it("provides copy of state if called with a function", () => {
 				const spy = jest.fn();
-				store.watch((state) => state.count, spy);
+				store.watch((state) => state.count, spy, false);
 
 				const increment = () => {
 					store.dispatch("", (state) => ({ count: state.count + 1 }));
@@ -318,7 +320,7 @@ function testBundle(bundle) {
 				 * This addresses a specific bug that I found while developing `useSimpleSharedState`.
 				 */
 				const spy = jest.fn();
-				store.watch((state) => state.count, spy);
+				store.watch((state) => state.count, spy, false);
 
 				store.dispatch("", { count: 2 });
 				store.dispatch("", { count: 1 });
@@ -330,6 +332,16 @@ function testBundle(bundle) {
 				store.dispatch("", { count: 1 });
 				store.dispatch("", { count: 2 });
 				expect(spy.mock.calls).toEqual([ [2], [1], [0], [-1], [-2], [-1], [-0], [1], [2] ]);
+			});
+
+			it("watch calls handler immediately unless false is provided as 3rd arg", () => {
+				const spy1 = jest.fn();
+				const spy2 = jest.fn();
+				store.watch((state) => state.count, spy1, false);
+				store.watch((state) => state.count, spy2);
+				expect(spy1.mock.calls.length).toEqual(0);
+				expect(spy2.mock.calls.length).toEqual(1);
+				expect(spy2.mock.calls[0]).toEqual([1]);
 			});
 
 			it("watch selectors work for empty arrays", () => {
@@ -345,8 +357,8 @@ function testBundle(bundle) {
 			it("dispatch invokes listeners", () => {
 				const spy1 = jest.fn();
 				const spy2 = jest.fn();
-				store.watch((state) => state.friends[1].name, spy1);
-				store.watch((state) => state.friends[1].name, spy2);
+				store.watch((state) => state.friends[1].name, spy1, false);
+				store.watch((state) => state.friends[1].name, spy2, false);
 				store.dispatch("", {
 					friends: {
 						"1": {
@@ -362,9 +374,9 @@ function testBundle(bundle) {
 				const spy1 = jest.fn();
 				const spy2 = jest.fn();
 				const spy3 = jest.fn();
-				store.watch((state) => state.friends, spy1);
-				store.watch((state) => state.friends[1], spy2);
-				store.watch((state) => state.friends[1].name, spy3);
+				store.watch((state) => state.friends, spy1, false);
+				store.watch((state) => state.friends[1], spy2, false);
+				store.watch((state) => state.friends[1].name, spy3, false);
 				store.dispatch("", {
 					friends: {
 						"1": {
@@ -393,7 +405,7 @@ function testBundle(bundle) {
 
 			it("unwatch removes watch listeners", () => {
 				const spy = jest.fn();
-				const unwatch = store.watch((state) => state.friends, spy);
+				const unwatch = store.watch((state) => state.friends, spy, false);
 
 				store.dispatch("", {
 					friends: {
@@ -424,12 +436,12 @@ function testBundle(bundle) {
 				const selector = (state) => state.friends[1];
 
 				expect(() => {
-					store.watch(selector, () => {});
-					store.watch(selector, () => {});
+					store.watch(selector, () => {}, false);
+					store.watch(selector, () => {}, false);
 				}).toThrow();
 
-				expect(typeof store.watch((state) => state.friends[1], () => {})).toEqual("function");
-				expect(typeof store.watch((state) => state.friends[1], () => {})).toEqual("function");
+				expect(typeof store.watch((state) => state.friends[1], () => {}, false)).toEqual("function");
+				expect(typeof store.watch((state) => state.friends[1], () => {}, false)).toEqual("function");
 			});
 		});
 
@@ -476,7 +488,7 @@ function testBundle(bundle) {
 					{ id: 1, label: "buy oat milk" },
 					{ id: 2, label: "buy cat food" },
 				]);
-				store.watch((state) => state.todos, spy);
+				store.watch((state) => state.todos, spy, false);
 
 				store.actions.replaceTodos();
 				expect(store.getState(s => s.todos)).toEqual([ true, "false" ]);
@@ -500,7 +512,7 @@ function testBundle(bundle) {
 		describe("dispatch with `deleted`", () => {
 			it("can remove items from arrays", () => {
 				const spy1 = jest.fn();
-				store.watch((state) => state.friends, spy1);
+				store.watch((state) => state.friends, spy1, false);
 				store.dispatch("", {
 					friends: {
 						"1": undefined,
@@ -520,8 +532,8 @@ function testBundle(bundle) {
 			it("can remove items from objects", () => {
 				const spy1 = jest.fn();
 				const spy2 = jest.fn();
-				store.watch((state) => state.friends, spy1);
-				store.watch((state) => state.friends[2].age, spy2);
+				store.watch((state) => state.friends, spy1, false);
+				store.watch((state) => state.friends[2].age, spy2, false);
 				store.dispatch("", {
 					friends: {
 						"1": {
@@ -584,7 +596,7 @@ function testBundle(bundle) {
 
 			it("watchers receive `undefined` when state is deleted", () => {
 				const spy = jest.fn();
-				store.watch((state) => state.friends[1].name, spy);
+				store.watch((state) => state.friends[1].name, spy, false);
 				store.dispatch("", {
 					friends: {
 						"1": {
@@ -773,5 +785,5 @@ function testBundle(bundle) {
 }
 
 describe("Source", () => testBundle(bundles.esm));
-// describe("ES6", () => testBundle(bundles.es6));
-// describe("ES5", () => testBundle(bundles.es5));
+describe("ES6", () => testBundle(bundles.es6));
+describe("ES5", () => testBundle(bundles.es5));
