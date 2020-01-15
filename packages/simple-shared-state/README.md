@@ -34,7 +34,7 @@ If using script tags:
 
 Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@4.0.0/dist/simple-shared-state.es5.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@4.0.1/dist/simple-shared-state.es5.umd.js"></script>
 ```
 
 

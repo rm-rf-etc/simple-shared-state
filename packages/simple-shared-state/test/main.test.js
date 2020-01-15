@@ -236,9 +236,9 @@ function testBundle(bundle) {
 					{ id: 2, label: "buy cat food" },
 				],
 				count: 1,
-			}, (store) => ({
+			}, (getState) => ({
 				increment: () => ({
-					count: store.getState(s => s.count) + 1,
+					count: getState(s => s.count) + 1,
 				}),
 				replaceTodos: () => ({
 					todos: [ true, "false" ],

@@ -46,7 +46,7 @@ export class Store {
 		}
 
 		if (getActions && typeof getActions === "function") {
-			const actions = getActions(this);
+			const actions = getActions(this.getState.bind(this));
 
 			Object.keys(actions).forEach((actionName) => {
 				const actionType = this.devtool ? `${actionName}()` : "";
