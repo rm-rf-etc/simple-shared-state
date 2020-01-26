@@ -28,10 +28,13 @@ function newDerivedState({ label, selectors, getPartial, putPartial, actions }) 
 };
 
 function addPartialState({ label, partialStateStore }) {
-	partialStateStore.watchDispatch(() => {
-		this.dispatchTyped("change from partial", {
-			[label]: partialStateStore.getState(),
-		});
+	this.dispatchTyped("state received", {
+		[label]: partialStateStore.getState(),
 	});
-	this.watch(s => s[label], s => s);
+	partialStateStore.watchDispatch(() => {
+		this.stateTree[label] = partialStateStore.getState();
+	});
+	this.watch(s => s[label], (state) => {
+		partialStateStore.stateTree = Object.assign({}, state);
+	});
 };
