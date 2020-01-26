@@ -112,7 +112,9 @@ export class Store {
 	 * @method module:SimpleSharedState.Store#watch
 	 * @param {function} selector - A pure function which takes state and returns a piece of that state.
 	 * @param {function} handler - The listener which will receive the piece of state when changes occur.
-	 * @returns {function} A function to call to remove the listener.
+	 * @param {boolean} [runNow=true] - Pass false to prevent `handler` from being called immediately
+	 * after watch is called.
+	 * @returns {function} Invoke this function to destroy the listener.
 	 *
 	 * @description Creates a state listener which is associated with the selector. Every selector must
 	 * be globally unique, as they're stored internally in a Set. If `watch` receives a selector which
