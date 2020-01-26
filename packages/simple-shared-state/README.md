@@ -100,3 +100,5 @@ not the same as a "reducer" in Redux.
 ## Future Work
 
 - Atoms for stateful, network-bound event handling (not thunks)
+- Support typescript types
+- Explore potential to optimize selector processing for very large state trees
