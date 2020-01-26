@@ -1,30 +1,22 @@
-import {
-	merge,
-	deleted,
-	PartialArray,
-	pop,
-	shift,
-	isArray,
-} from "./merge";
+import { merge, deleted } from "./merge";
+
+const isArray = Array.isArray;
 
 /**
  * @module SimpleSharedState
  */
 
-const objectPrototype = Object.getPrototypeOf({});
-
-/**
- * @description Create a new store instance.
- *
- * @constructor
- * @param {object} initialState - Any plain JS object (Arrays not allowed at the top level).
- * @param {function} [actions] - A function, which takes a reference to `store`, and returns an object of
- * actions for invoking changes to state.
- * @param {function} [devtool] - Provide a reference to `window.__REDUX_DEVTOOLS_EXTENSION__` to enable
- * redux devtools.
- */
 export class Store {
-
+	/**
+	 * @description Create a new store instance.
+	 *
+	 * @constructor
+	 * @param {object} initialState - Any plain JS object (Arrays not allowed at the top level).
+	 * @param {function} [actions] - A function, which takes a reference to `store`, and returns an object of
+	 * actions for invoking changes to state.
+	 * @param {function} [devtool] - Provide a reference to `window.__REDUX_DEVTOOLS_EXTENSION__` to enable
+	 * redux devtools.
+	 */
 	constructor(initialState = {}, getActions, useDevtool) {
 		this.devtool;
 		this.stateTree = Object.assign({}, initialState);
@@ -49,10 +41,10 @@ export class Store {
 			const actions = getActions(this.getState.bind(this));
 
 			Object.keys(actions).forEach((actionName) => {
-				const actionType = this.devtool ? `${actionName}()` : "";
+				const actionType = this.devtool ? `${actionName}()` : "unknown";
 
 				this.actions[actionName] = (...args) => {
-					this.dispatch(actionType, actions[actionName].apply(null, args));
+					this.dispatchTyped(actionType, actions[actionName].apply(null, args));
 				};
 			});
 		}
@@ -60,7 +52,6 @@ export class Store {
 
 	_applyBranch(branch) {
 		this.dispatching = true;
-		this.stateTree = Object.assign({}, this.stateTree);
 		merge(this.stateTree, branch);
 
 		this.listeners.forEach((handler, selector) => {
@@ -81,10 +72,10 @@ export class Store {
 					case deleted:
 						if (snapshot !== undefined) submit(undefined);
 						return;
-					case pop:
+					case Array.prototype.pop:
 						submit(selector(this.stateTree));
 						return;
-					case shift:
+					case Array.prototype.shift:
 						submit(selector(this.stateTree));
 						return;
 					case undefined:
@@ -163,9 +154,9 @@ export class Store {
 	 * `handler` function will be called with the array of snapshots, ***if*** any snapshots have changed.
 	 *
 	 * @example
-	 * import { createStore, partialArray } from "simple-shared-state";
+	 * import { Store, partialArray } from "simple-shared-state";
 	 *
-	 * const store = createStore({
+	 * const store = new Store({
 	 *   people: ["Alice", "Bob"],
 	 * });
 	 *
@@ -174,10 +165,10 @@ export class Store {
 	 *   (state) => state.people[1],
 	 * ], (values) => console.log(values));
 	 *
-	 * store.dispatch("", { people: partialArray(1, "John") });
+	 * store.dispatch({ people: partialArray(1, "John") });
 	 * // [ 'Alice', 'John' ]
 	 *
-	 * store.dispatch("", { people: [ "Janet", "Jake", "James" ] });
+	 * store.dispatch({ people: [ "Janet", "Jake", "James" ] });
 	 * // [ 'Janet', 'Jake' ]
 	 * // notice "James" is not present, that's because of our selectors
 	 *
@@ -185,7 +176,7 @@ export class Store {
 	 * // [ 'Janet', 'Jake', 'James' ]
 	 *
 	 * unwatch();
-	 * store.dispatch("", { people: [ "Justin", "Josh", store.deleted ] });
+	 * store.dispatch({ people: [ "Justin", "Josh", store.deleted ] });
 	 * // nothing happens, the watcher was removed
 	 *
 	 * console.log(store.getState(s => s.people));
@@ -254,8 +245,8 @@ export class Store {
 	 *
 	 * @param {function} [selector] - Optional but recommended function which returns a piece of the state.
 	 * Error handling not required, your selector will run inside a `try{} catch{}` block.
-	 * @returns {*} A copy of the state tree, or a copy of the piece returned from the selector, or
-	 * undefined if the selector fails.
+	 * @returns {*} A shallow copy of the state tree, or a copy of the piece returned from the selector,
+	 * or undefined if the selector fails.
 	 */
 	getState(selector) {
 		if (selector && typeof selector === "function") {
@@ -271,23 +262,47 @@ export class Store {
 	};
 
 	/**
-	 * @method module:SimpleSharedState.Store#dispatch
+	 * @method module:SimpleSharedState.Store#dispatchTyped
 	 *
-	 * @param {string} actionName - A string to label this action, this is only used by redux devtools. Normally
-	 * you won't call dispatch directly, you'll instead pass an action creators function to
-	 * [#createStore]{@link module:SimpleSharedState#createStore}, which will auto-generate this value for you.
-	 * @param {object|function} arg - A JavaScript object, or a function which takes state and returns a
-	 * JavaScript object. The object may contain any Array or JS primitive, but must be a plain JS object ({})
+	 * @param {string} actionName - This is only for the benefit of providing a label in redux devtools.
+	 * @param {object|function} branch - A JavaScript object, or a function which takes state and returns a
+	 * JavaScript object. The object may contain any Array or JS primitive, but must be a plain JS object
 	 * at the top level, otherwise dispatch will throw.
 	 *
-	 * @description Takes a branch (or a function which takes state and returns a branch), which is any plain
-	 * JS object that represents the desired change to state.
+	 * @description Please use [action creators]{@link module:SimpleSharedState#Store} instead of calling
+	 * dispatchTyped directly.
+	 */
+	dispatchTyped(actionName = "unknown", branch) {
+		if (this.dispatching) throw new Error("can't dispatch while dispatching");
+
+		if (!branch) throw new Error("can't dispatch invalid branch");
+
+		if (typeof branch === "function") {
+			branch = branch(this.getState());
+		}
+		if (typeof branch !== "object") {
+			throw new Error("dispatch got invalid branch");
+		}
+		this._applyBranch(branch);
+
+		if (this.devtool) this.devtool.send(actionName, this.getState());
+	};
+
+	/**
+	 * @method module:SimpleSharedState.Store#dispatch
+	 *
+	 * @param {object|function} branch - A JavaScript object, or a function which takes state and returns a
+	 * JavaScript object. The object may contain any Array or JS primitive, but must be a plain JS object
+	 * at the top level, otherwise dispatch will throw.
+	 *
+	 * @description Please use [action creators]{@link module:SimpleSharedState#Store} instead of calling
+	 * dispatch directly.
 	 *
 	 * @example
-	 * import { createStore } from "simple-shared-state";
+	 * import { Store } from "simple-shared-state";
 	 *
 	 * // Create a store with state:
-	 * const store = createStore({
+	 * const store = new Store({
 	 *   email: "user@example.com",
 	 *   counters: {
 	 *     likes: 1,
@@ -300,12 +315,12 @@ export class Store {
 	 *
 	 * // To change email, call dispatch with a branch. The branch you provide must include the full path
 	 * // from the root of the state, to the value you want to change.
-	 * store.dispatch("ANY_LABEL_YOU_CHOOSE", {
+	 * store.dispatch({
 	 *   email: "me@simplesharedstate.com",
 	 * });
 	 *
 	 * // To increment likes:
-	 * store.dispatch("ANY_LABEL_YOU_CHOOSE", (state) => ({
+	 * store.dispatch((state) => ({
 	 *   counters: {
 	 *     likes: state.counters.likes + 1,
 	 *   },
@@ -313,31 +328,20 @@ export class Store {
 	 *
 	 * // To delete any piece of state, use a reference to `store.deleted` as the value in the branch.
 	 * // To remove `counters` from the state entirely:
-	 * store.dispatch("ANY_LABEL_YOU_CHOOSE", {
+	 * store.dispatch({
 	 *   counters: store.deleted,
 	 * });
 	 *
 	 * // To update items in arrays, you can use `partialArray`:
-	 * store.dispatch("ANY_LABEL_YOU_CHOOSE", {
+	 * store.dispatch({
 	 *   todoList: partialArray(1, {
 	 *     label: "buy oat milk (because it requires 80 times less water than almond milk)",
 	 *   }),
 	 * });
 	 */
-	dispatch(actionName, arg) {
-		if (typeof actionName !== "string") throw new Error("dispatch actionName must be a string");
-		if (this.dispatching) throw new Error("can't dispatch while dispatching");
-
-		const branch = typeof arg === "function" ? arg(this.getState()) : arg;
-
-		if (!branch || Object.getPrototypeOf(branch) !== objectPrototype) {
-			throw new Error("dispatch expects plain object");
-		}
-
-		this._applyBranch(branch);
-
-		if (this.devtool) this.devtool.send(actionName, this.getState());
-	};
+	dispatch(branch) {
+		this.dispatchTyped("unknown", branch);
+	}
 };
 
 /**
@@ -354,11 +358,10 @@ export class Store {
  * import { partialArray } from "simple-shared-state";
  *
  * const change = partialArray(2, "thing");
- * console.log(change); // [ <2 empty items>, 'thing' ]
- * console.log(simpleMerge([ 0, 1, 2, 3 ], change)); // [ 0, 1, 'thing', 3 ]
+ * console.log(change); // PartialArray { '2': 'thing' }
  *
  * @example
- * import { createStore, partialArray } from "simple-shared-state";
+ * import { Store, partialArray } from "simple-shared-state";
  *
  * const initialState = {
  *   list: [
@@ -376,7 +379,7 @@ export class Store {
  *   }),
  * });
  *
- * const store = createStore(initialState, actions);
+ * const store = new Store(initialState, actions);
  *
  * console.log(store.getState());
  * // { list:
@@ -397,3 +400,8 @@ export const partialArray = (pos, thing) => new PartialArray(pos, thing);
 function copy(thing) {
 	return !thing || typeof thing !== "object" ? thing : Object.assign(isArray(thing) ? [] : {}, thing);
 }
+
+function PartialArray(pos, value) {
+	this[pos] = value;
+}
+PartialArray.prototype.isPartial = true;

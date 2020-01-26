@@ -26,12 +26,36 @@ module.exports = [
 			rules: [
 				{
 					test: /\.m?js$/,
-					exclude: /(node_modules)/,
 					use: {
 						loader: "babel-loader",
 						options: {
 							presets: ["@babel/preset-env"],
 							plugins: ["@babel/plugin-transform-object-assign"]
+						}
+					}
+				}
+			]
+		}
+	},
+	{
+		entry: "./src/merge.js",
+		mode: "production",
+		output: {
+			library: "merge",
+			libraryTarget: "umd",
+			filename: "merge.js",
+			path: path.resolve(__dirname, "test_bundle"),
+			globalObject: 'Function("return this")()',
+		},
+		module: {
+			rules: [
+				{
+					test: /src\/merge.js$/,
+					exclude: /.*/,
+					use: {
+						loader: "babel-loader",
+						options: {
+							presets: ["@babel/preset-env"],
 						}
 					}
 				}

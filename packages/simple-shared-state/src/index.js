@@ -1,2 +1,2 @@
 export { partialArray, Store } from "./store";
-export { deleted, merge } from "./merge";
+export { deleted } from "./merge";

@@ -1,4 +1,4 @@
-import { createStore, partialArray } from "simple-shared-state";
+import { Store, partialArray } from "simple-shared-state";
 
 const initialState = {
 	counters: {
@@ -12,7 +12,7 @@ const initialState = {
 	],
 };
 
-const actions = ({ getState }) => ({
+const actions = (getState) => ({
 	setCounter1: (value) => ({
 		counters: { count1: +value },
 	}),
@@ -45,4 +45,4 @@ const actions = ({ getState }) => ({
 	},
 });
 
-export default createStore(initialState, actions, window.__REDUX_DEVTOOLS_EXTENSION__);
+export default new Store(initialState, actions, window.__REDUX_DEVTOOLS_EXTENSION__);

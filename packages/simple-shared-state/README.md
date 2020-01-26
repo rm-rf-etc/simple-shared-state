@@ -26,7 +26,7 @@ If using script tags:
 ```html
 <script src="https://unpkg.com/simple-shared-state"></script>
 <script>
-  const store = SimpleSharedState.createStore({});
+  const store = new SimpleSharedState.Store({});
 </script>
 ```
 
@@ -34,7 +34,7 @@ If using script tags:
 
 Use `dist/simple-shared-state.es5.umd.js`. For example:
 ```html
-<script src="https://unpkg.com/simple-shared-state@4.0.1/dist/simple-shared-state.es5.umd.js"></script>
+<script src="https://unpkg.com/simple-shared-state@4.1.0/dist/simple-shared-state.es5.umd.js"></script>
 ```
 
 
@@ -42,7 +42,7 @@ Use `dist/simple-shared-state.es5.umd.js`. For example:
 
 First create a store.
 ```javascript
-import { createStore } from "simple-shared-state";
+import { Store } from "simple-shared-state";
 
 const initialState = {
   user: {
@@ -57,7 +57,7 @@ const actions = () => ({
     },
   }),
 });
-const store = createStore(initialState, actions);
+const store = new Store(initialState, actions);
 ```
 Then create a watcher. Don't worry about error handling in selectors, just return
 the state that you want.
@@ -79,7 +79,7 @@ store.actions.changeSlogan("simple-shared-state is better than cat memes");
 
 Works with devtools, of course. Just pass in the reference like this:
 ```javascript
-const store = createStore(initialState, actions, window.__REDUX_DEVTOOLS_EXTENSION__);
+const store = new Store(initialState, actions, window.__REDUX_DEVTOOLS_EXTENSION__);
 ```
 
 

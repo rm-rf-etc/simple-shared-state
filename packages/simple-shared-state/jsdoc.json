@@ -1,5 +1,8 @@
 {
     "plugins": ["plugins/markdown"],
+    "docdash": {
+        "static": true
+    },
     "source": {
         "include": ["src", "../../README.md"],
         "includePattern": ".+\\.js$",

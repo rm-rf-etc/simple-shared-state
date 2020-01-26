@@ -1,7 +1,7 @@
 {
   "name": "simple-shared-state",
-  "version": "4.0.1",
-  "description": "",
+  "version": "4.1.0",
+  "description": "Easily share state between components using a no-frills observable object API",
   "workspaces": true,
   "module": "src/index.js",
   "main": "dist/simple-shared-state.es6.umd.js",
@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "test": "jest --watchAll",
     "doc": "jsdoc -c ./jsdoc.json -t templates/",
-    "build": "webpack ./src/index.js"
+    "build": "webpack"
   },
   "keywords": [
     "shared state",
@@ -23,7 +23,6 @@
   ],
   "author": "Rob Christian <rm.rf.etc@gmail.com>",
   "license": "ISC",
-  "dependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/rm-rf-etc/simple-shared-state"
