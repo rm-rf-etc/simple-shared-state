@@ -88,17 +88,9 @@ const store = new Store(initialState, actions, window.__REDUX_DEVTOOLS_EXTENSION
 [useSimpleSharedState](https://npmjs.com/package/use-simple-shared-state)
 
 
-## Concepts
-
-Redux and SimpleSharedState have slightly different scope. If you're comparing one to the other in terms of performance, note
-that SimpleSharedState has more features (with roughly 2/3 the bundle size). The included test suite has some performance
-tests if you're interested, and you can test the build result with `yarn build && yarn test`.
-
-Terms like `reducers` and `action creators` will be reused for developer familiarity, but a "reducer" in SimpleSharedState is
-not the same as a "reducer" in Redux.
-
 ## Future Work
 
-- Atoms for stateful, network-bound event handling (not thunks)
+- Fix redux devtools integration
+- Add support for async/await in action creators
 - Support typescript types
 - Explore potential to optimize selector processing for very large state trees
