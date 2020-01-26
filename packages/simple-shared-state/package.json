@@ -1,6 +1,6 @@
 {
   "name": "simple-shared-state",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Easily share state between components using a no-frills observable object API",
   "workspaces": true,
   "module": "src/index.js",

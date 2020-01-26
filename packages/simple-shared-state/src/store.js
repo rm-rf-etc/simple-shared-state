@@ -349,10 +349,9 @@ export class Store {
  * @description This is a helper for making partial arrays from a one-liner. A partial array is
  * used to update a single element in an array.
  *
- * @param {number} pos - the position where `thing` will be placed in the resulting array.
- * @param {object|array|number|boolean|string} thing - any JS primitive which you want to place
- * into the resulting array.
- * @returns {array}
+ * @param {number} pos - The position where `thing` will be placed in the resulting array.
+ * @param {object|array|number|boolean|string} thing - Any JS primitive.
+ * @returns {object}
  *
  * @example
  * import { partialArray } from "simple-shared-state";
