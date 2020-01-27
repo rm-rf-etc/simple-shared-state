@@ -11,8 +11,15 @@
     "lint": "eslint .",
     "test": "jest --watchAll",
     "doc": "jsdoc -c ./jsdoc.json -t templates/",
-    "build": "webpack"
+    "build": "webpack",
+    "size": "npx size-limit"
   },
+  "size-limit": [
+    {
+      "path": "dist/simple-shared-state.es6.umd.js",
+      "limit": "10 KB"
+    }
+  ],
   "keywords": [
     "shared state",
     "redux",
@@ -31,6 +38,7 @@
     "@babel/core": "^7.0.0",
     "@babel/plugin-transform-object-assign": "^7.7.4",
     "@babel/preset-env": "^7.7.7",
+    "@size-limit/preset-small-lib": "^3.0.0",
     "babel-loader": "^8.0.6",
     "docdash": "^1.1.1",
     "esm": "^3.2.25",
