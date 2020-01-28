@@ -35,7 +35,7 @@ export const merge = (tree, branch) => {
 	if (tree && branch && typeof tree === "object") {
 		Object.keys(branch).forEach((key) => {
 			if (isArray(branch[key])) {
-				tree[key] = branch[key].slice();
+				tree[key] = branch[key];
 				return;
 			}
 			if (branch[key] === pop && isArray(tree[key])) {
