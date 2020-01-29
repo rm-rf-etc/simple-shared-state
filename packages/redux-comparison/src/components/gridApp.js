@@ -6,7 +6,7 @@ export default ({ clickStart, changeSize, size, ColorSquare }) => (
         <ColorSquareGrid gridSize={size} ColorSquare={ColorSquare} />
         <br />
 
-        <button onClick={clickStart}>Run</button>
+        <button onClick={clickStart}>Start / Stop</button>
         <br/>
 
         <input
