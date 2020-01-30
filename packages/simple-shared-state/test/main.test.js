@@ -564,7 +564,7 @@ function testBundle(bundle) {
 		});
 
 		describe("watchBatch", () => {
-			it("array.pop of a sibling array leaves adjacent properties unaffected", () => {
+			it("array.slice(0, -1) removes the last element from an array in state", () => {
 				const spy = jest.fn();
 				store.watchBatch([
 					(state) => state.friends[1],
@@ -584,7 +584,7 @@ function testBundle(bundle) {
 					],
 				]]);
 
-				store.dispatch({ todos: [].pop });
+				store.dispatch((state) => ({ todos: state.todos.slice(0, -1) }));
 
 				expect(spy.mock.calls[1]).toEqual([[
 					{
@@ -596,6 +596,48 @@ function testBundle(bundle) {
 						{ id: 1, label: "buy oat milk" },
 					],
 				]]);
+
+				expect(store.getState().todos).toEqual([
+					{ id: 1, label: "buy oat milk" },
+				]);
+			});
+
+			it("array.slice(1) removes the first element from an array in state", () => {
+				const spy = jest.fn();
+				store.watchBatch([
+					(state) => state.friends[1],
+					(state) => state.count,
+					(state) => state.todos,
+				], spy);
+
+				expect(spy.mock.calls[0]).toEqual([[
+					{
+						age: 25,
+						name: "Alice",
+					},
+					1,
+					[
+						{ id: 1, label: "buy oat milk" },
+						{ id: 2, label: "buy cat food" },
+					],
+				]]);
+
+				store.dispatch((state) => ({ todos: state.todos.slice(1) }));
+
+				expect(spy.mock.calls[1]).toEqual([[
+					{
+						age: 25,
+						name: "Alice"
+					},
+					1,
+					[
+						{ id: 2, label: "buy cat food" },
+					],
+				]]);
+
+				expect(store.getState().todos).toEqual([
+					{ id: 2, label: "buy cat food" },
+				]);
 			});
 
 			it("is called only once for a list of selectors", () => {
@@ -722,9 +764,10 @@ function testMerge(bundle, merge) {
 
 		it("correctly merges partial arrays", () => {
 			const array = [1, 2, 3, 4, 5];
-			const changes = [];
-			changes[1] = "change1";
-			changes[3] = "change2";
+			const changes = {
+				"1": "change1",
+				"3": "change2",
+			};
 
 			const expected = [1, "change1", 3, "change2", 5];
 			expect(merge(array, changes)).toEqual(expected);
@@ -733,7 +776,11 @@ function testMerge(bundle, merge) {
 
 		it("can update simple values in objects in arrays", () => {
 			const change = {
-				a: bundle.partialArray(1, { thing: 3 }),
+				a: {
+					"1": {
+						thing: 3,
+					},
+				},
 			};
 			expect(Array.isArray(change.a)).toEqual(false);
 			expect(change.a[1].thing).toEqual(3);
@@ -756,27 +803,33 @@ function testMerge(bundle, merge) {
 
 		it("can replace simple values in arrays with new objects", () => {
 			merge(state, {
-				a: bundle.partialArray(1, {
-					thing: {
-						new_thing: 1,
+				a: {
+					"1": {
+						thing: {
+							new_thing: 1,
+						},
 					},
-				}),
+				},
 			});
 			expect(state.a[1].thing).toEqual({ new_thing: 1 });
 		});
 
 		it("can append new items to arrays", () => {
 			merge(state, {
-				a: bundle.partialArray(2, {
-					thing: "was added",
-				}),
+				a: {
+					"2": {
+						thing: "was added",
+					},
+				},
 			});
 			expect(state.a[2]).toEqual({ thing: "was added" });
 		});
 
 		it("doesn't fail on null values", () => {
 			merge(state, {
-				a: bundle.partialArray(1, null),
+				a: {
+					"1": null,
+				},
 			});
 			expect(state.a[1]).toEqual(null);
 		});

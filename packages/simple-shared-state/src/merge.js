@@ -27,31 +27,20 @@
  */
 export const deleted = new Number();
 
-const pop = [].pop;
-const shift = [].shift;
 const isArray = Array.isArray;
 
 export const merge = (tree, branch) => {
+	if (isArray(branch)) {
+		return branch;
+	}
 	if (tree && branch && typeof tree === "object") {
 		Object.keys(branch).forEach((key) => {
 			if (isArray(branch[key])) {
 				tree[key] = branch[key];
 				return;
 			}
-			if (branch[key] === pop && isArray(tree[key])) {
-				tree[key] = tree[key].slice(0, tree[key].length - 1);
-				return;
-			}
-			if (branch[key] === shift && isArray(tree[key])) {
-				tree[key] = tree[key].slice(1, tree[key].length);
-				return;
-			}
 			if (branch[key] === deleted) {
 				delete tree[key];
-				return;
-			}
-			if (branch[key] && branch[key].isPartial) {
-				tree[key] = merge(tree[key], branch[key]);
 				return;
 			}
 			tree[key] = merge(tree[key], branch[key]);

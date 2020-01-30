@@ -72,12 +72,6 @@ export class Store {
 					case deleted:
 						if (snapshot !== undefined) submit(undefined);
 						return;
-					case Array.prototype.pop:
-						submit(selector(this.stateTree));
-						return;
-					case Array.prototype.shift:
-						submit(selector(this.stateTree));
-						return;
 					case undefined:
 						change = selector(this.stateTree);
 						// If ^this line throws, then **current state is also not applicable**,
@@ -346,63 +340,6 @@ export class Store {
 	}
 };
 
-/**
- * @function module:SimpleSharedState#partialArray
- * @description This is a helper for making partial arrays from a one-liner. A partial array is
- * used to update a single element in an array.
- *
- * @param {number} pos - The position where `thing` will be placed in the resulting array.
- * @param {object|array|number|boolean|string} thing - Any JS primitive.
- * @returns {object}
- *
- * @example
- * import { partialArray } from "simple-shared-state";
- *
- * const change = partialArray(2, "thing");
- * console.log(change); // PartialArray { '2': 'thing' }
- *
- * @example
- * import { Store, partialArray } from "simple-shared-state";
- *
- * const initialState = {
- *   list: [
- *     { text: "some text" },
- *     { text: "some more text" },
- *     { text: "far too much text" },
- *   ],
- * };
- *
- * const actions = () => ({
- *   tableFlip: () => ({
- *     list: partialArray(1, {
- *       text: "(╯°□°)╯︵ ┻━┻",
- *     },
- *   }),
- * });
- *
- * const store = new Store(initialState, actions);
- *
- * console.log(store.getState());
- * // { list:
- * //   [ { text: 'some text' },
- * //     { text: 'some more text' },
- * //     { text: 'far too much text' } ] }
- *
- * store.actions.tableFlip();
- *
- * console.log(store.getState());
- * // { list:
- * //   [ { text: 'some text' },
- * //     { text: '(╯°□°)╯︵ ┻━┻' },
- * //     { text: 'far too much text' } ] }
- */
-export const partialArray = (pos, thing) => new PartialArray(pos, thing);
-
 function copy(thing) {
 	return !thing || typeof thing !== "object" ? thing : Object.assign(isArray(thing) ? [] : {}, thing);
 }
-
-function PartialArray(pos, value) {
-	this[pos] = value;
-}
-PartialArray.prototype.isPartial = true;
