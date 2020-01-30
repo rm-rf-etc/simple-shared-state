@@ -44,9 +44,7 @@ const App = () => {
 
     const changes = {};
     for(let i=0; i < gridSize * gridSize; i++) {
-      if (Math.random() > 0.5) {
-        changes[i % (gridSize * gridSize)] = randomRGB();
-      }
+      changes[i] = randomRGB();
     }
     store.dispatch({
       type: 'CHANGE_COLORS',
