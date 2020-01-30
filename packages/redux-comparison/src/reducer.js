@@ -13,8 +13,8 @@ function reducer(state = initialState, action) {
   switch(action.type) {
     case 'CHANGE_EXAMPLE': {
       const newState = { ...state };
-      newState.example.thing1.a = `changed! ${Math.random()}`
-      newState.example.thing1.b = `changed! ${Math.random()}`
+      newState.example.thing1.a = `changed! ${Math.random()}`;
+      newState.example.thing1.b = `changed! ${Math.random()}`;
       return newState;
     }
     case 'CHANGE_COLORS': {
@@ -28,6 +28,7 @@ function reducer(state = initialState, action) {
     }
     case 'CHANGE_GRID_SIZE': {
       return {
+        ...state,
         gridSize: action.newSize,
         squareColors: Array(action.newSize * action.newSize).fill([0,0,0]),
       };
