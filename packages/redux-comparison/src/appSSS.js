@@ -9,6 +9,7 @@ import getStats from './lib/stats';
 import Stats from 'stats-incremental';
 
 let stats = Stats();
+let running = false;
 
 
 const TwoCol = styled.div`
@@ -34,11 +35,11 @@ const App = () => {
   const [gridSize, example] = useSharedState(store, [s => s.gridSize, s => s.example]);
   const [scoreState, setScoreState] = React.useState('');
 
-  const handleClick = React.useCallback(() => {
+  const scoreIt = React.useCallback(() => {
     const t1 = performance.now();
     
     const changes = {};
-    for(let i=0; i < gridSize * gridSize; i++) {
+    for(let i=0; i < (gridSize * gridSize); i++) {
       changes[i] = randomRGB();
     }
     changeColors(changes);
@@ -48,6 +49,22 @@ const App = () => {
 
     setScoreState(getStats('SSS', stats.getAll()));
   }, [gridSize]);
+
+  const handleClick = React.useCallback(() => {
+    if (running) {
+      running = false;
+      return;
+    }
+    running = true;
+    loop();
+
+    function loop() {
+      if (running) {
+        scoreIt();
+        setTimeout(loop, 500);
+      }
+    }
+  }, [scoreIt]);
 
   return (
     <>
@@ -75,6 +92,7 @@ const App = () => {
         </Col>
         <Col start="1">
           <GridApp
+            runOnce={scoreIt}
             clickStart={handleClick}
             changeSize={changeSize}
             size={gridSize}

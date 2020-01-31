@@ -11,6 +11,8 @@ import Stats from 'stats-incremental';
 
 let stats = Stats();
 
+let running = false;
+
 const TwoCol = styled.div`
 display: grid;
 grid-gap: 20px;
@@ -28,10 +30,12 @@ const resetScores = () => stats = Stats();
 
 const changeSize = (e) => store.dispatch({
   type: 'CHANGE_GRID_SIZE',
-  newSize: e.target.value
+  newSize: e.target.value,
 });
 
-const changeExample = () => store.dispatch({ type: 'CHANGE_EXAMPLE' });
+const changeExample = () => store.dispatch({
+  type: 'CHANGE_EXAMPLE',
+});
 
 const App = () => {
   const gridSize = useSelector(state => state.gridSize);
@@ -39,7 +43,7 @@ const App = () => {
   const [scoreState, setScoreState] = React.useState('');
   // useSelector(state => state.example.thing1.a);
 
-  const handleClick = React.useCallback(() => {
+  const scoreIt = React.useCallback(() => {
     const t1 = performance.now();
 
     const changes = {};
@@ -56,6 +60,22 @@ const App = () => {
 
     setScoreState(getStats('Redux', stats.getAll()));
   }, [gridSize]);
+
+  const handleClick = React.useCallback(() => {
+    if (running) {
+      running = false;
+      return;
+    }
+    running = true;
+    loop();
+
+    function loop() {
+      if (running) {
+        scoreIt();
+        setTimeout(loop, 500);
+      }
+    }
+  }, [scoreIt]);
 
   return (
     <>
@@ -84,6 +104,7 @@ const App = () => {
         <Col start="1">
           <GridApp
             size={gridSize}
+            runOnce={scoreIt}
             clickStart={handleClick}
             changeSize={changeSize}
             ColorSquareGrid={ColorSquareGrid}

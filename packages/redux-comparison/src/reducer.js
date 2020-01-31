@@ -1,6 +1,8 @@
 const initialState = {
   gridSize: 1,
-  squareColors: [[0,0,0]],
+  squareColors: [
+    [0,0,0],
+  ],
   example: {
     thing1: {
       a: 1,
@@ -30,7 +32,8 @@ function reducer(state = initialState, action) {
       return {
         ...state,
         gridSize: action.newSize,
-        squareColors: Array(action.newSize * action.newSize).fill([0,0,0]),
+        squareColors: Array(action.newSize * action.newSize)
+          .fill([0,0,0]),
       };
     }
     default:

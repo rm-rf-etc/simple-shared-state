@@ -1,7 +1,7 @@
 const randomRGB = () => ([
-    Math.floor(Math.random()*256),
-    Math.floor(Math.random()*256),
-    Math.floor(Math.random()*256)
+  Math.floor(Math.random()*256),
+  Math.floor(Math.random()*256),
+  Math.floor(Math.random()*256)
 ]);
 
 export function randomRGBArray(arrayLength) {

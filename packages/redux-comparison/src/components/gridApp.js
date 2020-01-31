@@ -1,12 +1,16 @@
 import React from 'react';
 import ColorSquareGrid from './squareGrid';
 
-export default ({ clickStart, changeSize, size, ColorSquare }) => (
+export default ({ clickStart, runOnce, changeSize, size, ColorSquare }) => (
     <div className="App">
-        <ColorSquareGrid gridSize={size} ColorSquare={ColorSquare} />
+        <ColorSquareGrid
+            gridSize={size}
+            ColorSquare={ColorSquare}
+        />
         <br />
 
-        <button onClick={clickStart}>Start / Stop</button>
+        <button onClick={clickStart}>Run</button>
+        <button onClick={runOnce}>Run Once</button>
         <br/>
 
         <input

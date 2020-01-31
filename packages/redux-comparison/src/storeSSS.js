@@ -2,7 +2,9 @@ import { Store } from 'simple-shared-state';
 
 const state = {
 	gridSize: 1,
-	squareColors: new Array(2 * 2).fill([0,0,0]),
+	squareColors: [
+		[0, 0, 0],
+	],
 	example: {
 		thing1: {
 			a: 1,
