@@ -45,7 +45,7 @@ export const merge = (tree, branch) => {
 			}
 			tree[key] = merge(tree[key], branch[key]);
 		});
-		return tree;
+		return Object.assign(isArray(tree) ? [] : {}, tree);
 	}
 	return branch;
 };

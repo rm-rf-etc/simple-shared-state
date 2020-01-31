@@ -230,6 +230,45 @@ function testBundle(bundle) {
 
 				expect(spy.mock.calls).toEqual([ [2], [3], [4], [5], [6], [7], [8], [9], [0] ]);
 			});
+
+			it("handles large objects of numbered props", () => {
+				const store = new bundle.Store({
+					colors: [
+						{r:0, g:0, b:0},
+					],
+				});
+				const colors = {
+					"0": {
+						"r": 48,
+						"g": 173,
+						"b": 3
+					},
+					"1": {
+						"r": 216,
+						"g": 229,
+						"b": 123
+					},
+					"2": {
+						"r": 255,
+						"g": 36,
+						"b": 245
+					},
+					"3": {
+						"r": 88,
+						"g": 89,
+						"b": 131
+					},
+				};
+				store.dispatch({ colors });
+				expect(store.stateTree).toEqual({ colors:
+					[
+						{ "r": 48, "g": 173, "b": 3 },
+						{ "r": 216, "g": 229, "b": 123 },
+						{ "r": 255, "g": 36, "b": 245 },
+						{ "r": 88, "g": 89, "b": 131 },
+					]
+				});
+			});
 		});
 
 		describe("watch", () => {
