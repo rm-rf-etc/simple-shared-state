@@ -10,7 +10,7 @@
   "scripts": {
     "lint": "eslint .",
     "test": "jest --watchAll",
-    "doc": "jsdoc -c ./jsdoc.json -t templates/",
+    "doc": "jsdoc -c ./jsdoc.json -t ../../node_modules/docdash",
     "build": "webpack",
     "size": "npx size-limit"
   },
@@ -40,9 +40,10 @@
     "@babel/preset-env": "^7.7.7",
     "@size-limit/preset-small-lib": "^3.0.0",
     "babel-loader": "^8.0.6",
-    "docdash": "^1.1.1",
+    "docdash": "^1.2.0",
     "esm": "^3.2.25",
     "jest": "^24.9.0",
+    "jsdoc": "^3.6.3",
     "redux": "^4.0.5",
     "taffydb": "^2.7.3",
     "webpack": "^4.41.5",
