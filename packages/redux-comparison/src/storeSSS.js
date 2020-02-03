@@ -33,3 +33,5 @@ const actions = () => ({
 
 // export default new Store(state, actions, window.__REDUX_DEVTOOLS_EXTENSION__);
 export default new Store(state, actions);
+
+export const altStoreSSS = new Store(state, actions);

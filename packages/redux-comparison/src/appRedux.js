@@ -1,17 +1,16 @@
 import React from 'react';
 import GridApp from './components/gridApp';
-import ColorSquareGrid from './components/squareGrid';
 import ColorSquare from './components/colorSquareRedux';
 import randomRGB from './lib/randomRGB';
 import { useSelector } from 'react-redux';
-import store from './storeRedux';
+import store, { altStoreRedux } from './storeRedux';
 import styled from 'styled-components';
 import getStats from './lib/stats';
 import Stats from 'stats-incremental';
 
 let stats = Stats();
-
 let running = false;
+let running2 = false;
 
 const TwoCol = styled.div`
 display: grid;
@@ -28,9 +27,13 @@ width: 100%;
 
 const resetScores = () => stats = Stats();
 
-const changeSize = (e) => store.dispatch({
+const changeSize = (value) => store.dispatch({
   type: 'CHANGE_GRID_SIZE',
-  newSize: e.target.value,
+  newSize: value,
+});
+const changeSize2 = (value) => altStoreRedux.dispatch({
+  type: 'CHANGE_GRID_SIZE',
+  newSize: value,
 });
 
 const changeExample = () => store.dispatch({
@@ -43,7 +46,7 @@ const App = () => {
   const [scoreState, setScoreState] = React.useState('');
   // useSelector(state => state.example.thing1.a);
 
-  const scoreIt = React.useCallback(() => {
+  const scoreIt = () => {
     const t1 = performance.now();
 
     const changes = {};
@@ -59,9 +62,26 @@ const App = () => {
     stats.update(t2 - t1);
 
     setScoreState(getStats('Redux', stats.getAll()));
-  }, [gridSize]);
+  };
+  const scoreIt2 = () => {
+    const t1 = performance.now();
 
-  const handleClick = React.useCallback(() => {
+    const changes = {};
+    for(let i=0; i < gridSize * gridSize; i++) {
+      changes[i] = randomRGB();
+    }
+    altStoreRedux.dispatch({
+      type: 'CHANGE_COLORS',
+      newColors: changes,
+    });
+
+    const t2 = performance.now();
+    stats.update(t2 - t1);
+
+    setScoreState(getStats('Redux', stats.getAll()));
+  };
+
+  const handleClick = () => {
     if (running) {
       running = false;
       return;
@@ -75,7 +95,22 @@ const App = () => {
         setTimeout(loop, 500);
       }
     }
-  }, [scoreIt]);
+  };
+  const handleClick2 = () => {
+    if (running2) {
+      running2 = false;
+      return;
+    }
+    running2 = true;
+    loop();
+
+    function loop() {
+      if (running2) {
+        scoreIt2();
+        setTimeout(loop, 500);
+      }
+    }
+  };
 
   return (
     <>
@@ -106,9 +141,12 @@ const App = () => {
             size={gridSize}
             runOnce={scoreIt}
             clickStart={handleClick}
-            changeSize={changeSize}
-            ColorSquareGrid={ColorSquareGrid}
+            clickStart2={handleClick2}
             ColorSquare={ColorSquare}
+            changeSize={({ target }) => {
+              changeSize(target.value);
+              changeSize2(target.value);
+            }}
           />
         </Col>
       </TwoCol>

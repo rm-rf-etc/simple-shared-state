@@ -1,24 +1,41 @@
 import { useEffect, useState } from "react";
 
 export default (store, selectors) => {
-	const [state, setState] = useState([]);
+	const [, setState] = useState([]);
+
+	const state = [];
+	let enabled = false;
+	const unwatchList = [];
 
 	useEffect(() => {
-		const unwatch = store.watchBatch(selectors, (array) => {
-			setState(array.slice());
+		selectors.forEach((fn, index) => {
+			const unwatch = store.watch(fn, (selectedState) => {
+				state[index] = selectedState;
+				if (enabled) setState(new Number());
+			});
+			unwatchList.push(unwatch);
 		});
-		return unwatch;
+		enabled = true;
+
+		console.log('using lib from repo');
+		return () => {
+			unwatchList.forEach(fn => fn());
+			unwatchList.splice(0);
+		};
 	}, []);
 
-	if (state.length) return state;
+	// only runs on first call
+	if (enabled) return state;
 
 	const storeState = store.getState();
-	return selectors.map((fn) => {
+	selectors.forEach((fn, index) => {
 		let snapshot;
 		try {
 			snapshot = fn(storeState);
 		} catch (_) {}
 
-		return snapshot;
+		state[index] = snapshot;
 	});
+
+	return state;
 };

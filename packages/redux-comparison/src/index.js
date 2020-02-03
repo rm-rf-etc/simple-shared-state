@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import App1 from './appSSS';
 import App2 from './appRedux';
 import { Provider } from 'react-redux';
+// import storeSSS, { ProviderSSS } from './storeSSS';
 import reduxStore from './storeRedux';
 import * as serviceWorker from './serviceWorker';
 
