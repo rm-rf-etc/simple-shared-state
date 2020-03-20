@@ -38,12 +38,12 @@ const App = () => {
   const [scoreState, setScoreState] = React.useState('');
 
   const scoreIt2 = () => {
-    const t1 = performance.now();
-
     const changes = {};
     for(let i=0; i < (gridSize * gridSize); i++) {
       changes[i] = randomRGB();
     }
+
+    const t1 = performance.now();
     altStoreSSS.actions.changeColors(changes);
 
     const t2 = performance.now();

@@ -47,12 +47,12 @@ const App = () => {
   // useSelector(state => state.example.thing1.a);
 
   const scoreIt = () => {
-    const t1 = performance.now();
-
     const changes = {};
     for(let i=0; i < gridSize * gridSize; i++) {
       changes[i] = randomRGB();
     }
+
+    const t1 = performance.now();
     store.dispatch({
       type: 'CHANGE_COLORS',
       newColors: changes,
