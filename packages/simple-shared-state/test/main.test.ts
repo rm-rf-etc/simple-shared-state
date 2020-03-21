@@ -1,8 +1,21 @@
 import * as redux from "redux";
+import { Reducer, Action } from "redux";
+import { Merge } from "../src/types";
+import * as esm from "../src/index";
+import { StoreConstructor } from "../src/index";
+
+type StoreType = InstanceType<StoreConstructor>;
+// resort to using require syntax to allow for relative import of
+// a UMD module
+const es5 = require("../dist/simple-shared-state.es5.umd");
+const es6 = require("../dist/simple-shared-state.es6.umd");
+type ESMBundle = typeof esm;
+type ES5Bundle = typeof es5;
+type ES6Bundle = typeof es6;
 const bundles = {
-	esm: require("../src/index"),
-	es5: require("../dist/simple-shared-state.es5.umd"),
-	es6: require("../dist/simple-shared-state.es6.umd"),
+	esm,
+	es5,
+	es6,
 	esm_merge: require("../src/merge").merge,
 	es6_merge: require("../test_bundle/merge").merge,
 };
@@ -11,18 +24,17 @@ const _100_000 = 100000;
 const _50_000_000 = 50000000;
 const _100_000_000 = 100000000;
 
-function testRawJSPerformance(times) {
+function testRawJSPerformance(times: number) {
 	describe.skip(`JS Performance over ${(times).toLocaleString()} repetitions`, () => {
 		const actionType = "SOME_ACTION_TYPE";
 		let string = "?";
-		let intrvl;
-		let num;
+		let num: number;
 		const state = {
 			some_prop: {
 				correct_path: 1,
 			},
 		};
-		intrvl = setInterval(() => {
+		let intrvl = setInterval(() => {
 			string = Math.random().toString().split(".")[1];
 		}, 0);
 		it(`time required to compare strings ${(times).toLocaleString()} times`, () => {
@@ -36,7 +48,7 @@ function testRawJSPerformance(times) {
 		it(`time required to lookup object properties ${(times).toLocaleString()} times`, () => {
 			for (let i = 0; i < times; i++) {
 				try {
-					num = state.some_prop[string];
+					num = (state as any).some_prop[string];
 				} catch (_) {}
 			}
 			expect(num).toEqual(undefined);
@@ -44,7 +56,7 @@ function testRawJSPerformance(times) {
 		it(`time required to lookup object properties ${(times).toLocaleString()} times`, () => {
 			for (let i = 0; i < times; i++) {
 				try {
-					num = state.some_prop.correct_path;
+					num = (state as any).some_prop.correct_path;
 				} catch (_) {}
 			}
 			expect(num).toEqual(1);
@@ -56,13 +68,21 @@ testRawJSPerformance(_100_000);
 testRawJSPerformance(_50_000_000);
 testRawJSPerformance(_100_000_000);
 
+type ReduxState = { [k: string]: any };
+const defaultAction = {
+	value: 0,
+	type: "",
+};
 describe("Redux Performance", () => {
-	const reducer = (oldState = { thing1: 1 }, action = {}) => {
+	const reducer: Reducer<ReduxState, Action<string> & typeof defaultAction> = (
+		oldState = { thing1: 1 },
+		action = defaultAction,
+	) => {
 		return {
 			...oldState,
 			a: {
-				thing1: action.value + 1,
-				thing2: -(action.value + 1),
+				thing1: (action.value || 0) + 1,
+				thing2: -((action.value || 0) + 1),
 			},
 		};
 	};
@@ -88,10 +108,12 @@ describe("Redux Performance", () => {
 	});
 });
 
-function testBundle(bundle) {
+function testBundle(bundle: ESMBundle | ES5Bundle | ES6Bundle) {
+	const Store = bundle.Store;
+	const deleted = bundle.deleted;
 
 	describe("SimpleSharedState Performance", () => {
-		const store = new bundle.Store({
+		const initialState = {
 			a: [
 				{
 					thing1: 1,
@@ -102,10 +124,12 @@ function testBundle(bundle) {
 			b: {
 				ignored: "asdf",
 			},
-		});
+		};
+		type InitialState = typeof initialState;
+		const store = new Store(initialState);
 
 		it(`run dispatch ${(_100_000).toLocaleString()} times`, (done) => {
-			store.watch((state) => state.a[0], (state) => {
+			store.watch((state: InitialState) => state.a[0], (state: InitialState["a"][0]) => {
 				if (state.thing1 === _100_000) {
 					done();
 				}
@@ -124,31 +148,34 @@ function testBundle(bundle) {
 	});
 
 	describe("Store", () => {
-		let store = {};
+		let store: StoreType;
+
+		const initialState = {
+			friends: {
+				"1": {
+					name: "Alice",
+					age: 25,
+				},
+				"2": {
+					name: "Bob",
+					age: 28,
+				},
+			},
+			emptyArray: ([] as any[]),
+			todos: [
+				{ id: 1, label: "buy oat milk" },
+				{ id: 2, label: "buy cat food" },
+			],
+			count: 1,
+		};
+		type InitialState = typeof initialState;
 
 		beforeEach(() => {
-			store = new bundle.Store({
-				friends: {
-					"1": {
-						name: "Alice",
-						age: 25,
-					},
-					"2": {
-						name: "Bob",
-						age: 28,
-					},
-				},
-				emptyArray: [],
-				todos: [
-					{ id: 1, label: "buy oat milk" },
-					{ id: 2, label: "buy cat food" },
-				],
-				count: 1,
-			}, (getState) => ({
+			store = new Store(initialState, (getState: (fn: (s: InitialState) => any) => any) => ({
 				increment: () => ({
 					count: getState(s => s.count) + 1,
 				}),
-				decrement: () => (state) => ({
+				decrement: () => (state: InitialState) => ({
 					count: state.count - 1,
 				}),
 				replaceTodos: () => ({
@@ -159,14 +186,14 @@ function testBundle(bundle) {
 
 		it("creates actions from provided function and passes reference to store", () => {
 			const spy = jest.fn();
-			store.watch((state) => state.count, spy, false);
+			store.watch((state: InitialState) => state.count, spy, false);
 			store.actions.increment();
 			expect(spy.mock.calls).toEqual([[2]]);
 		});
 
 		it("actions that return a function will call the function and receive state", () => {
 			const spy = jest.fn();
-			store.watch((state) => state.count, spy, false);
+			store.watch((state: InitialState) => state.count, spy, false);
 			store.actions.decrement();
 			expect(spy.mock.calls).toEqual([[0]]);
 		});
@@ -185,7 +212,7 @@ function testBundle(bundle) {
 							age: 28,
 						},
 					},
-					emptyArray: [],
+					emptyArray: ([] as any[]),
 					todos: [
 						{ id: 1, label: "buy oat milk" },
 						{ id: 2, label: "buy cat food" },
@@ -209,7 +236,7 @@ function testBundle(bundle) {
 				let friends = store.getState(s => s.friends);
 				friends = null;
 				expect(friends).toEqual(null);
-				expect(store.getState(s => s.friends[1])).toEqual({
+				expect(store.getState((s: InitialState) => s.friends[1])).toEqual({
 					name: "Alice",
 					age: 25,
 				});
@@ -219,10 +246,10 @@ function testBundle(bundle) {
 		describe("dispatch", () => {
 			it("provides copy of state if called with a function", () => {
 				const spy = jest.fn();
-				store.watch((state) => state.count, spy, false);
+				store.watch((state: InitialState) => state.count, spy, false);
 
 				const increment = () => {
-					store.dispatch((state) => ({ count: state.count + 1 }));
+					store.dispatch((state: InitialState) => ({ count: state.count + 1 }));
 				};
 
 				for (let i=0; i<8; i++) increment();
@@ -232,9 +259,9 @@ function testBundle(bundle) {
 			});
 
 			it("handles large objects of numbered props", () => {
-				const store = new bundle.Store({
+				const store = new Store({
 					colors: [
-						{r:0, g:0, b:0},
+						{ r:0, g:0, b:0 },
 					],
 				});
 				const colors = {
@@ -260,13 +287,13 @@ function testBundle(bundle) {
 					},
 				};
 				store.dispatch({ colors });
-				expect(store.stateTree).toEqual({ colors:
-					[
+				expect(store.stateTree).toEqual({
+					colors: [
 						{ "r": 48, "g": 173, "b": 3 },
 						{ "r": 216, "g": 229, "b": 123 },
 						{ "r": 255, "g": 36, "b": 245 },
 						{ "r": 88, "g": 89, "b": 131 },
-					]
+					],
 				});
 			});
 		});
@@ -277,7 +304,7 @@ function testBundle(bundle) {
 				 * This addresses a specific bug that I found while developing `useSimpleSharedState`.
 				 */
 				const spy = jest.fn();
-				store.watch((state) => state.count, spy, false);
+				store.watch((state: InitialState) => state.count, spy, false);
 
 				store.dispatch({ count: 2 });
 				store.dispatch({ count: 1 });
@@ -294,8 +321,8 @@ function testBundle(bundle) {
 			it("watch calls handler immediately unless false is provided as 3rd arg", () => {
 				const spy1 = jest.fn();
 				const spy2 = jest.fn();
-				store.watch((state) => state.count, spy1, false);
-				store.watch((state) => state.count, spy2);
+				store.watch((state: InitialState) => state.count, spy1, false);
+				store.watch((state: InitialState) => state.count, spy2);
 				expect(spy1.mock.calls.length).toEqual(0);
 				expect(spy2.mock.calls.length).toEqual(1);
 				expect(spy2.mock.calls[0]).toEqual([1]);
@@ -304,8 +331,8 @@ function testBundle(bundle) {
 			it("watch selectors work for empty arrays", () => {
 				const spy = jest.fn();
 				store.watchBatch([
-					(state) => state.emptyArray,
-					(state) => state.count,
+					(state: InitialState) => state.emptyArray,
+					(state: InitialState) => state.count,
 				], spy);
 				expect(spy.mock.calls.length).toEqual(1);
 				expect(spy.mock.calls[0]).toEqual([[[], 1]]);
@@ -314,8 +341,8 @@ function testBundle(bundle) {
 			it("dispatch invokes listeners", () => {
 				const spy1 = jest.fn();
 				const spy2 = jest.fn();
-				store.watch((state) => state.friends[1].name, spy1, false);
-				store.watch((state) => state.friends[1].name, spy2, false);
+				store.watch((state: InitialState) => state.friends[1].name, spy1, false);
+				store.watch((state: InitialState) => state.friends[1].name, spy2, false);
 				store.dispatch({
 					friends: {
 						"1": {
@@ -331,9 +358,9 @@ function testBundle(bundle) {
 				const spy1 = jest.fn();
 				const spy2 = jest.fn();
 				const spy3 = jest.fn();
-				store.watch((state) => state.friends, spy1, false);
-				store.watch((state) => state.friends[1], spy2, false);
-				store.watch((state) => state.friends[1].name, spy3, false);
+				store.watch((state: InitialState) => state.friends, spy1, false);
+				store.watch((state: InitialState) => state.friends[1], spy2, false);
+				store.watch((state: InitialState) => state.friends[1].name, spy3, false);
 				store.dispatch({
 					friends: {
 						"1": {
@@ -362,7 +389,7 @@ function testBundle(bundle) {
 
 			it("unwatch removes watch listeners", () => {
 				const spy = jest.fn();
-				const unwatch = store.watch((state) => state.friends, spy, false);
+				const unwatch = store.watch((state: InitialState) => state.friends, spy, false);
 
 				store.dispatch({
 					friends: {
@@ -390,15 +417,17 @@ function testBundle(bundle) {
 			});
 
 			it("should throw when attempting to reuse existing selector", () => {
-				const selector = (state) => state.friends[1];
+				const selector = (state: InitialState) => state.friends[1];
 
 				expect(() => {
 					store.watch(selector, () => {}, false);
 					store.watch(selector, () => {}, false);
 				}).toThrow();
 
-				expect(typeof store.watch((state) => state.friends[1], () => {}, false)).toEqual("function");
-				expect(typeof store.watch((state) => state.friends[1], () => {}, false)).toEqual("function");
+				expect(typeof store.watch((state: InitialState) => state.friends[1], () => {}, false))
+				.toEqual("function");
+				expect(typeof store.watch((state: InitialState) => state.friends[1], () => {}, false))
+				.toEqual("function");
 			});
 		});
 
@@ -445,7 +474,7 @@ function testBundle(bundle) {
 					{ id: 1, label: "buy oat milk" },
 					{ id: 2, label: "buy cat food" },
 				]);
-				store.watch((state) => state.todos, spy, false);
+				store.watch((state: InitialState) => state.todos, spy, false);
 
 				store.actions.replaceTodos();
 				expect(store.getState(s => s.todos)).toEqual([ true, "false" ]);
@@ -469,11 +498,11 @@ function testBundle(bundle) {
 		describe("dispatch with `deleted`", () => {
 			it("can remove items from arrays", () => {
 				const spy1 = jest.fn();
-				store.watch((state) => state.friends, spy1, false);
+				store.watch((state: InitialState) => state.friends, spy1, false);
 				store.dispatch({
 					friends: {
 						"1": undefined,
-						"2": bundle.deleted,
+						"2": deleted,
 					},
 				});
 				expect(spy1.mock.calls).toEqual([[{
@@ -482,15 +511,15 @@ function testBundle(bundle) {
 				expect(store.getState().friends.hasOwnProperty("1")).toEqual(true);
 				expect(store.getState().friends.hasOwnProperty("2")).toEqual(false);
 
-				store.dispatch({ friends: bundle.deleted });
+				store.dispatch({ friends: deleted });
 				expect(store.getState().hasOwnProperty("friends")).toEqual(false);
 			});
 
 			it("can remove items from objects", () => {
 				const spy1 = jest.fn();
 				const spy2 = jest.fn();
-				store.watch((state) => state.friends, spy1, false);
-				store.watch((state) => state.friends[2].age, spy2, false);
+				store.watch((state: InitialState) => state.friends, spy1, false);
+				store.watch((state: InitialState) => state.friends[2].age, spy2, false);
 				store.dispatch({
 					friends: {
 						"1": {
@@ -498,7 +527,7 @@ function testBundle(bundle) {
 							age: undefined, // age will remain in state with value `undefined`
 						},
 						"2": {
-							age: bundle.deleted, // age will be removed from state
+							age: deleted, // age will be removed from state
 						},
 					},
 				});
@@ -524,13 +553,13 @@ function testBundle(bundle) {
 				store.dispatch({
 					friends: {
 						"2": {
-							age: bundle.deleted,
+							age: deleted,
 						},
 					},
 				});
 				store.dispatch({
 					friends: {
-						"2": bundle.deleted,
+						"2": deleted,
 					},
 				});
 
@@ -553,7 +582,7 @@ function testBundle(bundle) {
 
 			it("watchers receive `undefined` when state is deleted", () => {
 				const spy = jest.fn();
-				store.watch((state) => state.friends[1].name, spy, false);
+				store.watch((state: InitialState) => state.friends[1].name, spy, false);
 				store.dispatch({
 					friends: {
 						"1": {
@@ -565,7 +594,7 @@ function testBundle(bundle) {
 
 				store.dispatch({
 					friends: {
-						"1": bundle.deleted,
+						"1": deleted,
 					},
 				});
 
@@ -606,35 +635,33 @@ function testBundle(bundle) {
 			it("array.slice(0, -1) removes the last element from an array in state", () => {
 				const spy = jest.fn();
 				store.watchBatch([
-					(state) => state.friends[1],
-					(state) => state.count,
-					(state) => state.todos,
+					(state: InitialState) => state.friends[1],
+					(state: InitialState) => state.count,
+					(state: InitialState) => state.todos,
 				], spy);
 
-				expect(spy.mock.calls[0]).toEqual([[
-					{
-						age: 25,
-						name: "Alice",
-					},
-					1,
+				expect(spy.mock.calls[0]).toEqual([
 					[
-						{ id: 1, label: "buy oat milk" },
-						{ id: 2, label: "buy cat food" },
-					],
-				]]);
+						{ age: 25, name: "Alice" },
+						1,
+						[
+							{ id: 1, label: "buy oat milk" },
+							{ id: 2, label: "buy cat food" },
+						],
+					]
+				]);
 
-				store.dispatch((state) => ({ todos: state.todos.slice(0, -1) }));
+				store.dispatch((state: InitialState) => ({ todos: state.todos.slice(0, -1) }));
 
-				expect(spy.mock.calls[1]).toEqual([[
-					{
-						age: 25,
-						name: "Alice"
-					},
-					1,
+				expect(spy.mock.calls[1]).toEqual([
 					[
-						{ id: 1, label: "buy oat milk" },
-					],
-				]]);
+						{ age: 25, name: "Alice" },
+						1,
+						[
+							{ id: 1, label: "buy oat milk" },
+						],
+					]
+				]);
 
 				expect(store.getState().todos).toEqual([
 					{ id: 1, label: "buy oat milk" },
@@ -644,35 +671,33 @@ function testBundle(bundle) {
 			it("array.slice(1) removes the first element from an array in state", () => {
 				const spy = jest.fn();
 				store.watchBatch([
-					(state) => state.friends[1],
-					(state) => state.count,
-					(state) => state.todos,
+					(state: InitialState) => state.friends[1],
+					(state: InitialState) => state.count,
+					(state: InitialState) => state.todos,
 				], spy);
 
-				expect(spy.mock.calls[0]).toEqual([[
-					{
-						age: 25,
-						name: "Alice",
-					},
-					1,
+				expect(spy.mock.calls[0]).toEqual([
 					[
-						{ id: 1, label: "buy oat milk" },
-						{ id: 2, label: "buy cat food" },
-					],
-				]]);
+						{ age: 25, name: "Alice" },
+						1,
+						[
+							{ id: 1, label: "buy oat milk" },
+							{ id: 2, label: "buy cat food" },
+						],
+					]
+				]);
 
-				store.dispatch((state) => ({ todos: state.todos.slice(1) }));
+				store.dispatch((state: InitialState) => ({ todos: state.todos.slice(1) }));
 
-				expect(spy.mock.calls[1]).toEqual([[
-					{
-						age: 25,
-						name: "Alice"
-					},
-					1,
+				expect(spy.mock.calls[1]).toEqual([
 					[
-						{ id: 2, label: "buy cat food" },
-					],
-				]]);
+						{ age: 25, name: "Alice" },
+						1,
+						[
+							{ id: 2, label: "buy cat food" },
+						],
+					]
+				]);
 
 				expect(store.getState().todos).toEqual([
 					{ id: 2, label: "buy cat food" },
@@ -682,10 +707,10 @@ function testBundle(bundle) {
 			it("is called only once for a list of selectors", () => {
 				const spy = jest.fn();
 				const removeWatcher = store.watchBatch([
-					(state) => state.friends[1].age,
-					(state) => state.friends[1].name,
-					(state) => state.friends[2].age,
-					(state) => state.friends[2].name,
+					(state: InitialState) => state.friends[1].age,
+					(state: InitialState) => state.friends[1].name,
+					(state: InitialState) => state.friends[2].age,
+					(state: InitialState) => state.friends[2].name,
 				], spy);
 				expect(spy.mock.calls.length).toEqual(1);
 				expect(spy.mock.calls).toEqual([[[25, "Alice", 28, "Bob"]]]);
@@ -721,9 +746,9 @@ function testBundle(bundle) {
 			it("is not called repeatedly for inapplicable selectors", () => {
 				const spy = jest.fn();
 				store.watchBatch([
-					(s) => s.something,
-					(s) => s.nothing.here,
-					(s) => s.none.state.here,
+					(s: any): any => s.something,
+					(s: any): any => s.nothing.here,
+					(s: any): any => s.none.state.here,
 				], spy);
 
 				store.dispatch({
@@ -751,7 +776,7 @@ function testBundle(bundle) {
 		describe("erroneous selectors", () => {
 			it("does not spam the listener with `undefined` on every dispatch event", () => {
 				const spy = jest.fn();
-				store.watch((state) => state.not.valid.selector, spy);
+				store.watch((state: any) => state.not.valid.selector, spy);
 				store.dispatch({
 					friends: {
 						"1": {
@@ -783,34 +808,40 @@ function testBundle(bundle) {
 	});
 }
 
-function testMerge(bundle, merge) {
+const target = {
+	a: [
+		{ thing: 1 },
+		{ thing: 2 },
+	],
+	b: {
+		asdf1: "!",
+		asdf2: 0,
+		bool: false,
+	},
+};
+type Target = typeof target;
+function testMerge(merge: (a: any, b: any) => Merge<Target, any>) {
 	describe("merge", () => {
-		let state;
-		const target = {
-			a: [
-				{ thing: 1 },
-				{ thing: 2 },
-			],
-			b: {
-				asdf1: "!",
-				asdf2: 0,
-				bool: false,
-			},
-		};
+		let state: Target;
+
 		beforeEach(() => {
 			state = { ...target };
 		});
 
 		it("correctly merges partial arrays", () => {
-			const array = [1, 2, 3, 4, 5];
+			const array = { a: [1, 2, 3, 4, 5] };
 			const changes = {
-				"1": "change1",
-				"3": "change2",
+				a: {
+					"1": "change1",
+					"3": "change2",
+				},
 			};
 
-			const expected = [1, "change1", 3, "change2", 5];
+			const expected = {
+				a: [1, "change1", 3, "change2", 5],
+			};
 			expect(merge(array, changes)).toEqual(expected);
-			expect(array).toEqual(expected);
+			expect(array).toEqual({ a: [1, 2, 3, 4, 5] });
 		});
 
 		it("can update simple values in objects in arrays", () => {
@@ -825,23 +856,23 @@ function testMerge(bundle, merge) {
 			expect(change.a[1].thing).toEqual(3);
 			expect(target.a[1].thing).toEqual(2);
 
-			merge(state, change);
-			expect(state.a[1].thing).toEqual(3);
-			expect(Array.isArray(state.a)).toEqual(true);
-			expect(JSON.stringify(state.a)).toEqual('[{"thing":1},{"thing":3}]');
+			const result = merge(state, change);
+			expect(result.a[1].thing).toEqual(3);
+			expect(Array.isArray(result.a)).toEqual(true);
+			expect(JSON.stringify(result.a)).toEqual('[{"thing":1},{"thing":3}]');
 		});
 
 		it("can change simple values to other data types inside nested objects", () => {
-			merge(state, {
+			const result = merge(state, {
 				b: {
 					bool: "true",
 				},
 			});
-			expect(state.b.bool).toEqual("true");
+			expect(result.b.bool).toEqual("true");
 		});
 
 		it("can replace simple values in arrays with new objects", () => {
-			merge(state, {
+			const result = merge(state, {
 				a: {
 					"1": {
 						thing: {
@@ -850,31 +881,31 @@ function testMerge(bundle, merge) {
 					},
 				},
 			});
-			expect(state.a[1].thing).toEqual({ new_thing: 1 });
+			expect(result.a[1].thing).toEqual({ new_thing: 1 });
 		});
 
 		it("can append new items to arrays", () => {
-			merge(state, {
+			const result = merge(state, {
 				a: {
 					"2": {
 						thing: "was added",
 					},
 				},
 			});
-			expect(state.a[2]).toEqual({ thing: "was added" });
+			expect(result.a[2]).toEqual({ thing: "was added" });
 		});
 
 		it("doesn't fail on null values", () => {
-			merge(state, {
+			const result = merge(state, {
 				a: {
 					"1": null,
 				},
 			});
-			expect(state.a[1]).toEqual(null);
+			expect(result.a[1]).toEqual(null);
 		});
 
 		it("doesn't fail for values of 0", () => {
-			merge(state, {
+			const result = merge(state, {
 				a: 0,
 				b: {
 					asdf1: 0,
@@ -883,20 +914,20 @@ function testMerge(bundle, merge) {
 					},
 				},
 			});
-			expect(state.a).toEqual(0);
-			expect(state.b.asdf1).toEqual(0);
-			expect(state.b.asdf2).toEqual({ stuff: "stuff" });
+			expect(result.a).toEqual(0);
+			expect(result.b.asdf1).toEqual(0);
+			expect(result.b.asdf2).toEqual({ stuff: "stuff" });
 		});
 	});
 }
 
 describe("Source", () => {
 	testBundle(bundles.esm);
-	testMerge(bundles.esm, bundles.esm_merge);
+	testMerge(bundles.esm_merge);
 });
 describe("ES6", () => {
 	testBundle(bundles.es6);
-	testMerge(bundles.es6, bundles.es6_merge);
+	testMerge(bundles.es6_merge);
 });
 describe("ES5", () => {
 	testBundle(bundles.es5);

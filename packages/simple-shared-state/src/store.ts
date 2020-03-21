@@ -1,6 +1,23 @@
-import { merge, deleted } from "./merge";
+import {
+	deleted,
+	Branch,
+	StateRoot,
+	StateValue,
+	Selector,
+	Snapshot,
+	Handler,
+	BatchHandler,
+	DevToolSubscriberMessage,
+	isObject,
+	isBranch,
+	isPrimitive,
+} from "./types";
+import { merge } from "./merge";
+
 
 const isArray = Array.isArray;
+
+export type StoreConstructor = typeof Store;
 
 /**
  * @module SimpleSharedState
@@ -17,7 +34,16 @@ export class Store {
 	 * @param {function} [devtool] - Provide a reference to `window.__REDUX_DEVTOOLS_EXTENSION__` to enable
 	 * redux devtools.
 	 */
-	constructor(initialState = {}, getActions, useDevtool) {
+
+	devtool: any;
+	stateTree: StateRoot;
+	dispatching: boolean;
+	listeners: Map<Selector<StateRoot | StateValue>, Handler>;
+	snapshots: Map<Selector<StateRoot | StateValue>, StateValue>;
+	dispatchListeners: Set<Function>;
+	actions: { [k: string]: Function };
+
+	constructor(initialState = {}, getActions?: Function, useDevtool?: { connect: Function }) {
 		this.devtool;
 		this.stateTree = Object.assign({}, initialState);
 		this.dispatching = false;
@@ -29,7 +55,7 @@ export class Store {
 		if (useDevtool && useDevtool.connect && typeof useDevtool.connect === "function") {
 			// this adapts SimpleSharedState to work with redux devtools
 			this.devtool = useDevtool.connect();
-			this.devtool.subscribe((message) => {
+			this.devtool.subscribe((message: DevToolSubscriberMessage) => {
 				if (message.type === "DISPATCH" && message.payload.type === "JUMP_TO_STATE") {
 					this._applyBranch(JSON.parse(message.state));
 				}
@@ -43,21 +69,21 @@ export class Store {
 			Object.keys(actions).forEach((actionName) => {
 				const actionType = this.devtool ? `${actionName}()` : "unknown";
 
-				this.actions[actionName] = (...args) => {
+				this.actions[actionName] = (...args: any[]) => {
 					this.dispatchTyped(actionType, actions[actionName].apply(null, args));
 				};
 			});
 		}
 	}
 
-	_applyBranch(branch) {
+	_applyBranch(branch: Branch) {
 		this.dispatching = true;
-		merge(this.stateTree, branch);
+		this.stateTree = merge(this.stateTree, branch);
 
 		this.listeners.forEach((handler, selector) => {
 			let change;
 			const snapshot = this.snapshots.get(selector);
-			const submit = (value) => {
+			const submit = (value: StateValue) => {
 				this.snapshots.set(selector, value);
 				handler(value);
 			};
@@ -91,10 +117,12 @@ export class Store {
 			// This test also covers the scenario where both are undefined.
 			if (change === snapshot) return;
 
-			if (isArray(change) && !change.isPartial) {
+			if (isArray(change)) {
 				submit(change);
-			} else {
+			} else if (isObject(snapshot)) {
 				submit(merge(snapshot, change));
+			} else if (change === undefined || isPrimitive(change)) {
+				submit(change);
 			}
 		});
 
@@ -115,7 +143,7 @@ export class Store {
 	 * has already been passed before, `watch` will throw. Refer to the tests for more examples. `watch`
 	 * returns a function which, when called, removes the watcher / listener.
 	 */
-	watch(selector, handler, runNow = true) {
+	watch(selector: Selector<StateValue>, handler: Handler, runNow: boolean = true): Function {
 		if (typeof selector !== "function" || typeof handler !== "function") {
 			throw new Error("selector and handler must be functions");
 		}
@@ -178,13 +206,13 @@ export class Store {
 	 * console.log(store.getState(s => s.people));
 	 * // [ 'Justin', 'Josh', <1 empty item> ]
 	 */
-	watchBatch(selectors, handler) {
+	watchBatch(selectors: Selector<StateValue>[], handler: BatchHandler): () => void {
 		if (!selectors || typeof selectors.forEach !== "function") {
 			throw new Error("selectors must be a list of functions");
 		}
 		if (typeof handler !== "function") throw new Error("handler is not a function");
 
-		const snapshotsArray = [];
+		const snapshotsArray: Snapshot[] = [];
 
 		let i = 0;
 		let changed = false;
@@ -194,7 +222,8 @@ export class Store {
 				throw new Error("selector must be a function");
 			}
 
-			let pos = i++; // pos = 0, i += 1
+			let pos = i;
+			i += 1;
 			try {
 				snapshotsArray[pos] = fn(this.stateTree);
 			} catch (_) {
@@ -230,7 +259,7 @@ export class Store {
 	 *
 	 * @param {function} handler - A callback function.
 	 */
-	watchDispatch(handler) {
+	watchDispatch(handler: Handler): () => void {
 		if (typeof handler !== "function") throw new Error("handler must be a function");
 		this.dispatchListeners.add(handler);
 		return () => this.dispatchListeners.delete(handler);
@@ -244,9 +273,9 @@ export class Store {
 	 * @returns {*} A shallow copy of the state tree, or a copy of the piece returned from the selector,
 	 * or undefined if the selector fails.
 	 */
-	getState(selector) {
+	getState(selector?: Selector<StateRoot>): any {
 		if (selector && typeof selector === "function") {
-			let piece;
+			let piece: StateValue;
 			try {
 				piece = copy(selector(this.stateTree));
 			} catch (_) {}
@@ -268,7 +297,7 @@ export class Store {
 	 * @description Please use [action creators]{@link module:SimpleSharedState#Store} instead of calling
 	 * dispatchTyped directly.
 	 */
-	dispatchTyped(actionName = "unknown", branch) {
+	dispatchTyped(actionName: string = "unknown", branch: Selector<StateValue> | StateValue): void {
 		if (this.dispatching) throw new Error("can't dispatch while dispatching");
 
 		if (!branch) throw new Error("can't dispatch invalid branch");
@@ -279,7 +308,9 @@ export class Store {
 		if (typeof branch !== "object") {
 			throw new Error("dispatch got invalid branch");
 		}
-		this._applyBranch(branch);
+		if (isBranch(branch)) {
+			this._applyBranch(branch);
+		}
 
 		if (this.devtool) this.devtool.send(actionName, this.getState());
 	};
@@ -335,11 +366,11 @@ export class Store {
 	 *   }),
 	 * });
 	 */
-	dispatch(branch) {
+	dispatch(branch: Selector<StateValue> | StateValue): void {
 		this.dispatchTyped("unknown", branch);
 	}
 };
 
-function copy(thing) {
+function copy(thing: StateRoot | Snapshot): StateRoot | Snapshot {
 	return !thing || typeof thing !== "object" ? thing : Object.assign(isArray(thing) ? [] : {}, thing);
 }

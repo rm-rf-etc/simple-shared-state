@@ -2,8 +2,11 @@ const path = require("path");
 
 module.exports = [
 	{
-		entry: "./src/index.js",
+		entry: "./src/index.ts",
 		mode: "production",
+		resolve: {
+			extensions: [".tsx", ".ts", ".js", ".json"],
+		},
 		output: {
 			library: "SimpleSharedState",
 			libraryTarget: "umd",
@@ -11,10 +14,22 @@ module.exports = [
 			path: path.resolve(__dirname, "dist"),
 			globalObject: 'Function("return this")()',
 		},
+		module: {
+			rules: [
+				{
+					test: /\.tsx?$/,
+					use: ["ts-loader"],
+					exclude: /node_modules/,
+				},
+			]
+		}
 	},
 	{
-		entry: "./src/index.js",
+		entry: "./src/index.ts",
 		mode: "production",
+		resolve: {
+			extensions: [".tsx", ".ts", ".js", ".json"],
+		},
 		output: {
 			library: "SimpleSharedState",
 			libraryTarget: "umd",
@@ -24,6 +39,11 @@ module.exports = [
 		},
 		module: {
 			rules: [
+				{
+					test: /\.tsx?$/,
+					use: ["ts-loader"],
+					exclude: /node_modules/,
+				},
 				{
 					test: /\.m?js$/,
 					use: {
@@ -38,8 +58,11 @@ module.exports = [
 		}
 	},
 	{
-		entry: "./src/merge.js",
+		entry: "./src/merge.ts",
 		mode: "production",
+		resolve: {
+			extensions: [".tsx", ".ts", ".js", ".json"],
+		},
 		output: {
 			library: "merge",
 			libraryTarget: "umd",
@@ -49,6 +72,11 @@ module.exports = [
 		},
 		module: {
 			rules: [
+				{
+					test: /\.tsx?$/,
+					use: ["ts-loader"],
+					exclude: /node_modules/,
+				},
 				{
 					test: /src\/merge.js$/,
 					exclude: /.*/,
