@@ -3,13 +3,15 @@
 		"include": [ "jest" ]
 	},
 	"compilerOptions": {
+		"outDir": "dist",
 		"allowJs": true,
 		"moduleResolution": "node",
 		"target": "es2015",
 		"noImplicitAny": true,
 		"removeComments": false,
 		"preserveConstEnums": true,
-		"sourceMap": true
+		"sourceMap": true,
+		"declaration": true
 	},
 	"include": [
 		"./src/*"
