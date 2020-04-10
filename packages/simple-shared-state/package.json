@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "test": "jest --watchAll",
     "doc": "jsdoc -c ./jsdoc.json -t ../../node_modules/docdash",
-    "build": "webpack",
+    "build": "../../node_modules/typescript/bin/tsc && webpack",
     "size": "npx size-limit"
   },
   "size-limit": [
